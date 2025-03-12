@@ -9,10 +9,14 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Images\coffe.png" />
     <None Remove="Images\CyberVault.ico" />
   </ItemGroup>
 
   <ItemGroup>
+    <Resource Include="Images\coffe.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
     <Resource Include="Images\CyberVault.ico" />
   </ItemGroup>
 

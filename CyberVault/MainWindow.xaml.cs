@@ -4,6 +4,8 @@ using System.Windows;
 using System.Windows.Input;
 using System.Windows.Controls;
 using System.Security.Cryptography;
+using CyberVault.View.Dashboard; 
+
 
 namespace CyberVault
 {
@@ -14,204 +16,110 @@ namespace CyberVault
             InitializeComponent();
         }
 
-        private void UsernameInput_TextChanged(object sender, TextChangedEventArgs e)
+        private void CloseButton_Click(object sender, RoutedEventArgs e)
         {
-            // Handle username input changes if needed
+            this.Close();
         }
 
-        private void PasswordInput_PasswordChanged(object sender, RoutedEventArgs e)
+        private void MinimizeButton_Click(object sender, RoutedEventArgs e)
         {
-            // Handle password input changes if needed
+            this.WindowState = WindowState.Minimized;
         }
 
+        private void TitleBar_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            if (e.ChangedButton == MouseButton.Left)
+                this.DragMove();
+        }
+
+        private void LoginTextBlock_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            
+            CyberVault.View.Login loginWindow = new CyberVault.View.Login();
+            loginWindow.Show();
+
+            
+            this.Close();
+        }
+
+        private void UsernameInput_TextChanged(object sender, TextChangedEventArgs e) { }
+
+        private void PasswordInput_PasswordChanged(object sender, RoutedEventArgs e) { }
+
+        // Register knapp
         private void Button_Click(object sender, RoutedEventArgs e)
-        {
-            // Get username and password from the textboxes
+        {   
+            // Kobler UsernameInput til string varibalen "username". det samme skjer med password
             string username = UsernameInput.Text;
-            string password = PasswordInput.Password; // Use Password property from PasswordBox
+            string password = PasswordInput.Password;
 
-            // Validate inputs
+            //hvis Variblen "username" eller varibalen "password" ikke inneholder tekts. så return Registration Error messgbox
             if (string.IsNullOrWhiteSpace(username) || string.IsNullOrWhiteSpace(password))
             {
                 MessageBox.Show("Username and password cannot be empty!", "Registration Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
 
+            
+            // her prøver appen å salte og hashe varibalen "password" den converter også hashet passord og salta passord inn til en base 64 string. den lager også en mappe i %appdata% som heter cybervault hvor det er en txt fil som blir laget for å lagre hashet passordet
             try
             {
-                // Generate a random salt
                 byte[] salt = GenerateSalt();
-
-                // Hash the password using PBKDF2
                 byte[] hashedPassword = HashPassword(password, salt);
 
-                // Convert hash and salt to base64 strings for storage
                 string saltBase64 = Convert.ToBase64String(salt);
                 string hashBase64 = Convert.ToBase64String(hashedPassword);
 
-                // Create directory if it doesn't exist
                 string appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
                 string cyberVaultPath = Path.Combine(appDataPath, "CyberVault");
+                if (!Directory.Exists(cyberVaultPath)) Directory.CreateDirectory(cyberVaultPath);
 
-                if (!Directory.Exists(cyberVaultPath))
-                {
-                    Directory.CreateDirectory(cyberVaultPath);
-                }
-
-                // Create user credentials file
                 string credentialsFilePath = Path.Combine(cyberVaultPath, "credentials.txt");
-
-                // Store username, salt, and hashed password in the file
-                // Format: username,salt,hashedPassword
                 string userCredentials = $"{username},{saltBase64},{hashBase64}";
 
-                // Check if the user already exists
                 if (File.Exists(credentialsFilePath))
                 {
-                    string[] existingCredentials = File.ReadAllLines(credentialsFilePath);
-                    foreach (string line in existingCredentials)
-                    {
+                    foreach (string line in File.ReadAllLines(credentialsFilePath))
+                    {   //hvis brukernavnet allerde eksisterer send Registration Error mssgboxen
                         if (line.StartsWith(username + ","))
                         {
                             MessageBox.Show("Username already exists!", "Registration Error", MessageBoxButton.OK, MessageBoxImage.Error);
                             return;
                         }
                     }
-
-                    // Append new user credentials
                     File.AppendAllText(credentialsFilePath, userCredentials + Environment.NewLine);
-                }
+                }// hvis ikke så skriv alt til filen
                 else
                 {
-                    // Create new file with user credentials
                     File.WriteAllText(credentialsFilePath, userCredentials + Environment.NewLine);
                 }
-
+                // registrasjonen er en success og registrerings boxene blir cleard.
                 MessageBox.Show("Registration successful!", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
-
-                // Clear the input fields after successful registration
                 UsernameInput.Clear();
                 PasswordInput.Clear();
             }
-            catch (Exception ex)
+            catch (Exception ex) // dette er bare hvis det er noen andre errorer som skjer.
             {
-                MessageBox.Show($"An error occurred during registration: {ex.Message}", "Registration Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show($"An error occurred: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
-        // Helper method to generate a random salt
+        // salte funskjonen
         private byte[] GenerateSalt(int saltSize = 16)
         {
-            using (var rng = new RNGCryptoServiceProvider())
-            {
-                byte[] salt = new byte[saltSize];
-                rng.GetBytes(salt);
-                return salt;
-            }
+            byte[] salt = new byte[saltSize];
+            RandomNumberGenerator.Fill(salt);
+            return salt;
         }
 
-        // Helper method to hash the password using PBKDF2
+        // hashe funskjonen.
         private byte[] HashPassword(string password, byte[] salt, int iterations = 10000, int hashSize = 32)
-        {
-            using (var pbkdf2 = new Rfc2898DeriveBytes(password, salt, iterations))
+        {   //dette er algoritmen som blir brukt for å hashe. den hasher passord, salta passordet. iterations og algoritme navnet in til en lang passord som havnet i txt filen lengre opp.
+            using (var pbkdf2 = new Rfc2898DeriveBytes(password, salt, iterations, HashAlgorithmName.SHA256))
             {
                 return pbkdf2.GetBytes(hashSize);
             }
         }
-
-        // Method to validate login credentials
-        public bool ValidateLogin(string username, string password)
-        {
-            try
-            {
-                string appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-                string credentialsFilePath = Path.Combine(appDataPath, "CyberVault", "credentials.txt");
-
-                if (!File.Exists(credentialsFilePath))
-                {
-                    return false;
-                }
-
-                string[] credentials = File.ReadAllLines(credentialsFilePath);
-
-                foreach (string line in credentials)
-                {
-                    string[] parts = line.Split(',');
-                    if (parts.Length != 3)
-                    {
-                        continue;
-                    }
-
-                    if (parts[0] == username)
-                    {
-                        // Extract stored salt and hash
-                        byte[] storedSalt = Convert.FromBase64String(parts[1]);
-                        byte[] storedHash = Convert.FromBase64String(parts[2]);
-
-                        // Hash the provided password with the stored salt
-                        byte[] computedHash = HashPassword(password, storedSalt);
-
-                        // Compare the computed hash with the stored hash
-                        return CompareByteArrays(computedHash, storedHash);
-                    }
-                }
-
-                return false;
-            }
-            catch (Exception)
-            {
-                return false;
-            }
-        }
-
-        // Helper method to compare two byte arrays
-        private bool CompareByteArrays(byte[] array1, byte[] array2)
-        {
-            if (array1.Length != array2.Length)
-            {
-                return false;
-            }
-
-            for (int i = 0; i < array1.Length; i++)
-            {
-                if (array1[i] != array2[i])
-                {
-                    return false;
-                }
-            }
-
-            return true;
-        }
-
-        private void LoginButton_Click(object sender, RoutedEventArgs e)
-        {
-            string username = UsernameInput.Text;
-            string password = PasswordInput.Password;
-
-            if (string.IsNullOrWhiteSpace(username) || string.IsNullOrWhiteSpace(password))
-            {
-                MessageBox.Show("Username and password cannot be empty!", "Login Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                return;
-            }
-
-            if (ValidateLogin(username, password))
-            {
-                MessageBox.Show("Login successful!", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
-
-                // Open the main application window or dashboard
-                VaultDashboard dashboard = new VaultDashboard(username);
-                dashboard.Show();
-                this.Close();
-            }
-            else
-            {
-                MessageBox.Show("Invalid username or password!", "Login Error", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
-        }
-
-        private void ExitButton_Click(object sender, RoutedEventArgs e)
-        {
-            this.Close();
-        }
     }
 }
+    
