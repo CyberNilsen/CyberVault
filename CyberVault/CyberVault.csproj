@@ -8,4 +8,16 @@
     <UseWPF>true</UseWPF>
   </PropertyGroup>
 
+  <ItemGroup>
+    <None Remove="Images\CyberVault.ico" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Images\CyberVault.ico" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Main\" />
+  </ItemGroup>
+
 </Project>
