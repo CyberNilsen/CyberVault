@@ -6,18 +6,36 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
+    <ApplicationIcon>Images\CyberVaultLogo.ico</ApplicationIcon>
   </PropertyGroup>
 
   <ItemGroup>
     <None Remove="Images\coffe.png" />
+    <None Remove="Images\copy.png" />
     <None Remove="Images\CyberVault.ico" />
+    <None Remove="Images\CyberVault.jpg" />
+    <None Remove="Images\CyberVaultLogo.ico" />
+    <None Remove="Images\eyes.png" />
+    <None Remove="Images\wrench.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="Images\CyberVaultLogo.ico">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 
   <ItemGroup>
     <Resource Include="Images\coffe.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Resource>
+    <Resource Include="Images\copy.png">
+      <CopyToOutputDirectory></CopyToOutputDirectory>
+    </Resource>
     <Resource Include="Images\CyberVault.ico" />
+    <Resource Include="Images\CyberVault.jpg" />
+    <Resource Include="Images\eyes.png" />
+    <Resource Include="Images\wrench.png" />
   </ItemGroup>
 
   <ItemGroup>

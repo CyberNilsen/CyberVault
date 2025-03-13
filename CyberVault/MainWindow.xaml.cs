@@ -4,7 +4,8 @@ using System.Windows;
 using System.Windows.Input;
 using System.Windows.Controls;
 using System.Security.Cryptography;
-using CyberVault.View.Dashboard; 
+using CyberVault.View;
+
 
 
 namespace CyberVault
@@ -26,10 +27,12 @@ namespace CyberVault
             this.WindowState = WindowState.Minimized;
         }
 
-        private void TitleBar_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        private void Window_MouseDown(object sender, MouseButtonEventArgs e)
         {
-            if (e.ChangedButton == MouseButton.Left)
+            if (e.LeftButton == MouseButtonState.Pressed)
+            {
                 this.DragMove();
+            }
         }
 
         private void LoginTextBlock_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
@@ -53,6 +56,7 @@ namespace CyberVault
             string username = UsernameInput.Text;
             string password = PasswordInput.Password;
 
+
             //hvis Variblen "username" eller varibalen "password" ikke inneholder tekts. så return Registration Error messgbox
             if (string.IsNullOrWhiteSpace(username) || string.IsNullOrWhiteSpace(password))
             {
@@ -61,7 +65,8 @@ namespace CyberVault
             }
 
             
-            // her prøver appen å salte og hashe varibalen "password" den converter også hashet passord og salta passord inn til en base 64 string. den lager også en mappe i %appdata% som heter cybervault hvor det er en txt fil som blir laget for å lagre hashet passordet
+            // her prøver appen å salte og hashe varibalen "password" den converter også hashet passord og salta passord inn til en base 64 string.
+            // den lager også en mappe i %appdata% som heter cybervault hvor det er en txt fil som blir laget for å lagre hashet passordet
             try
             {
                 byte[] salt = GenerateSalt();
@@ -114,7 +119,8 @@ namespace CyberVault
 
         // hashe funskjonen.
         private byte[] HashPassword(string password, byte[] salt, int iterations = 10000, int hashSize = 32)
-        {   //dette er algoritmen som blir brukt for å hashe. den hasher passord, salta passordet. iterations og algoritme navnet in til en lang passord som havnet i txt filen lengre opp.
+        {   //dette er algoritmen som blir brukt for å hashe. den hasher passord,
+            //salta passordet. iterations og algoritme navnet in til en lang passord som havnet i txt filen lengre opp.
             using (var pbkdf2 = new Rfc2898DeriveBytes(password, salt, iterations, HashAlgorithmName.SHA256))
             {
                 return pbkdf2.GetBytes(hashSize);

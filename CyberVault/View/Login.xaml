@@ -12,12 +12,20 @@
         AllowsTransparency="True"
         WindowStartupLocation="CenterScreen"
         Icon="pack://application:,,,/Images/CyberVault.ico">
-    <Border Background="White" CornerRadius="20">
+    <Border Background="White" CornerRadius="20" MouseDown="Window_MouseDown">
+        
+        <Border.Clip>
+            <RectangleGeometry Rect="0,0,1200,700" RadiusX="15" RadiusY="15"/>
+        </Border.Clip>
+
         <Grid>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="580"/>
                 <ColumnDefinition/>
             </Grid.ColumnDefinitions>
+
+            
+
 
             <Grid Grid.Column="0" Background="#853E3E">
 
@@ -41,7 +49,7 @@
                 <Image Margin="103,-35,0,312" Source="/Images/coffe.png" Stretch="Fill" HorizontalAlignment="Left" Width="386"/>
 
                 <Grid>
-                    <TextBlock Foreground="#8C5B0E" HorizontalAlignment="Center" Margin="0,332,0,48" FontSize="80" FontFamily="Segoe UI" Width="568" FontWeight="Black" ><Run Language="nb-no" Text="   "/><Run Text="Welcome "/><LineBreak/><Run Text="to "/><Run Text="C"/><Run Text="yberVault"/></TextBlock>
+                    <TextBlock Foreground="#8C5B0E" HorizontalAlignment="Center" Margin="0,332,0,48" FontSize="80" FontFamily="Segoe UI" Width="568" FontWeight="Black" ><Run Text="   "/><Run Language="nb-no" Text=" "/><Run Text="Welcome "/><LineBreak/><Run Text="to "/><Run Text="C"/><Run Text="yberVault"/></TextBlock>
                 </Grid>
 
                 <Rectangle Margin="0,-293,283,293" HorizontalAlignment="Right" Width="620">
@@ -125,8 +133,8 @@
                          Foreground="Black"
                          Background="#FFBA7E"
                          BorderThickness="0"
-                         Cursor="Hand"
-                         Click="Button_Click"/>
+                         Click="Button_Click"
+                        />
             </Grid>
 
             <Grid Grid.Column="1" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,10,10,0">
@@ -164,7 +172,7 @@
             </Grid>
 
             <Grid Grid.Column="1" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,10,50,0">
-                <Button Content="-" Width="30" Height="30" Click="MinimizeButton_Click">
+                <Button Content="-" Width="30" Height="30" Click="MinimizeButton_Click" Margin="10,0,-10,0">
                     <Button.Style>
                         <Style TargetType="{x:Type Button}">
                             <Setter Property="Template">
@@ -196,9 +204,7 @@
                     </Button.Style>
                 </Button>
             </Grid>
-            <Grid HorizontalAlignment="Left" VerticalAlignment="Top" Width="1100" Height="66" Grid.ColumnSpan="2">
-                <TextBlock MouseLeftButtonDown="TitleBar_MouseLeftButtonDown" Text="" VerticalAlignment="Top" HorizontalAlignment="Left" FontSize="24" Margin="234,202,0,0"/>
-            </Grid>
+
         </Grid>
     </Border>
 </Window>

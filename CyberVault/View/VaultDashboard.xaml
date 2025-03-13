@@ -5,8 +5,183 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:CyberVault.View"
         mc:Ignorable="d"
-        Title="VaultDashboard" Height="450" Width="800">
-    <Grid>
+        Title="CyberVault dashboard" Height="700" Width="1200"
+        WindowStyle="None"  
+        ResizeMode="NoResize"
+        Background="Transparent"
+        AllowsTransparency="True"
+        WindowStartupLocation="CenterScreen"
+        Icon="pack://application:,,,/Images/CyberVault.ico">
+
+    <Border Background="#e7d3d3" CornerRadius="20" MouseDown="Window_MouseDown">
+
+        <Border.Clip>
+            <RectangleGeometry Rect="0,0,1200,700" RadiusX="15" RadiusY="15"/>
+        </Border.Clip>
+
         
-    </Grid>
+        <Grid>
+            <Grid>
+            <TextBlock Text="Welcome back username" HorizontalAlignment="Left" VerticalAlignment="Top" FontSize="50" FontFamily="Segoe UI" Margin="72,36,0,0" FontWeight="Bold">
+
+            </TextBlock>
+        </Grid>
+
+        <Grid>
+            <TextBlock Text="Have you taken your daily sip of coffee?" HorizontalAlignment="Left" VerticalAlignment="Top" FontSize="25" FontFamily="Segoe UI" Margin="77,105,0,0">
+
+            </TextBlock>
+        </Grid>
+
+
+            <Button Width="300" Height="200" Background="#853E3E" BorderThickness="0" Cursor="Hand" Margin="-750,-70,0,0">
+                <Button.Template>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="#853E3E" BorderBrush="#853E3E" BorderThickness="1" CornerRadius="20">
+                            <StackPanel Orientation="Vertical" HorizontalAlignment="Center">
+                                <Image Source="pack://application:,,,/Images/copy.png" Width="80" Height="150"/>
+                                <TextBlock Text="Password Vault" Foreground="White" FontSize="28" FontWeight="Bold" TextAlignment="Center" Width="280" Margin="0,-20,0,0"/>
+                            </StackPanel>
+                        </Border>
+                    </ControlTemplate>
+                </Button.Template>
+            </Button>
+
+            <Button Width="300" Height="200" Background="#853E3E" BorderThickness="0" Cursor="Hand" Margin="10,420,0,0">
+                <Button.Template>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="#853E3E" BorderBrush="#853E3E" BorderThickness="1" CornerRadius="20">
+                            <StackPanel Orientation="Vertical" HorizontalAlignment="Center">
+                                <Image Source="/Images/wrench.png" Width="80" Height="150"/>
+                                <TextBlock Text="Under Construction" Foreground="White" FontSize="28" FontWeight="Bold" TextAlignment="Center" Width="280" Margin="0,-20,0,0"/>
+                            </StackPanel>
+                        </Border>
+                    </ControlTemplate>
+                </Button.Template>
+            </Button>
+
+            <Button Width="300" Height="200" Background="#853E3E" BorderThickness="0" Cursor="Hand" Margin="750,420,0,0">
+                <Button.Template>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="#853E3E" BorderBrush="#853E3E" BorderThickness="1" CornerRadius="20">
+                            <StackPanel Orientation="Vertical" HorizontalAlignment="Center">
+                                <Image Source="/Images/wrench.png" Width="80" Height="150"/>
+                                <TextBlock Text="Under Construction" Foreground="White" FontSize="28" FontWeight="Bold" TextAlignment="Center" Width="280" Margin="0,-20,0,0"/>
+                            </StackPanel>
+                        </Border>
+                    </ControlTemplate>
+                </Button.Template>
+            </Button>
+
+            <Button Width="300" Height="200" Background="#853E3E" BorderThickness="0" Cursor="Hand" Margin="-750,420,0,0">
+                <Button.Template>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="#853E3E" BorderBrush="#853E3E" BorderThickness="1" CornerRadius="20">
+                            <StackPanel Orientation="Vertical" HorizontalAlignment="Center">
+                                <Image Source="/Images/wrench.png" Width="80" Height="150"/>
+                                <TextBlock Text="Under Construction" Foreground="White" FontSize="28" FontWeight="Bold" TextAlignment="Center" Width="280" Margin="0,-20,0,0"/>
+                            </StackPanel>
+                        </Border>
+                    </ControlTemplate>
+                </Button.Template>
+            </Button>
+
+            <Button Width="300" Height="200" Background="#853E3E" BorderThickness="0" Cursor="Hand" Margin="10,-70,0,0">
+                <Button.Template>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="#853E3E" BorderBrush="#853E3E" BorderThickness="1" CornerRadius="20">
+                            <StackPanel Orientation="Vertical" HorizontalAlignment="Center">
+                                <Image Source="/Images/wrench.png" Width="80" Height="150"/>
+                                <TextBlock Text="Under Construction" Foreground="White" FontSize="28" FontWeight="Bold" TextAlignment="Center" Width="280" Margin="0,-20,0,0"/>
+                            </StackPanel>
+                        </Border>
+                    </ControlTemplate>
+                </Button.Template>
+            </Button>
+
+            <Button Width="300" Height="200" Background="#853E3E" BorderThickness="0" Cursor="Hand" Margin="750,-70,0,0">
+                <Button.Template>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="#853E3E" BorderBrush="#853E3E" BorderThickness="1" CornerRadius="20">
+                            <StackPanel Orientation="Vertical" HorizontalAlignment="Center">
+                                <Image Source="/Images/wrench.png" Width="80" Height="150"/>
+                                <TextBlock Text="Under Construction" Foreground="White" FontSize="28" FontWeight="Bold" TextAlignment="Center" Width="280" Margin="0,-20,0,0"/>
+                            </StackPanel>
+                        </Border>
+                    </ControlTemplate>
+                </Button.Template>
+            </Button>
+
+            <Grid Grid.Column="1" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,10,10,0">
+                <Button x:Name="CloseButton" Content="X" Width="30" Height="30" Click="CloseButton_Click" HorizontalAlignment="Right" VerticalAlignment="Top">
+                    <Button.Style>
+                        <Style TargetType="{x:Type Button}">
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="{x:Type Button}">
+                                        <Border x:Name="border"
+                                     Background="{TemplateBinding Background}"
+                                     BorderBrush="{TemplateBinding BorderBrush}"
+                                     BorderThickness="1"
+                                     CornerRadius="9">
+                                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                        </Border>
+                                        <ControlTemplate.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter TargetName="border" Property="Background" Value="Red" />
+                                                <Setter Property="Foreground" Value="White"/>
+                                            </Trigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+
+                            <Setter Property="Background" Value="#e7d3d3"/>
+                            <Setter Property="Foreground" Value="Black"/>
+                            <Setter Property="BorderBrush" Value="Transparent"/>
+                            <Setter Property="BorderThickness" Value="0"/>
+                            <Setter Property="FontSize" Value="20"/>
+                        </Style>
+                    </Button.Style>
+                </Button>
+            </Grid>
+
+            <Grid Grid.Column="1" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,10,50,0">
+                <Button Content="-" Width="30" Height="30" Click="MinimizeButton_Click" Margin="10,0,-10,0">
+                    <Button.Style>
+                        <Style TargetType="{x:Type Button}">
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="{x:Type Button}">
+                                        <Border x:Name="border"
+                                     Background="{TemplateBinding Background}"
+                                     BorderBrush="{TemplateBinding BorderBrush}"
+                                     BorderThickness="1"
+                                     CornerRadius="9">
+                                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Top"/>
+                                        </Border>
+                                        <ControlTemplate.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter TargetName="border" Property="Background" Value="LightGray"/>
+                                                <Setter Property="Foreground" Value="White"/>
+                                            </Trigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+
+                            <Setter Property="Background" Value="#e7d3d3"/>
+                            <Setter Property="Foreground" Value="Black"/>
+                            <Setter Property="BorderBrush" Value="Transparent"/>
+                            <Setter Property="BorderThickness" Value="0"/>
+                            <Setter Property="FontSize" Value="24"/>
+                        </Style>
+                    </Button.Style>
+                </Button>
+            </Grid>
+        </Grid>
+    </Border>
+        
+
+
 </Window>

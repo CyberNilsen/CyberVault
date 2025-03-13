@@ -1,33 +1,36 @@
-﻿using System.Windows.Controls;
-using System.Windows.Media.Media3D;
-using System.Windows;
+﻿using System.Windows;
+using System.Windows.Input;
 
-namespace CyberVault.View.Dashboard
+namespace CyberVault.View
 {
-    public class VaultDashboard : Window
+    public partial class VaultDashboard : Window
     {
         private string _username;
 
         public VaultDashboard(string username)
         {
+            InitializeComponent();  
+
             _username = username;
             Title = $"CyberVault - {_username}'s Dashboard";
-            Width = 800;
-            Height = 600;
-            WindowStartupLocation = WindowStartupLocation.CenterScreen;
+        }
 
-            Grid mainGrid = new Grid();
-            Content = mainGrid;
-
-            Label welcomeLabel = new Label
+        private void Window_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            if (e.LeftButton == MouseButtonState.Pressed)
             {
-                Content = $"Welcome to your secure vault, {_username}!",
-                FontSize = 20,
-                HorizontalAlignment = HorizontalAlignment.Center,
-                VerticalAlignment = VerticalAlignment.Center
-            };
+                DragMove();
+            }
+        }
 
-            mainGrid.Children.Add(welcomeLabel);
+        private void CloseButton_Click(object sender, RoutedEventArgs e)
+        {
+            this.Close();
+        }
+
+        private void MinimizeButton_Click(object sender, RoutedEventArgs e)
+        {
+            this.WindowState = WindowState.Minimized;
         }
     }
 }
