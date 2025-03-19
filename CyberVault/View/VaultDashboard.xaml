@@ -22,19 +22,19 @@
         
         <Grid>
             <Grid>
-            <TextBlock Text="Welcome back username" HorizontalAlignment="Left" VerticalAlignment="Top" FontSize="50" FontFamily="Segoe UI" Margin="72,36,0,0" FontWeight="Bold">
+            <TextBlock Name="Username" Text="Welcome back username" HorizontalAlignment="Left" VerticalAlignment="Top" FontSize="50" FontFamily="Segoe UI" Margin="72,36,0,0" FontWeight="Bold">
 
             </TextBlock>
         </Grid>
 
         <Grid>
-            <TextBlock Text="Have you taken your daily sip of coffee?" HorizontalAlignment="Left" VerticalAlignment="Top" FontSize="25" FontFamily="Segoe UI" Margin="77,105,0,0">
+            <TextBlock Name="QuoteTextBlock" Text="Have you taken your daily sip of coffee?" HorizontalAlignment="Left" VerticalAlignment="Top" FontSize="25" FontFamily="Segoe UI" Margin="77,105,0,0">
 
             </TextBlock>
         </Grid>
 
 
-            <Button Width="300" Height="200" Background="#853E3E" BorderThickness="0" Cursor="Hand" Margin="-750,-70,0,0">
+            <Button Name="PasswordVault" Width="300" Height="200" Background="#853E3E" BorderThickness="0" Cursor="Hand" Margin="-750,-70,0,0" Click="PasswordVault_Click">
                 <Button.Template>
                     <ControlTemplate TargetType="Button">
                         <Border Background="#853E3E" BorderBrush="#853E3E" BorderThickness="1" CornerRadius="20">
@@ -106,6 +106,18 @@
                             <StackPanel Orientation="Vertical" HorizontalAlignment="Center">
                                 <Image Source="/Images/wrench.png" Width="80" Height="150"/>
                                 <TextBlock Text="Under Construction" Foreground="White" FontSize="28" FontWeight="Bold" TextAlignment="Center" Width="280" Margin="0,-20,0,0"/>
+                            </StackPanel>
+                        </Border>
+                    </ControlTemplate>
+                </Button.Template>
+            </Button>
+
+            <Button Name="Logout" Width="200" Height="70" Background="#853E3E" BorderThickness="0" Cursor="Hand" Margin="825,66,75,534" Click="LogOutButton_Click">
+                <Button.Template>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="#853E3E" BorderBrush="#853E3E" BorderThickness="1" CornerRadius="20">
+                            <StackPanel Orientation="Vertical" HorizontalAlignment="Center">
+                                <TextBlock Text="Log Out" Foreground="White" FontSize="28" FontWeight="Bold" TextAlignment="Center" Width="280" Margin="-35,20,0,0"/>
                             </StackPanel>
                         </Border>
                     </ControlTemplate>
