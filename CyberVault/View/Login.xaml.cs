@@ -149,5 +149,11 @@ namespace CyberVault.View
             mainWindow.Show();
             this.Close();
         }
+
+        private void RememberMeCheckBox_Checked(object sender, RoutedEventArgs e)
+        {
+            //Skal legge til slik at hvis du har trykket på denne knappen blir du husket og automatisk logget inn.
+            //Varer noen dager eller månender.
+        }
     }
 }

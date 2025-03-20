@@ -24,16 +24,31 @@
 
             <Grid Grid.Column="0" Background="#853E3E">
 
-                <PasswordBox x:Name="PasswordInput" 
-                               Width="350" 
-                               HorizontalAlignment="Center"
-                               Margin="0,350,0,305" 
-                               FontSize="18" 
-                               Background="White"
-                               BorderBrush="White"
-                               BorderThickness="2"
-                               Padding="5" 
-                               PasswordChanged="PasswordInput_PasswordChanged"/>
+                <TextBlock Text="Password" 
+                           HorizontalAlignment="Left" 
+                           Margin="115,305,0,369" 
+                           FontSize="20" 
+                           FontFamily="Segoe UI"
+                           Foreground="White"/>
+
+                <Border Background="#F5F5F5" 
+                        CornerRadius="15" 
+                        Width="350" 
+                        HorizontalAlignment="Center"
+                        BorderBrush="#F5F5F5" 
+                        BorderThickness="2" 
+                        Padding="5" 
+                        Margin="0,345,0,305">
+                    <PasswordBox x:Name="PasswordInput" 
+                                 Width="340" 
+                                 FontSize="18" 
+                                 Background="Transparent"
+                                 BorderThickness="0"
+                                 Padding="5" 
+                                 PasswordChanged="PasswordInput_PasswordChanged"/>
+                </Border>
+
+
             </Grid>
 
             <Grid>
@@ -44,7 +59,8 @@
                 <Image Margin="103,-35,0,312" Source="/Images/coffe.png" Stretch="Fill" HorizontalAlignment="Left" Width="386"/>
 
                 <Grid>
-                    <TextBlock Foreground="#8C5B0E" HorizontalAlignment="Center" Margin="0,332,0,48" FontSize="80" FontFamily="Segoe UI" Width="568" FontWeight="Black" ><Run Text="   "/><Run Language="nb-no" Text=" "/><Run Text="Welcome "/><LineBreak/><Run Text="to "/><Run Text="C"/><Run Text="yberVault"/></TextBlock>
+                    <TextBlock Foreground="#8C5B0E" HorizontalAlignment="Center" 
+                                Margin="0,332,0,48" FontSize="80" FontFamily="Segoe UI" Width="568" FontWeight="Black" ><Run Text="   "/><Run Language="nb-no" Text=" "/><Run Text="Welcome "/><LineBreak/><Run Text="to "/><Run Text="C"/><Run Text="yberVault"/></TextBlock>
                 </Grid>
 
                 <Rectangle Margin="0,-293,283,293" HorizontalAlignment="Right" Width="620">
@@ -92,17 +108,18 @@
             <Grid>
                 <TextBlock Text="Username" HorizontalAlignment="Left" Margin="111,210,0,455" FontSize="20" FontFamily="Segoe UI" Foreground="White"/>
 
-                <TextBox   x:Name="UsernameInput" 
-                               Width="350" 
-                               HorizontalAlignment="Center"
-                               Margin="0,250,0,400" 
-                               FontSize="18" 
-                               Background="White"
-                               BorderBrush="White"
-                               BorderThickness="2"
-                               Padding="5" 
-                               TextChanged="UsernameInput_TextChanged">
-                </TextBox>
+                <TextBlock Text="Username" HorizontalAlignment="Left" Margin="111,210,0,455" FontSize="20" FontFamily="Segoe UI" Foreground="White"/>
+
+                <Border Background="#F5F5F5" CornerRadius="15" Width="350" HorizontalAlignment="Center"
+                        BorderBrush="#F5F5F5" BorderThickness="2" Padding="5" Margin="0,250,0,400">
+                    <TextBox x:Name="UsernameInput" 
+                             Width="340" 
+                             FontSize="18" 
+                             Background="Transparent"
+                             BorderThickness="0"
+                             Padding="5" 
+                             TextChanged="UsernameInput_TextChanged"/>
+                </Border>
 
                 <TextBlock Text="Password" 
                                HorizontalAlignment="Left" 
@@ -112,25 +129,75 @@
                                Foreground="White"/>
 
                 <TextBlock HorizontalAlignment="Center" 
-                               Margin="0,433,0,231" 
+                               Margin="0,455,0,205"
                                FontSize="22"
                                Foreground="White"
                                FontFamily="Sitka Text">
-                            <Run Text="Already have an account? " />
-                            <Run Text="Login" Foreground="Blue" Cursor="Hand" MouseLeftButtonDown="LoginTextBlock_MouseLeftButtonDown"/>
+                        <Run Text="Already have an account? " />
+                        <TextBlock Text="Login"
+                                   Foreground="Blue"
+                                   Cursor="Hand"
+                                   MouseLeftButtonDown="LoginTextBlock_MouseLeftButtonDown">
+                        <TextBlock.Style>
+                                        <Style TargetType="TextBlock">
+                                            <Style.Triggers>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter Property="TextDecorations" Value="Underline"/>
+                                                </Trigger>
+                                            </Style.Triggers>
+                                        </Style>
+                        </TextBlock.Style>
+                        </TextBlock>
                 </TextBlock>
+
+
+
 
                 <Button Content="Register" 
                             Width="150" Height="40"
                             HorizontalAlignment="Center"
-                            Margin="0,502,0,158"
+                            Margin="0,494,0,146"
                             FontSize="20"
                             FontFamily="Segoe UI"
                             Foreground="Black"
                             Background="#FFBA7E"
                             BorderThickness="0"
                             Cursor="Hand"
-                            Click="Button_Click"/>
+                            Click="Button_Click">
+                    <Button.Style>
+                        <Style TargetType="Button">
+                            <Setter Property="Background" Value="#FFBA7E"/>
+                            <Setter Property="Foreground" Value="Black"/>
+                            <Setter Property="BorderBrush" Value="Transparent"/>
+                            <Setter Property="BorderThickness" Value="0"/>
+                            <Setter Property="FontSize" Value="20"/>
+                            <Setter Property="Padding" Value="5"/>
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="Button">
+                                        <Border x:Name="border"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="1"
+                                CornerRadius="8">
+                                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                        </Border>
+                                        <ControlTemplate.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter TargetName="border" Property="Background" Value="#E69A5B"/>
+                                                <Setter TargetName="border" Property="Effect">
+                                                    <Setter.Value>
+                                                        <DropShadowEffect Color="Black" BlurRadius="5" ShadowDepth="1"/>
+                                                    </Setter.Value>
+                                                </Setter>
+                                            </Trigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                    </Button.Style>
+                </Button>
             </Grid>
 
             <Grid Grid.Column="1" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,10,10,0">

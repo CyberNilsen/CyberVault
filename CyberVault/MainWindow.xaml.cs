@@ -93,7 +93,7 @@ namespace CyberVault
                         }
                     }
                     File.AppendAllText(credentialsFilePath, userCredentials + Environment.NewLine);
-                }// hvis ikke så skriv alt til filen
+                } // hvis ikke så skriv alt til filen
                 else
                 {
                     File.WriteAllText(credentialsFilePath, userCredentials + Environment.NewLine);
