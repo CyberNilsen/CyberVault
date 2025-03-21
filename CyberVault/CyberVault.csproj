@@ -37,7 +37,6 @@
     <Content Include="Images\CoffeeMachine.gif">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <PackageReference Include="WpfAnimatedGif" Version="2.0.2" />
     <Resource Include="Images\copy.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Resource>
