@@ -21,20 +21,18 @@ CyberVault is a C#-based password manager app designed for users to securely sto
 
    ```bash
    git clone https://github.com/CyberNilsen/CyberVault.git
-Open the project in Visual Studio.
+2. Open the project in Visual Studio.
 
-Build and run the application.
+3. Build and run the application.
 
 Usage
 Launch the CyberVault app.
 Create an account or log in with your credentials.
 Add, edit, and delete passwords in the secure database.
+
 All passwords are encrypted and stored locally for maximum security.
-Roadmap
-Chrome Extension: A browser extension to integrate with your password vault.
-Advanced Security Features: Multi-factor authentication (MFA), password strength checker, etc.
-Cross-Platform Support: Expanding to other platforms in future releases.
-Contributing
+
+Contributing:
 We welcome contributions from the community! If you have suggestions or bug reports, feel free to open an issue or submit a pull request.
 
 License
