@@ -13,25 +13,25 @@
         WindowStartupLocation="CenterScreen"
         Icon="pack://application:,,,/Images/CyberVault.ico">
 
-    <Border Background="#e7d3d3" CornerRadius="20" MouseDown="Window_MouseDown">
+    <Border Background="#e7d3d3" CornerRadius="0" MouseDown="Window_MouseDown">
 
         <Border.Clip>
             <RectangleGeometry Rect="0,0,1200,700" RadiusX="15" RadiusY="15"/>
         </Border.Clip>
 
-        
+
         <Grid>
             <Grid>
-            <TextBlock Name="Username" Text="Welcome back username" HorizontalAlignment="Left" VerticalAlignment="Top" FontSize="50" FontFamily="Segoe UI" Margin="72,36,0,0" FontWeight="Bold">
+                <TextBlock Name="Username" Text="Welcome back username" HorizontalAlignment="Left" VerticalAlignment="Top" FontSize="50" FontFamily="Segoe UI" Margin="72,36,0,0" FontWeight="Bold">
 
-            </TextBlock>
-        </Grid>
+                </TextBlock>
+            </Grid>
 
-        <Grid>
-            <TextBlock Name="QuoteTextBlock" Text="Have you taken your daily sip of coffee?" HorizontalAlignment="Left" VerticalAlignment="Top" FontSize="25" FontFamily="Segoe UI" Margin="77,105,0,0">
+            <Grid>
+                <TextBlock Name="QuoteTextBlock" Text="Have you taken your daily sip of coffee?" HorizontalAlignment="Left" VerticalAlignment="Top" FontSize="25" FontFamily="Segoe UI" Margin="77,105,0,0">
 
-            </TextBlock>
-        </Grid>
+                </TextBlock>
+            </Grid>
 
 
             <Button Name="PasswordVault" Width="300" Height="200" Background="#853E3E" BorderThickness="1" BorderBrush="#6A2C2C" Cursor="Hand" Margin="-750,-70,0,0" Click="PasswordVault_Click">
@@ -46,8 +46,8 @@
 
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="buttonBorder" Property="Background" Value="#FF8A2D2A"/>
-                                <Setter TargetName="buttonBorder" Property="BorderBrush" Value="#9A1F1F"/>
+                                <Setter TargetName="buttonBorder" Property="Background" Value="#E69A5B"/>
+                                <Setter TargetName="buttonBorder" Property="BorderBrush" Value="#E69A5B"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -123,12 +123,12 @@
                 </Button.Template>
             </Button>
 
-            <Button Name="Logout" Width="200" Height="70" Background="#853E3E" BorderThickness="0" Cursor="Hand" Margin="825,66,75,534" Click="LogOutButton_Click">
+            <Button Name="Logout" Background="#853E3E" BorderThickness="0" Cursor="Hand" Margin="989,10,85,642" Click="LogOutButton_Click" Content="">
                 <Button.Template>
                     <ControlTemplate TargetType="Button">
                         <Border Name="buttonBorder" Background="#853E3E" BorderBrush="#853E3E" BorderThickness="1" CornerRadius="20">
                             <StackPanel Orientation="Vertical" HorizontalAlignment="Center">
-                                <TextBlock Text="Log Out" Foreground="White" FontSize="28" FontWeight="Bold" TextAlignment="Center" Width="280" Margin="-40,17,0,0"/>
+                                <TextBlock Text="Log Out" Foreground="White" FontSize="15" FontWeight="Bold" TextAlignment="center" Width="280" RenderTransformOrigin="0.236,1.454" Margin="-75,15,0,0"/>
                             </StackPanel>
                         </Border>
 
@@ -136,7 +136,7 @@
                             <Trigger Property="IsMouseOver" Value="True">
                                 <Setter TargetName="buttonBorder" Property="Background" Value="Red"/>
                                 <Setter TargetName="buttonBorder" Property="BorderBrush" Value="#B55B5B"/>
-                             
+
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -213,7 +213,7 @@
             </Grid>
         </Grid>
     </Border>
-        
+
 
 
 </Window>

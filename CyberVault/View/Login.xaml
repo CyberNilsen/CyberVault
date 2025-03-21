@@ -155,40 +155,7 @@
                          </TextBlock>
                 </TextBlock>
 
-                <CheckBox x:Name="RememberMeCheckBox" Content="Remember Me" 
-          HorizontalAlignment="Left" VerticalAlignment="Top" 
-          Margin="140,400,0,0" FontSize="20" Foreground="White" 
-          Height="40" Width="250" Checked="RememberMeCheckBox_Checked">
-    <CheckBox.Style>
-        <Style TargetType="CheckBox">
-            <Setter Property="Background" Value="Transparent"/>
-            <Setter Property="BorderBrush" Value="#FFBA7E"/>
-            <Setter Property="BorderThickness" Value="2"/>
-            <Setter Property="Padding" Value="5"/>
-            <Setter Property="FontSize" Value="20"/>
-            <Setter Property="Height" Value="40"/>
-            <Setter Property="Width" Value="250"/>
-            <Setter Property="HorizontalContentAlignment" Value="Left"/>
-            <Setter Property="VerticalContentAlignment" Value="Center"/>
-            <Setter Property="Margin" Value="10"/>
-            <Setter Property="FontFamily" Value="Segoe UI"/>
-            <Setter Property="Foreground" Value="White"/>
-            <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
-            
-            <Style.Triggers>
-                <Trigger Property="IsMouseOver" Value="True">
-                    <Setter Property="Background" Value="#E69A5B"/>
-                    <Setter Property="BorderBrush" Value="#FFBA7E"/>
-                </Trigger>
                 
-                <Trigger Property="IsChecked" Value="True">
-                    <Setter Property="Background" Value="#FFBA7E"/>
-                    <Setter Property="BorderBrush" Value="#8C5B0E"/>
-                </Trigger>
-            </Style.Triggers>
-        </Style>
-    </CheckBox.Style>
-</CheckBox>
 
 
 

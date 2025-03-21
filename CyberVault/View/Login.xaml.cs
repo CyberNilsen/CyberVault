@@ -2,87 +2,98 @@
 using System.IO;
 using System.Windows;
 using System.Windows.Input;
-using System.Windows.Controls;
 using System.Security.Cryptography;
-using CyberVault.View;
+using System.Windows.Controls;
 
 namespace CyberVault.View
 {
     public partial class Login : Window
     {
+        // This property will be used to pass the encryption key to the dashboard
+        private static byte[] _currentEncryptionKey;
+
+        public static byte[] CurrentEncryptionKey
+        {
+            get { return _currentEncryptionKey; }
+            private set { _currentEncryptionKey = value; }
+        }
+
         public Login()
         {
             InitializeComponent();
-            
         }
 
-        private void Button_Click(object sender, RoutedEventArgs e)
+
+
+        // Static method to get the encryption key for the current session
+        public static byte[] GetEncryptionKey()
         {
-            // Får brukernavn og passord fra input feltet.
+            return CurrentEncryptionKey;
+        }
+
+        // Login button click event
+        private void LoginButton_Click(object sender, RoutedEventArgs e)
+        {
             string username = UsernameInput.Text;
             string password = PasswordInput.Password;
 
-            // Deretter sjekker den om et eller begge feltene er tomme.
             if (string.IsNullOrWhiteSpace(username) || string.IsNullOrWhiteSpace(password))
             {
-                // Hvis de er tomme så kommer det opp du må skrive både brukernavn og passord.
-                MessageBox.Show("You must enter both username and password!", "Login Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                return; // Så får du heller ikke gått videre
-            }
-
-            // Sjekk om credentials.txt filen finnes
-            string appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-            string cyberVaultPath = Path.Combine(appDataPath, "CyberVault");
-            string credentialsFilePath = Path.Combine(cyberVaultPath, "credentials.txt");
-
-            if (!File.Exists(credentialsFilePath))
-            {
-                MessageBox.Show("No users registered in the system.", "Login Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show("Username and password cannot be empty!", "Login Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
 
             try
             {
-                bool userFound = false;
-                bool loginSuccess = false;
+                string appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+                string cyberVaultPath = Path.Combine(appDataPath, "CyberVault");
+                string credentialsFilePath = Path.Combine(cyberVaultPath, "credentials.txt");
 
-                // Les hver linje fra credentials.txt
+                if (!File.Exists(credentialsFilePath))
+                {
+                    MessageBox.Show("No user accounts found. Please register first.", "Login Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
+                }
+
+                bool userFound = false;
+                byte[] salt = null;
+                byte[] storedHash = null;
+
                 foreach (string line in File.ReadAllLines(credentialsFilePath))
                 {
                     string[] parts = line.Split(',');
                     if (parts.Length == 3 && parts[0] == username)
                     {
-
                         userFound = true;
-
-                        // Hent salt og hashet passord
-                        byte[] salt = Convert.FromBase64String(parts[1]);
-                        byte[] storedHash = Convert.FromBase64String(parts[2]);
-
-                        // Hash det angitte passordet med samme salt
-                        byte[] inputHash = HashPassword(password, salt);
-
-                        // Sammenlign de to hashene
-                        loginSuccess = CompareByteArrays(inputHash, storedHash);
+                        salt = Convert.FromBase64String(parts[1]);
+                        storedHash = Convert.FromBase64String(parts[2]);
                         break;
                     }
                 }
 
                 if (!userFound)
                 {
-                    MessageBox.Show("Username or password is incorrect", "Login Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    MessageBox.Show("Username not found!", "Login Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
                 }
-                else if (!loginSuccess)
+
+                // Hash the entered password with the stored salt
+                byte[] inputHash = HashPassword(password, salt);
+                bool passwordMatch = CompareByteArrays(inputHash, storedHash);
+
+                if (!passwordMatch)
                 {
-                    MessageBox.Show("Username or password is incorrect.", "Login Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    MessageBox.Show("Incorrect password!", "Login Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
                 }
-                else
-                {
-                    // Hvis alt funker og passord er riktig så kommer du videre
-                    VaultDashboard vaultDashboard = new VaultDashboard(username);
-                    vaultDashboard.Show();
-                    this.Close(); // lukker login vinduet.
-                }
+
+                // Password is correct, derive encryption key and proceed to dashboard
+                CurrentEncryptionKey = KeyDerivation.DeriveKey(password, salt);
+
+                VaultDashboard dashboard = new VaultDashboard(username);
+                dashboard.SetEncryptionKey(CurrentEncryptionKey);
+                dashboard.Show();
+                this.Close();
             }
             catch (Exception ex)
             {
@@ -90,28 +101,26 @@ namespace CyberVault.View
             }
         }
 
-        // Sammenlign to byte arrays
-        private bool CompareByteArrays(byte[] array1, byte[] array2)
-        {
-            if (array1.Length != array2.Length)
-                return false;
-
-            // Bruk en constant-time sammenligning for å unngå timing attacks
-            int result = 0;
-            for (int i = 0; i < array1.Length; i++)
-            {
-                result |= array1[i] ^ array2[i];
-            }
-            return result == 0;
-        }
-
-        // Hash passord med samme metode som i registrering
         private byte[] HashPassword(string password, byte[] salt, int iterations = 10000, int hashSize = 32)
         {
             using (var pbkdf2 = new Rfc2898DeriveBytes(password, salt, iterations, HashAlgorithmName.SHA256))
             {
                 return pbkdf2.GetBytes(hashSize);
             }
+        }
+
+        private bool CompareByteArrays(byte[] array1, byte[] array2)
+        {
+            if (array1.Length != array2.Length)
+                return false;
+
+            for (int i = 0; i < array1.Length; i++)
+            {
+                if (array1[i] != array2[i])
+                    return false;
+            }
+
+            return true;
         }
 
         private void Window_MouseDown(object sender, MouseButtonEventArgs e)
@@ -132,28 +141,33 @@ namespace CyberVault.View
             this.WindowState = WindowState.Minimized;
         }
 
-        private void UsernameInput_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
+        private void RegisterTextBlock_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
-
-        }
-
-        private void PasswordInput_PasswordChanged(object sender, RoutedEventArgs e)
-        {
-
-        }
-
-        private void SignupTextBlock_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
-        {
-            
             MainWindow mainWindow = new MainWindow();
             mainWindow.Show();
             this.Close();
         }
 
-        private void RememberMeCheckBox_Checked(object sender, RoutedEventArgs e)
+
+        private void PasswordInput_PasswordChanged(object sender, RoutedEventArgs e)
         {
-            //Skal legge til slik at hvis du har trykket på denne knappen blir du husket og automatisk logget inn.
-            //Varer noen dager eller månender.
         }
+
+        private void UsernameInput_TextChanged(object sender, TextChangedEventArgs e)
+        {
+        }
+
+        private void SignupTextBlock_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            MainWindow mainWindow = new MainWindow();
+            mainWindow.Show();
+            this.Close();
+        }
+
+        private void Button_Click(object sender, RoutedEventArgs e)
+        {
+            LoginButton_Click(sender, e);
+        }
+
     }
 }

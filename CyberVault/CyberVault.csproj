@@ -12,6 +12,7 @@
   <ItemGroup>
     <None Remove="Images\arrow.png" />
     <None Remove="Images\coffe.png" />
+    <None Remove="Images\CoffeeMachine.gif" />
     <None Remove="Images\copy.png" />
     <None Remove="Images\CyberVault.ico" />
     <None Remove="Images\CyberVault.jpg" />
@@ -33,17 +34,21 @@
     <Resource Include="Images\coffe.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Resource>
+    <Content Include="Images\CoffeeMachine.gif">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <PackageReference Include="WpfAnimatedGif" Version="2.0.2" />
     <Resource Include="Images\copy.png">
-      <CopyToOutputDirectory></CopyToOutputDirectory>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Resource>
     <Resource Include="Images\CyberVault.ico" />
     <Resource Include="Images\CyberVault.jpg" />
-    <Resource Include="Images\eyes.png" />
-    <Resource Include="Images\wrench.png" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Main\" />
+    <Resource Include="Images\eyes.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Images\wrench.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
   </ItemGroup>
 
 </Project>
