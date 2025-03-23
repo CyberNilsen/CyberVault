@@ -97,15 +97,22 @@
                 </Button.Template>
             </Button>
 
-            <Button Width="300" Height="200" Background="#853E3E" BorderThickness="0" Cursor="Hand" Margin="10,-70,0,0">
+            <Button Name="TwoFactorAuthButton" Width="300" Height="200" Background="#853E3E" BorderThickness="0" Cursor="Hand" Margin="10,-70,0,0" Click="TwoFactorAuth_Click">
                 <Button.Template>
                     <ControlTemplate TargetType="Button">
-                        <Border Background="#853E3E" BorderBrush="#853E3E" BorderThickness="1" CornerRadius="20">
+                        <Border Name="buttonBorder"  Background="#853E3E" BorderBrush="#853E3E" BorderThickness="1" CornerRadius="20">
                             <StackPanel Orientation="Vertical" HorizontalAlignment="Center">
-                                <Image Source="/Images/wrench.png" Width="80" Height="150"/>
-                                <TextBlock Text="Under Construction" Foreground="White" FontSize="28" FontWeight="Bold" TextAlignment="Center" Width="280" Margin="0,-20,0,0"/>
+                                <Image Source="pack://application:,,,/Images/2fa.png" Width="80" Height="120" Margin="5"/>
+                                <TextBlock Text="Cyber Authenticator" Foreground="White" FontSize="28" FontWeight="Bold" TextAlignment="Center" Width="280" Height="39"/>
                             </StackPanel>
                         </Border>
+
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="buttonBorder" Property="Background" Value="#E69A5B"/>
+                                <Setter TargetName="buttonBorder" Property="BorderBrush" Value="#E69A5B"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
                     </ControlTemplate>
                 </Button.Template>
             </Button>

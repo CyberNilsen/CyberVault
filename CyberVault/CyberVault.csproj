@@ -10,6 +10,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Images\2fa.png" />
     <None Remove="Images\arrow.png" />
     <None Remove="Images\coffe.png" />
     <None Remove="Images\CoffeeMachine.gif" />
@@ -28,6 +29,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Resource Include="Images\2fa.png" />
     <Resource Include="Images\arrow.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Resource>

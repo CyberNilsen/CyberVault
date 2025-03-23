@@ -102,6 +102,14 @@ namespace CyberVault.View
             this.Close();
         }
 
+        private void TwoFactorAuth_Click(object sender, RoutedEventArgs e)
+        {
+            TwoFactorAuthenticator twoFactorAuthWindow = new TwoFactorAuthenticator(_username);
+            twoFactorAuthWindow.SetEncryptionKey(_encryptionKey);
+            twoFactorAuthWindow.Show();
+            this.Close();
+        }
+
         private void LogOutButton_Click(object sender, RoutedEventArgs e)
         {
             // Clean up the encryption key when logging out
