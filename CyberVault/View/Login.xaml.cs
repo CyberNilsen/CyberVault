@@ -9,7 +9,6 @@ namespace CyberVault.View
 {
     public partial class Login : Window
     {
-        // This property will be used to pass the encryption key to the dashboard
         private static byte[] _currentEncryptionKey;
 
         public static byte[] CurrentEncryptionKey
@@ -25,13 +24,11 @@ namespace CyberVault.View
 
 
 
-        // Static method to get the encryption key for the current session
         public static byte[] GetEncryptionKey()
         {
             return CurrentEncryptionKey;
         }
 
-        // Login button click event
         private void LoginButton_Click(object sender, RoutedEventArgs e)
         {
             string username = UsernameInput.Text;
@@ -77,7 +74,6 @@ namespace CyberVault.View
                     return;
                 }
 
-                // Hash the entered password with the stored salt
                 byte[] inputHash = HashPassword(password, salt);
                 bool passwordMatch = CompareByteArrays(inputHash, storedHash);
 
@@ -87,7 +83,6 @@ namespace CyberVault.View
                     return;
                 }
 
-                // Password is correct, derive encryption key and proceed to dashboard
                 CurrentEncryptionKey = KeyDerivation.DeriveKey(password, salt);
 
                 VaultDashboard dashboard = new VaultDashboard(username);

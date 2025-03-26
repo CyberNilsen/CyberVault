@@ -1,4 +1,5 @@
-﻿using System;
+﻿using CyberVault.WebExtension;
+using System;
 using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Input;
@@ -18,11 +19,16 @@ namespace CyberVault.View
             // Try to get encryption key from Login
             _encryptionKey = Login.GetEncryptionKey();
 
+            _webServer = new LocalWebServer(_username, _encryptionKey);
+            _webServer.Start();
+
+            // Display the access token
+            WebExtensionKeyDisplay.Text = _webServer.GetAccessToken();
+
             Title = $"CyberVault - {_username}";
-
             Username.Text = $"Welcome, {_username}!";
-
             SetRandomQuote();
+
         }
 
         public void SetEncryptionKey(byte[] key)
@@ -118,9 +124,29 @@ namespace CyberVault.View
                 System.Reflection.BindingFlags.Static)?.SetValue(null, null);
 
             _username = string.Empty;
+            _webServer?.Stop();
             Login login = new Login();
             login.Show();
             this.Close();
+
         }
+
+      
+        
+         private LocalWebServer _webServer;
+
+         public string GetWebExtensionAccessToken()
+            {
+                return _webServer?.GetAccessToken();
+            }
+
+
+        private void CopyWebExtensionKey_Click(object sender, RoutedEventArgs e)
+        {
+            Clipboard.SetText(WebExtensionKeyDisplay.Text);
+            MessageBox.Show("Web Extension Key copied to clipboard!", "Copied", MessageBoxButton.OK);
+        }
+
     }
+
 }
