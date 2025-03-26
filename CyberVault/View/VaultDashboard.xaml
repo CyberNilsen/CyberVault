@@ -150,25 +150,29 @@
                 </Button.Template>
             </Button>
 
-            <Border Background="#6A2C2C" CornerRadius="10" Margin="989,72,85,523">
+            <Border Background="#6A2C2C" CornerRadius="10" Margin="989,72,85,567">
                 <StackPanel>
-                    <TextBlock Text="Web Extension Key" Foreground="White" FontSize="12" 
+                    <TextBlock Text="Web Extension Key" Foreground="White" FontSize="14" 
                    HorizontalAlignment="Center" Margin="0,5,0,0"/>
-                    <TextBlock x:Name="WebExtensionKeyDisplay" 
-                   Text="" 
-                   Foreground="White" 
-                   FontSize="10" 
-                   HorizontalAlignment="Center" 
-                   TextWrapping="Wrap"
-                   Margin="5"/>
+
                     <Button Content="Copy Key" 
-                Width="100" 
-                Height="25" 
-                Background="#853E3E" 
-                Foreground="White" 
-                BorderThickness="0"
-                Click="CopyWebExtensionKey_Click"
-                Margin="0,5,0,5"/>
+            
+                            Width="100" 
+                            Height="25" 
+                            Background="#853E3E" 
+                            Foreground="White" 
+                            BorderThickness="0"
+                            Click="CopyWebExtensionKey_Click"
+                            Margin="0,5,0,5"/>
+
+                    <TextBlock x:Name="WebExtensionKeyDisplay" Opacity="0"  
+                               Text="" 
+                               Margin="0,50,0,0"
+                               Foreground="White" 
+                               FontSize="10" 
+                               HorizontalAlignment="Center" 
+                               TextWrapping="Wrap"/>
+
                 </StackPanel>
             </Border>
 
