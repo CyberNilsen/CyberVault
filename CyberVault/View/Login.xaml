@@ -70,7 +70,7 @@
                     <TextBlock Foreground="#8C5B0E" HorizontalAlignment="Center" Margin="0,332,0,48" FontSize="80" FontFamily="Segoe UI" Width="568" FontWeight="Black" ><Run Text="   "/><Run Language="nb-no" Text=" "/><Run Text="Welcome "/><LineBreak/><Run Text="to "/><Run Text="C"/><Run Text="yberVault"/></TextBlock>
                 </Grid>
 
-                <Rectangle Margin="0,-293,283,293" HorizontalAlignment="Right" Width="620">
+                <Rectangle Margin="0,-43,443,543" HorizontalAlignment="Right" Width="329" Height="200">
                     <Rectangle.Fill>
                         <VisualBrush Stretch="None">
                             <VisualBrush.Visual>
@@ -80,7 +80,7 @@
                     </Rectangle.Fill>
                 </Rectangle>
 
-                <Rectangle Margin="0,438,283,-168" HorizontalAlignment="Right" Width="620">
+                <Rectangle Margin="0,438,443,-168" HorizontalAlignment="Right" Width="329" Height="200">
                     <Rectangle.Fill>
                         <VisualBrush Stretch="None">
                             <VisualBrush.Visual>
@@ -90,7 +90,7 @@
                     </Rectangle.Fill>
                 </Rectangle>
 
-                <Rectangle Margin="0,-193,-272,393" HorizontalAlignment="Right" Width="620">
+                <Rectangle Margin="0,-193,-142,393" HorizontalAlignment="Right" Width="329" Height="200">
                     <Rectangle.Fill>
                         <VisualBrush Stretch="None">
                             <VisualBrush.Visual>
