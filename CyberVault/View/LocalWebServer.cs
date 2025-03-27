@@ -14,33 +14,56 @@ namespace CyberVault.WebExtension
         private string _username;
         private byte[] _encryptionKey;
         private static string _accessToken;
+        private static bool _isRunning = false;
 
         public LocalWebServer(string username, byte[] encryptionKey)
         {
             _username = username;
             _encryptionKey = encryptionKey;
             _accessToken = GenerateAccessToken();
+            _listener = new HttpListener();
+            _listener.Prefixes.Add("http://localhost:8765/");
         }
 
         public void Start()
         {
-            _listener = new HttpListener();
-            _listener.Prefixes.Add("http://localhost:8765/");
-            _listener.Start();
+            if (_isRunning) return;
 
-            Task.Run(async () =>
+            try
             {
-                while (_listener.IsListening)
+                _listener.Start();
+                _isRunning = true;
+
+                Task.Run(async () =>
                 {
-                    HttpListenerContext context = await _listener.GetContextAsync();
-                    ProcessRequest(context);
-                }
-            });
+                    while (_isRunning)
+                    {
+                        try
+                        {
+                            HttpListenerContext context = await _listener.GetContextAsync();
+                            ProcessRequest(context);
+                        }
+                        catch (HttpListenerException) { }
+                    }
+                });
+            }
+            catch (HttpListenerException)
+            {
+                _isRunning = false;
+            }
         }
 
         public void Stop()
         {
-            _listener?.Stop();
+            if (!_isRunning) return;
+
+            try
+            {
+                _isRunning = false;
+                _listener.Stop();
+                _listener.Close();
+            }
+            catch (ObjectDisposedException) { }
         }
 
         private void ProcessRequest(HttpListenerContext context)
@@ -56,29 +79,22 @@ namespace CyberVault.WebExtension
                 return;
             }
 
-            if (context.Request.HttpMethod != "GET" ||
-                context.Request.Url.LocalPath != "/passwords")
+            if (context.Request.HttpMethod != "GET" || context.Request.Url.LocalPath != "/passwords")
             {
                 context.Response.StatusCode = 404;
                 context.Response.Close();
                 return;
             }
 
-            // Check Authorization
             string authHeader = context.Request.Headers["Authorization"];
-            if (string.IsNullOrEmpty(authHeader) ||
-                !authHeader.StartsWith("Bearer ") ||
-                authHeader.Substring(7) != _accessToken)
+            if (string.IsNullOrEmpty(authHeader) || !authHeader.StartsWith("Bearer ") || authHeader.Substring(7) != _accessToken)
             {
                 context.Response.StatusCode = 401;
                 context.Response.Close();
                 return;
             }
 
-            // Fetch and decrypt passwords
             List<PasswordItem> passwords = PasswordStorage.LoadPasswords(_username, _encryptionKey);
-
-            // Convert to JSON
             string jsonPasswords = JsonSerializer.Serialize(passwords);
             byte[] buffer = Encoding.UTF8.GetBytes(jsonPasswords);
 
@@ -98,7 +114,6 @@ namespace CyberVault.WebExtension
             }
         }
 
-        // Method to get the access token (to be used in the main app)
         public string GetAccessToken() => _accessToken;
     }
 }
