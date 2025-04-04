@@ -15,20 +15,24 @@ namespace CyberVault
     {
         private MainWindow mainWindow;
         private bool _passwordVisible = false;
+
         public RegisterControl(MainWindow mw)
         {
             InitializeComponent();
             mainWindow = mw;
         }
+
         private void RegisterButton_Click(object sender, RoutedEventArgs e)
         {
             string username = UsernameInput.Text;
-            string password = PasswordInput.Password;
+            string password = _passwordVisible ? PasswordVisible.Text : PasswordInput.Password;
+
             if (string.IsNullOrWhiteSpace(username) || string.IsNullOrWhiteSpace(password))
             {
                 MessageBox.Show("Username and password cannot be empty!", "Registration Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
+
             try
             {
                 byte[] salt = GenerateSalt();
@@ -36,12 +40,15 @@ namespace CyberVault
                 byte[] encryptionKey = KeyDerivation.DeriveKey(password, salt);
                 string saltBase64 = Convert.ToBase64String(salt);
                 string hashBase64 = Convert.ToBase64String(hashedPassword);
+
                 string appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
                 string cyberVaultPath = Path.Combine(appDataPath, "CyberVault");
                 if (!Directory.Exists(cyberVaultPath))
                     Directory.CreateDirectory(cyberVaultPath);
+
                 string credentialsFilePath = Path.Combine(cyberVaultPath, "credentials.txt");
                 string userCredentials = $"{username},{saltBase64},{hashBase64}";
+
                 if (File.Exists(credentialsFilePath))
                 {
                     foreach (string line in File.ReadAllLines(credentialsFilePath))
@@ -58,26 +65,32 @@ namespace CyberVault
                 {
                     File.WriteAllText(credentialsFilePath, userCredentials + Environment.NewLine);
                 }
+
                 PasswordStorage.SavePasswords(new List<PasswordItem>(), username, encryptionKey);
                 MessageBox.Show("Registration successful!", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
+
                 UsernameInput.Clear();
                 PasswordInput.Clear();
+                PasswordVisible.Clear();
             }
             catch (Exception ex)
             {
                 MessageBox.Show($"An error occurred: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
+
         private void LoginTextBlock_MouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
             mainWindow.Navigate(new LoginControl(mainWindow));
         }
+
         private byte[] GenerateSalt(int saltSize = 16)
         {
             byte[] salt = new byte[saltSize];
             RandomNumberGenerator.Fill(salt);
             return salt;
         }
+
         private byte[] HashPassword(string password, byte[] salt, int iterations = 10000, int hashSize = 32)
         {
             using (var pbkdf2 = new Rfc2898DeriveBytes(password, salt, iterations, HashAlgorithmName.SHA256))
@@ -85,6 +98,7 @@ namespace CyberVault
                 return pbkdf2.GetBytes(hashSize);
             }
         }
+
         private void PasswordInput_PasswordChanged(object sender, RoutedEventArgs e)
         {
             string password = PasswordInput.Password;
@@ -92,6 +106,7 @@ namespace CyberVault
             AnimateProgressBar(strength);
             PasswordStrengthMessage.Text = GetStrengthMessage(strength);
         }
+
         private void PasswordVisible_TextChanged(object sender, TextChangedEventArgs e)
         {
             string password = PasswordVisible.Text;
@@ -99,9 +114,11 @@ namespace CyberVault
             AnimateProgressBar(strength);
             PasswordStrengthMessage.Text = GetStrengthMessage(strength);
         }
+
         private void TogglePasswordButton_Click(object sender, RoutedEventArgs e)
         {
             _passwordVisible = !_passwordVisible;
+
             if (_passwordVisible)
             {
                 PasswordVisible.Text = PasswordInput.Password;
@@ -115,6 +132,7 @@ namespace CyberVault
                 PasswordInput.Visibility = Visibility.Visible;
             }
         }
+
         private void AnimateProgressBar(int targetValue)
         {
             DoubleAnimation animation = new DoubleAnimation
@@ -124,7 +142,9 @@ namespace CyberVault
                 Duration = TimeSpan.FromMilliseconds(500),
                 EasingFunction = new QuadraticEase()
             };
+
             PasswordStrengthBar.BeginAnimation(ProgressBar.ValueProperty, animation);
+
             if (targetValue < 50)
                 PasswordStrengthBar.Foreground = new SolidColorBrush(Colors.Red);
             else if (targetValue < 81)
@@ -132,9 +152,11 @@ namespace CyberVault
             else
                 PasswordStrengthBar.Foreground = new SolidColorBrush(Colors.Green);
         }
+
         private int CalculatePasswordStrength(string password)
         {
             int strength = 0;
+
             if (password.Length >= 4)
                 strength += 5;
             if (password.Length >= 6)
@@ -143,14 +165,17 @@ namespace CyberVault
                 strength += 20;
             if (password.Length >= 15)
                 strength += 50;
+
             if (Regex.IsMatch(password, @"[A-Z]"))
                 strength += 20;
             if (Regex.IsMatch(password, @"[0-9]"))
                 strength += 20;
             if (Regex.IsMatch(password, @"[\W_]"))
                 strength += 20;
+
             return strength;
         }
+
         private string GetStrengthMessage(int strength)
         {
             if (strength < 40)
@@ -160,7 +185,5 @@ namespace CyberVault
             else
                 return "Strong password";
         }
-
-        
     }
 }

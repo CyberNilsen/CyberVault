@@ -8,7 +8,7 @@
 
         <Style x:Key="WindowControlButton" TargetType="Button">
             <Setter Property="Background" Value="Transparent" />
-            <Setter Property="Foreground" Value="#3B4252" />
+            <Setter Property="Foreground" Value="#4C6A99" />
             <Setter Property="Cursor" Value="Hand" />
             <Setter Property="BorderThickness" Value="0" />
             <Setter Property="Width" Value="46" />
@@ -21,11 +21,11 @@
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter Property="Background" TargetName="border" Value="#FF7A7A7A" />
+                                <Setter Property="Background" TargetName="border" Value="#5E81AC" />
                                 <Setter Property="TextBlock.Foreground" Value="White" />
                             </Trigger>
                             <Trigger Property="IsPressed" Value="True">
-                                <Setter Property="Background" TargetName="border" Value="#444444" />
+                                <Setter Property="Background" TargetName="border" Value="#4C6A99" />
                                 <Setter Property="TextBlock.Foreground" Value="White" />
                             </Trigger>
                         </ControlTemplate.Triggers>
@@ -65,11 +65,11 @@
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter Property="Background" TargetName="border" Value="#555555" />
+                                <Setter Property="Background" TargetName="border" Value="#5E81AC" />
                                 <Setter Property="TextBlock.Foreground" Value="White" />
                             </Trigger>
                             <Trigger Property="IsPressed" Value="True">
-                                <Setter Property="Background" TargetName="border" Value="#666666" />
+                                <Setter Property="Background" TargetName="border" Value="#4C6A99" />
                                 <Setter Property="TextBlock.Foreground" Value="White" />
                             </Trigger>
                         </ControlTemplate.Triggers>

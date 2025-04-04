@@ -22,6 +22,7 @@
     <None Remove="Images\eye3.svg" />
     <None Remove="Images\eye4.png" />
     <None Remove="Images\eyes.png" />
+    <None Remove="Images\png_508rug.png" />
     <None Remove="Images\wrench.png" />
   </ItemGroup>
 
@@ -39,17 +40,11 @@
     <Resource Include="Images\coffe.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Resource>
-    <Content Include="Images\CoffeeMachine.gif">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
     <Resource Include="Images\copy.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Resource>
     <Resource Include="Images\CyberVault.ico" />
     <Resource Include="Images\CyberVault.jpg" />
-    <Resource Include="Images\eye.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Resource>
     <Resource Include="Images\wrench.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Resource>

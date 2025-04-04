@@ -210,10 +210,6 @@ namespace CyberVault.View
             PasswordListBox.SelectedItem = item;
             passwordTextBox.Visibility = Visibility.Collapsed;
             NewPasswordBox.Visibility = Visibility.Visible;
-            if (EyeIcon != null)
-            {
-                EyeIcon.Source = new BitmapImage(new Uri("/Images/eyes.png", UriKind.Relative));
-            }
             if (item != null)
             {
                 PasswordNameTextBox.Text = item.Name;

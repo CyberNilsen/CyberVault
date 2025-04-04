@@ -31,7 +31,6 @@ namespace CyberVault.View
 
         private void InitializePasswordVisibilityToggle()
         {
-            // Create the TextBox for showing the password in clear text
             passwordTextBox = new TextBox
             {
                 Visibility = Visibility.Collapsed,
@@ -45,8 +44,7 @@ namespace CyberVault.View
                 HorizontalAlignment = NewPasswordBox.HorizontalAlignment
             };
 
-            // Add the TextBox next to the PasswordBox
-            // Note: You need to add this to your XAML grid that contains the NewPasswordBox
+           
             var grid = NewPasswordBox.Parent as Grid;
             if (grid != null)
             {
@@ -60,14 +58,12 @@ namespace CyberVault.View
         {
             if (NewPasswordBox.Visibility == Visibility.Visible)
             {
-                // Show password as plain text
                 PlainTextPassword.Text = NewPasswordBox.Password;
                 NewPasswordBox.Visibility = Visibility.Collapsed;
                 PlainTextPassword.Visibility = Visibility.Visible;
             }
             else
             {
-                // Hide password (show dots)
                 NewPasswordBox.Password = PlainTextPassword.Text;
                 PlainTextPassword.Visibility = Visibility.Collapsed;
                 NewPasswordBox.Visibility = Visibility.Visible;
@@ -83,10 +79,8 @@ namespace CyberVault.View
         {
             try
             {
-                // Use the encryption key passed to this window
                 if (_encryptionKey == null)
                 {
-                    // As a fallback, try to get from Login
                     _encryptionKey = Login.GetEncryptionKey();
 
                     if (_encryptionKey == null)
@@ -97,13 +91,10 @@ namespace CyberVault.View
                     }
                 }
 
-                // Clear existing passwords
                 SavedPasswords.Clear();
 
-                // Load passwords from encrypted file
                 List<PasswordItem> passwords = PasswordStorage.LoadPasswords(_username, _encryptionKey);
 
-                // Add loaded passwords to observable collection
                 foreach (var password in passwords)
                 {
                     SavedPasswords.Add(password);
@@ -119,7 +110,6 @@ namespace CyberVault.View
         {
             try
             {
-                // Use the encryption key passed to this window
                 if (_encryptionKey == null)
                 {
                     MessageBox.Show("Session expired. Please log in again.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
@@ -174,7 +164,6 @@ namespace CyberVault.View
 
         private void SavePassword_Click(object sender, RoutedEventArgs e)
         {
-            // Ensure we get the password from whichever control is currently visible
             string password = NewPasswordBox.Visibility == Visibility.Visible ?
                 NewPasswordBox.Password : passwordTextBox.Text;
 
@@ -182,7 +171,6 @@ namespace CyberVault.View
 
             if (selectedItem != null)
             {
-                // Update existing password
                 selectedItem.Name = PasswordNameTextBox.Text;
                 selectedItem.Website = WebsiteTextBox.Text;
                 selectedItem.Email = EmailTextBox.Text;
@@ -195,7 +183,6 @@ namespace CyberVault.View
             }
             else
             {
-                // Create new password
                 var newItem = new PasswordItem
                 {
                     Name = PasswordNameTextBox.Text,
@@ -279,11 +266,9 @@ namespace CyberVault.View
 
             PasswordListBox.SelectedItem = item;
 
-            // Ensure password is hidden when opening the form
             passwordTextBox.Visibility = Visibility.Collapsed;
             NewPasswordBox.Visibility = Visibility.Visible;
 
-            // Reset the eye icon
             if (EyeIcon != null)
             {
                 EyeIcon.Source = new BitmapImage(new Uri("/Images/eyes.png", UriKind.Relative));

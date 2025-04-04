@@ -40,15 +40,20 @@
                                     <ColumnDefinition Width="*" />
                                     <ColumnDefinition Width="Auto" />
                                 </Grid.ColumnDefinitions>
-                                
-                                <PasswordBox x:Name="PasswordInput" Grid.Column="0"
-                                           Style="{StaticResource ModernPasswordBox}"
-                                           Height="48" Foreground="White" />
-                                
+
+                                <PasswordBox x:Name="PasswordInput" Grid.Column="0" 
+                                             Style="{StaticResource ModernPasswordBox}"
+                                             Height="48" Foreground="White" />
+
+                                <TextBox x:Name="PlainTextPassword" Grid.Column="0"
+                                         Style="{StaticResource ModernTextBox}"
+                                         Height="48" Foreground="White" 
+                                         Visibility="Collapsed" />
+
                                 <Button x:Name="TogglePasswordButton" Grid.Column="1" 
                                         Style="{StaticResource ImageButtonStyle}" 
                                         Click="TogglePasswordButton_Click">
-                                    <Image Source="/Images/eye.png" Width="30" Height="22"/>
+                                    <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE7B3;" FontSize="24" Foreground="White"/>
                                 </Button>
 
                             </Grid>
@@ -69,7 +74,6 @@
 
         <Border Grid.Column="1" Background="#ECEFF4" CornerRadius="0,10,10,0">
             <Grid>
-
                 <StackPanel VerticalAlignment="Center">
                     <Viewbox MaxHeight="250" MaxWidth="250" Margin="0,0,0,30">
                         <Image Source="/Images/coffe.png" />

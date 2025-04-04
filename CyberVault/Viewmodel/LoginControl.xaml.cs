@@ -95,15 +95,16 @@ namespace CyberVault
         {
             if (PasswordInput.Visibility == Visibility.Visible)
             {
-                PasswordInput = PasswordInput;
                 PasswordInput.Visibility = Visibility.Collapsed;
-                PasswordInput.Visibility = Visibility.Visible;
+                PlainTextPassword.Text = PasswordInput.Password;  
+                PlainTextPassword.Visibility = Visibility.Visible;
             }
             else
             {
-                PasswordInput.Password = PasswordInput;
+         
+                PasswordInput.Password = PlainTextPassword.Text;  
                 PlainTextPassword.Visibility = Visibility.Collapsed;
-                NewPasswordBox.Visibility = Visibility.Visible;
+                PasswordInput.Visibility = Visibility.Visible;
             }
         }
     }
