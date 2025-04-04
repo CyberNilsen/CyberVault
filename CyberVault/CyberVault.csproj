@@ -18,6 +18,9 @@
     <None Remove="Images\CyberVault.ico" />
     <None Remove="Images\CyberVault.jpg" />
     <None Remove="Images\CyberVaultLogo.ico" />
+    <None Remove="Images\eye2.png" />
+    <None Remove="Images\eye3.svg" />
+    <None Remove="Images\eye4.png" />
     <None Remove="Images\eyes.png" />
     <None Remove="Images\wrench.png" />
   </ItemGroup>
@@ -44,7 +47,7 @@
     </Resource>
     <Resource Include="Images\CyberVault.ico" />
     <Resource Include="Images\CyberVault.jpg" />
-    <Resource Include="Images\eyes.png">
+    <Resource Include="Images\eye.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Resource>
     <Resource Include="Images\wrench.png">

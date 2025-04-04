@@ -6,13 +6,49 @@
         xmlns:local="clr-namespace:CyberVault"
         mc:Ignorable="d"
         Title="CyberVault" Height="700" Width="1200"
+        MinHeight="600" MinWidth="900"
         WindowStyle="None"  
-        ResizeMode="NoResize"
+        ResizeMode="CanResize"
         Background="Transparent"
         AllowsTransparency="True"
         WindowStartupLocation="CenterScreen"
-        Icon="pack://application:,,,/Images/CyberVault.ico">
-    <Border Background="White" CornerRadius="20" ClipToBounds="True" MouseDown="Window_MouseDown">
-        <ContentControl x:Name="MainContent"/>
+        Icon="pack://application:,,,/Images/CyberVault.ico"
+        MouseLeftButtonDown="Window_MouseLeftButtonDown"
+        MouseDoubleClick="Window_MouseDoubleClick"
+        >
+
+    <WindowChrome.WindowChrome>
+        <WindowChrome CaptionHeight="0" ResizeBorderThickness="5" />
+    </WindowChrome.WindowChrome>
+
+    <Border Background="White" CornerRadius="20" ClipToBounds="True">
+        <Grid>
+            <ResizeGrip HorizontalAlignment="Right" VerticalAlignment="Bottom" Opacity="0.8" />
+            <ContentControl x:Name="MainContent"/>
+
+            <Grid>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,0,0,0">
+
+                    <Button x:Name="MinimizeButton" Style="{StaticResource MinimizeButton}" Click="MinimizeButton_Click">
+                        <TextBlock Text="&#xE921;" FontFamily="Segoe MDL2 Assets" FontSize="10"/>
+                    </Button>
+
+                    <Button x:Name="MaximizeButton" Style="{StaticResource MinimizeButton}" Click="MaximizeButton_Click">
+                        <TextBlock x:Name="MaximizeIcon" Text="&#xE922;" FontFamily="Segoe MDL2 Assets" FontSize="10"/>
+                    </Button>
+
+                    <Button x:Name="CloseButton" Style="{StaticResource CloseButton}" Click="CloseButton_Click">
+                        <TextBlock Text="&#xE8BB;" FontFamily="Segoe MDL2 Assets" FontSize="10"/>
+                    </Button>
+
+
+
+                </StackPanel>
+
+                <ContentControl Content="{Binding CurrentControl}" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"/>
+            </Grid>
+
+        </Grid>
     </Border>
+
 </Window>

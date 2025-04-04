@@ -5,6 +5,7 @@ using System.Security.Cryptography;
 using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
 
@@ -19,25 +20,6 @@ namespace CyberVault
             InitializeComponent();
             mainWindow = mw;
         }
-
-        private void MinimizeButton_Click(object sender, RoutedEventArgs e)
-        {
-            Window window = Window.GetWindow(this);
-            if (window != null)
-            {
-                window.WindowState = WindowState.Minimized;
-            }
-        }
-
-        private void CloseButton_Click(object sender, RoutedEventArgs e)
-        {
-            Window window = Window.GetWindow(this);
-            if (window != null)
-            {
-                window.Close();
-            }
-        }
-
         private void RegisterButton_Click(object sender, RoutedEventArgs e)
         {
             string username = UsernameInput.Text;

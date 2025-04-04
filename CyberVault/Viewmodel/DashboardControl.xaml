@@ -12,21 +12,15 @@
                 <Grid>
                     <TextBlock Text="CyberVault Dashboard" VerticalAlignment="Center" Margin="15,0,0,0" 
                                FontSize="16" FontWeight="SemiBold" Foreground="White"/>
-                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                        <Button x:Name="MinimizeButton" Style="{StaticResource MinimizeButton}" Click="MinimizeButton_Click">
-                            <TextBlock Text="&#xE921;" FontFamily="Segoe MDL2 Assets" FontSize="10"/>
-                        </Button>
-                        <Button x:Name="CloseButton" Style="{StaticResource CloseButton}" Click="CloseButton_Click">
-                            <TextBlock Text="&#xE8BB;" FontFamily="Segoe MDL2 Assets" FontSize="10"/>
-                        </Button>
-                    </StackPanel>
                 </Grid>
             </Border>
+            
             <Grid Grid.Row="1">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="250"/>
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
+                
                 <Border Grid.Column="0" Background="#2E3440" CornerRadius="0,0,0,10">
                     <Grid>
                         <Grid.RowDefinitions>

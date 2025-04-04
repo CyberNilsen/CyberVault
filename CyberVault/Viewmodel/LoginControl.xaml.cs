@@ -16,24 +16,6 @@ namespace CyberVault
             InitializeComponent();
             mainWindow = mw;
         }
-
-        private void CloseButton_Click(object sender, RoutedEventArgs e)
-        {
-            Window window = Window.GetWindow(this);
-            if (window != null)
-            {
-                window.Close();
-            }
-        }
-
-        private void MinimizeButton_Click(object sender, RoutedEventArgs e)
-        {
-            Window window = Window.GetWindow(this);
-            if (window != null)
-            {
-                window.WindowState = WindowState.Minimized;
-            }
-        }
         private void LoginButton_Click(object sender, RoutedEventArgs e)
         {
             string username = UsernameInput.Text;
@@ -109,6 +91,20 @@ namespace CyberVault
             mainWindow.Navigate(new RegisterControl(mainWindow));
         }
 
-        
+        private void TogglePasswordButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (PasswordInput.Visibility == Visibility.Visible)
+            {
+                PasswordInput = PasswordInput;
+                PasswordInput.Visibility = Visibility.Collapsed;
+                PasswordInput.Visibility = Visibility.Visible;
+            }
+            else
+            {
+                PasswordInput.Password = PasswordInput;
+                PlainTextPassword.Visibility = Visibility.Collapsed;
+                NewPasswordBox.Visibility = Visibility.Visible;
+            }
+        }
     }
 }
