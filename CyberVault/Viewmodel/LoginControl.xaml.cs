@@ -10,11 +10,29 @@ namespace CyberVault
     public partial class LoginControl : UserControl
     {
         private MainWindow mainWindow;
-        public static byte[] CurrentEncryptionKey { get; private set; }
+        public static byte[] ?CurrentEncryptionKey { get; private set; }
         public LoginControl(MainWindow mw)
         {
             InitializeComponent();
             mainWindow = mw;
+        }
+
+        private void CloseButton_Click(object sender, RoutedEventArgs e)
+        {
+            Window window = Window.GetWindow(this);
+            if (window != null)
+            {
+                window.Close();
+            }
+        }
+
+        private void MinimizeButton_Click(object sender, RoutedEventArgs e)
+        {
+            Window window = Window.GetWindow(this);
+            if (window != null)
+            {
+                window.WindowState = WindowState.Minimized;
+            }
         }
         private void LoginButton_Click(object sender, RoutedEventArgs e)
         {
@@ -36,8 +54,8 @@ namespace CyberVault
                     return;
                 }
                 bool userFound = false;
-                byte[] salt = null;
-                byte[] storedHash = null;
+                byte[] ?salt = null;
+                byte[] ?storedHash = null;
                 foreach (string line in File.ReadAllLines(credentialsFilePath))
                 {
                     string[] parts = line.Split(',');
@@ -51,7 +69,7 @@ namespace CyberVault
                 }
                 if (!userFound)
                 {
-                    MessageBox.Show("Username not found!", "Login Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    MessageBox.Show("Account not found!", "Login Error", MessageBoxButton.OK, MessageBoxImage.Error);
                     return;
                 }
                 byte[] inputHash = HashPassword(password, salt);
@@ -90,5 +108,7 @@ namespace CyberVault
         {
             mainWindow.Navigate(new RegisterControl(mainWindow));
         }
+
+        
     }
 }

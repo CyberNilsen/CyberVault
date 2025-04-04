@@ -50,7 +50,7 @@ namespace CyberVault.View
                 grid.Children.Add(passwordTextBox);
             }
         }
-        private void TogglePasswordVisibility_Click(object sender, MouseButtonEventArgs e)
+        private void TogglePasswordVisibility_Click(object sender, RoutedEventArgs e)
         {
             if (NewPasswordBox.Visibility == Visibility.Visible)
             {
@@ -116,23 +116,6 @@ namespace CyberVault.View
         private void LogOut()
         {
             mainWindow.Navigate(new LoginControl(mainWindow));
-        }
-        private void UserControl_MouseDown(object sender, MouseButtonEventArgs e)
-        {
-            if (e.LeftButton == MouseButtonState.Pressed)
-                Window.GetWindow(this).DragMove();
-        }
-        private void CloseButton_Click(object sender, RoutedEventArgs e)
-        {
-            mainWindow.Navigate(new DashboardControl(mainWindow, _username, _encryptionKey));
-        }
-        private void MinimizeButton_Click(object sender, RoutedEventArgs e)
-        {
-            Window.GetWindow(this).WindowState = WindowState.Minimized;
-        }
-        private void ReturnButton_Click(object sender, RoutedEventArgs e)
-        {
-            mainWindow.Navigate(new DashboardControl(mainWindow, _username, _encryptionKey));
         }
         private void CreateSavePassword_Click(object sender, RoutedEventArgs e)
         {

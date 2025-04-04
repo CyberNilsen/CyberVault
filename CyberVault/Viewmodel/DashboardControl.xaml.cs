@@ -17,7 +17,7 @@ namespace CyberVault
             mainWindow = mw;
             username = user;
             encryptionKey = key;
-            WelcomeText.Text = $"Welcome, {username}";
+            WelcomeText.Text = $"Welcome to CyberVault, {username}!";
             DashboardContent.Content = new HomeDashboardControl();
         }
         private void TopBar_MouseDown(object sender, MouseButtonEventArgs e)

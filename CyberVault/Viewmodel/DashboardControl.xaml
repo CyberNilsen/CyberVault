@@ -2,30 +2,95 @@
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              Height="700" Width="1200">
-    <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="40"/>
-            <RowDefinition Height="*"/>
-        </Grid.RowDefinitions>
-        <Grid Grid.Row="0" Background="#FFBA7E" MouseDown="TopBar_MouseDown">
-            <TextBlock Text="CyberVault Dashboard" VerticalAlignment="Center" Margin="10,0,0,0" FontSize="16" FontWeight="Bold" Foreground="Black"/>
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                <Button x:Name="MinimizeButton" Content="-" Width="30" Height="30" Margin="0,5,5,5" Click="MinimizeButton_Click" Background="Transparent" BorderThickness="0"/>
-                <Button x:Name="CloseButton" Content="X" Width="30" Height="30" Margin="0,5,5,5" Click="CloseButton_Click" Background="Transparent" BorderThickness="0"/>
-            </StackPanel>
+    <Border CornerRadius="10" ClipToBounds="True">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="40"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+            <Border Grid.Row="0" Background="#2E3440" CornerRadius="10,10,0,0" MouseDown="TopBar_MouseDown">
+                <Grid>
+                    <TextBlock Text="CyberVault Dashboard" VerticalAlignment="Center" Margin="15,0,0,0" 
+                               FontSize="16" FontWeight="SemiBold" Foreground="White"/>
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                        <Button x:Name="MinimizeButton" Style="{StaticResource MinimizeButton}" Click="MinimizeButton_Click">
+                            <TextBlock Text="&#xE921;" FontFamily="Segoe MDL2 Assets" FontSize="10"/>
+                        </Button>
+                        <Button x:Name="CloseButton" Style="{StaticResource CloseButton}" Click="CloseButton_Click">
+                            <TextBlock Text="&#xE8BB;" FontFamily="Segoe MDL2 Assets" FontSize="10"/>
+                        </Button>
+                    </StackPanel>
+                </Grid>
+            </Border>
+            <Grid Grid.Row="1">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="250"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Border Grid.Column="0" Background="#2E3440" CornerRadius="0,0,0,10">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <StackPanel Grid.Row="0" Margin="0,30,0,20">
+                            <Image Source="/Images/coffe.png" Width="60" Height="60" HorizontalAlignment="Center"/>
+                            <TextBlock Text="CyberVault" FontSize="24" FontWeight="SemiBold" Foreground="White" 
+                                      HorizontalAlignment="Center" Margin="0,10,0,0"/>
+                            <TextBlock Text="Security Dashboard" FontSize="14" Foreground="#88FFFFFF" 
+                                      HorizontalAlignment="Center" Margin="0,5,0,0"/>
+                        </StackPanel>
+
+                        <StackPanel Grid.Row="1" Margin="20,20,20,0">
+                            <TextBlock Text="MENU" Foreground="#88FFFFFF" 
+                                     FontSize="14" FontWeight="SemiBold" Margin="10,0,0,15"/>
+
+                            <Border Background="#3B4252" CornerRadius="10" Margin="0,0,0,10">
+                                <Button Content="Password Manager" Height="46" Style="{StaticResource ActionButton}" 
+                                       Background="#5E81AC" Click="PasswordManagerButton_Click"/>
+                            </Border>
+
+                            <Border Background="#3B4252" CornerRadius="10" Margin="0,0,0,10">
+                                <Button Content="Authenticator" Height="46" Style="{StaticResource ActionButton}" 
+                                       Background="#434C5E" Click="AuthenticatorButton_Click"/>
+                            </Border>
+
+                            <Border Background="#3B4252" CornerRadius="10" Margin="0,0,0,10">
+                                <Button Content="Security Status" Height="46" Style="{StaticResource ActionButton}" 
+                                       Background="#434C5E"/>
+                            </Border>
+
+                            <Border Background="#3B4252" CornerRadius="10" Margin="0,0,0,10">
+                                <Button Content="Settings" Height="46" Style="{StaticResource ActionButton}" 
+                                       Background="#434C5E"/>
+                            </Border>
+                        </StackPanel>
+
+                        <Border Grid.Row="2" Background="#3B4252" CornerRadius="10" Margin="20,0,20,20">
+                            <Button Content="Logout" Height="46" Style="{StaticResource ActionButton}" 
+                                   Background="#BF616A" Click="LogoutButton_Click"/>
+                        </Border>
+                    </Grid>
+                </Border>
+
+                <Border Grid.Column="1" Background="#ECEFF4" CornerRadius="0,0,10,0">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+
+                        <TextBlock x:Name="WelcomeText" Grid.Row="0" Text="Welcome to CyberVault" 
+                                   FontWeight="Bold" FontSize="28" Foreground="#2E3440" Margin="30,30,30,15"/>
+                    </Grid>
+                </Border>
+
+                <Border CornerRadius="0,0,10,0">
+                    <ContentControl x:Name="DashboardContent" Grid.RowSpan="2"/>
+                </Border>
+            </Grid>
         </Grid>
-        <Grid Grid.Row="1">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="200"/>
-                <ColumnDefinition Width="*"/>
-            </Grid.ColumnDefinitions>
-            <StackPanel Grid.Column="0" Background="#853E3E">
-                <TextBlock x:Name="WelcomeText" Foreground="White" FontSize="16" Margin="10"/>
-                <Button Content="Password Manager" Margin="10" Click="PasswordManagerButton_Click"/>
-                <Button Content="Authenticator" Margin="10" Click="AuthenticatorButton_Click"/>
-                <Button Content="Logout" Margin="10" Click="LogoutButton_Click"/>
-            </StackPanel>
-            <ContentControl x:Name="DashboardContent" Grid.Column="1"/>
-        </Grid>
-    </Grid>
+    </Border>
 </UserControl>

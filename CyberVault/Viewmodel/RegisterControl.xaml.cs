@@ -19,6 +19,25 @@ namespace CyberVault
             InitializeComponent();
             mainWindow = mw;
         }
+
+        private void MinimizeButton_Click(object sender, RoutedEventArgs e)
+        {
+            Window window = Window.GetWindow(this);
+            if (window != null)
+            {
+                window.WindowState = WindowState.Minimized;
+            }
+        }
+
+        private void CloseButton_Click(object sender, RoutedEventArgs e)
+        {
+            Window window = Window.GetWindow(this);
+            if (window != null)
+            {
+                window.Close();
+            }
+        }
+
         private void RegisterButton_Click(object sender, RoutedEventArgs e)
         {
             string username = UsernameInput.Text;
@@ -159,5 +178,7 @@ namespace CyberVault
             else
                 return "Strong password";
         }
+
+        
     }
 }
