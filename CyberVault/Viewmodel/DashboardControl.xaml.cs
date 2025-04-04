@@ -35,6 +35,11 @@ namespace CyberVault
         {
             Window.GetWindow(this).Close();
         }
+
+        private void Home_Click(object sender, RoutedEventArgs e)
+        {
+            DashboardContent.Content = null;
+        }
         private void PasswordManagerButton_Click(object sender, RoutedEventArgs e)
         {
             DashboardContent.Content = new PasswordVaultControl(mainWindow, username, encryptionKey);
@@ -49,5 +54,6 @@ namespace CyberVault
             
             mainWindow.Navigate(new LoginControl(mainWindow));
         }
+
     }
 }

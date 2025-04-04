@@ -48,8 +48,13 @@
                                      FontSize="14" FontWeight="SemiBold" Margin="10,0,0,15"/>
 
                             <Border Background="#3B4252" CornerRadius="10" Margin="0,0,0,10">
+                                <Button Content="Home" Height="46" Style="{StaticResource ActionButton}" 
+                                    Background="#434C5E" Click="Home_Click"/>
+                            </Border>
+
+                            <Border Background="#3B4252" CornerRadius="10" Margin="0,0,0,10">
                                 <Button Content="Password Manager" Height="46" Style="{StaticResource ActionButton}" 
-                                       Background="#5E81AC" Click="PasswordManagerButton_Click"/>
+                                       Background="#434C5E" Click="PasswordManagerButton_Click"/>
                             </Border>
 
                             <Border Background="#3B4252" CornerRadius="10" Margin="0,0,0,10">
@@ -57,15 +62,15 @@
                                        Background="#434C5E" Click="AuthenticatorButton_Click"/>
                             </Border>
 
-                            <Border Background="#3B4252" CornerRadius="10" Margin="0,0,0,10">
-                                <Button Content="Security Status" Height="46" Style="{StaticResource ActionButton}" 
-                                       Background="#434C5E"/>
+                            <Border Background="#3B4252" CornerRadius="10" Margin="0,130,0,0">
+                                <Button Height="46" Style="{StaticResource ActionButton}" Background="#434C5E">
+                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                        <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE713;" FontSize="16" Margin="0,0,5,0"/>
+                                        <TextBlock Text="Settings" FontSize="14" Foreground="White"/>
+                                    </StackPanel>
+                                </Button>
                             </Border>
 
-                            <Border Background="#3B4252" CornerRadius="10" Margin="0,0,0,10">
-                                <Button Content="Settings" Height="46" Style="{StaticResource ActionButton}" 
-                                       Background="#434C5E"/>
-                            </Border>
                         </StackPanel>
 
                         <Border Grid.Row="2" Background="#3B4252" CornerRadius="10" Margin="20,0,20,20">
@@ -88,7 +93,7 @@
                 </Border>
 
                 <Border CornerRadius="0,0,10,0">
-                    <ContentControl x:Name="DashboardContent" Grid.RowSpan="2"/>
+                    <ContentControl x:Name="DashboardContent" Grid.RowSpan="2" Margin="250,0,-950,0"/>
                 </Border>
             </Grid>
         </Grid>
