@@ -191,5 +191,21 @@
                 </Setter.Value>
             </Setter>
         </Style>
+
+        <DropShadowEffect x:Key="StandardShadow"
+                  BlurRadius="10"
+                  ShadowDepth="4"
+                  Opacity="0.4"
+                  Direction="270"
+                  Color="Black" />
+
+        <Style x:Key="ShadowedCard" TargetType="Border">
+            <Setter Property="CornerRadius" Value="10"/>
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="Margin" Value="10"/>
+            <Setter Property="Padding" Value="10"/>
+            <Setter Property="Effect" Value="{StaticResource StandardShadow}"/>
+        </Style>
+
     </Application.Resources>
 </Application>

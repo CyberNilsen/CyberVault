@@ -8,6 +8,8 @@ namespace CyberVault
 {
     public partial class MainWindow : Window
     {
+        private const double NormalTopBarHeight = 40;
+        private const double MaximizedTopBarHeight = 44;
         public MainWindow()
         {
             InitializeComponent();
@@ -34,6 +36,11 @@ namespace CyberVault
         public void Navigate(UserControl newPage)
         {
             MainContent.Content = newPage;
+
+            if (newPage is DashboardControl dashboard)
+            {
+                dashboard.SetTopBarHeight(NormalTopBarHeight);
+            }
         }
 
         private void CloseButton_Click(object sender, RoutedEventArgs e)
@@ -69,7 +76,6 @@ namespace CyberVault
 
         private void Window_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
-            // Check if the original source is not an interactive element
             if (!IsInteractiveElement(e.OriginalSource as DependencyObject))
             {
                 ToggleWindowState();
@@ -78,20 +84,19 @@ namespace CyberVault
 
         private bool IsInteractiveElement(DependencyObject element)
         {
-            // Check if the element is null
+
             if (element == null)
                 return false;
 
-            // Check if element is one of interactive controls
             if (element is Button || element is TextBox || element is ComboBox ||
                 element is CheckBox || element is RadioButton || element is ListBox ||
                 element is ListView || element is Slider || element is ScrollBar ||
-                element is TextBlock) // TextBlock included as sometimes they are used for interactive elements
+                element is TextBlock) 
             {
                 return true;
             }
 
-            // Check if parent of the element is an interactive element
+
             DependencyObject parent = VisualTreeHelper.GetParent(element);
             if (parent != null && IsInteractiveElement(parent))
             {
@@ -107,6 +112,12 @@ namespace CyberVault
             {
                 this.WindowState = WindowState.Normal;
                 SetSizeAndPositionOnPrimaryScreen();
+
+                if (MainContent.Content is DashboardControl dashboard)
+                {
+                    dashboard.TopBar.Height = NormalTopBarHeight;
+                }
+
                 MinimizeButton.Margin = new Thickness(0, 0, 0, 0);
                 MaximizeButton.Margin = new Thickness(0, 0, 0, 0);
                 CloseButton.Margin = new Thickness(0, 0, 0, 0);
@@ -114,10 +125,17 @@ namespace CyberVault
             else
             {
                 this.WindowState = WindowState.Maximized;
+
+                if (MainContent.Content is DashboardControl dashboard)
+                {
+                    dashboard.TopBar.Height = MaximizedTopBarHeight;
+                }
+
                 MinimizeButton.Margin = new Thickness(0, 4, 0, 0);
                 MaximizeButton.Margin = new Thickness(0, 4, 0, 0);
-                CloseButton.Margin = new Thickness(0, 4, 6.6, 0);
+                CloseButton.Margin = new Thickness(0, 4, 4, 0);
             }
+
             MaximizeIcon.Text = (this.WindowState == WindowState.Maximized) ? "\uE923" : "\uE922";
         }
     }

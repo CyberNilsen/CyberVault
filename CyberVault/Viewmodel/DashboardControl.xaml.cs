@@ -11,6 +11,7 @@ namespace CyberVault
         private MainWindow mainWindow;
         private string username;
         private byte[] encryptionKey;
+        public Border TopBar => Dashboardtopbar;
         public DashboardControl(MainWindow mw, string user, byte[] key)
         {
             InitializeComponent();
@@ -27,21 +28,19 @@ namespace CyberVault
                 Window.GetWindow(this).DragMove();
             }
         }
-        private void MinimizeButton_Click(object sender, RoutedEventArgs e)
+        public void SetTopBarHeight(double height)
         {
-            Window.GetWindow(this).WindowState = WindowState.Minimized;
-        }
-        private void CloseButton_Click(object sender, RoutedEventArgs e)
-        {
-            Window.GetWindow(this).Close();
+            Dashboardtopbar.Height = height;
         }
 
         private void Home_Click(object sender, RoutedEventArgs e)
         {
+            WelcomeText.Text = $"Welcome to CyberVault, {username}!";
             DashboardContent.Content = null;
         }
         private void PasswordManagerButton_Click(object sender, RoutedEventArgs e)
         {
+            WelcomeText.Text = "Password Manager";
             DashboardContent.Content = new PasswordVaultControl(mainWindow, username, encryptionKey);
         }
 
