@@ -7,6 +7,65 @@
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
     <Grid>
-            
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <TextBlock Grid.Row="0" Text="Dashboard Overview" 
+                   FontWeight="Bold" FontSize="20" Foreground="#2E3440" Margin="0,0,0,20"/>
+        
+        <Border Grid.Row="2" Background="#3B4252" CornerRadius="8" Margin="0,0,0,20">
+            <Grid Margin="20">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <TextBlock Grid.Row="0" Text="Security Quote of the Day" 
+                       FontWeight="SemiBold" FontSize="16" Foreground="White" Margin="0,0,0,10"/>
+                
+                <TextBlock Grid.Row="1" x:Name="QuoteText" Text="☕ Strong passwords and strong coffee: two things you should never compromise." 
+                       FontSize="14" Foreground="#AAFFFFFF" TextWrapping="Wrap" Margin="0,0,0,5"/>
+            </Grid>
+        </Border>
+
+        <Border Grid.Row="1" Background="#3B4252" CornerRadius="8" Margin="0,0,0,20">
+            <Grid Margin="20">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <TextBlock Grid.Row="0" Text="Browser Extension Key" 
+                           FontWeight="SemiBold" FontSize="16" Foreground="White" Margin="0,0,0,10"/>
+
+                <TextBlock Grid.Row="1" Text="Copy the key below to connect your browser extension with CyberVault." 
+                           FontSize="14" Foreground="#AAFFFFFF" TextWrapping="Wrap" Margin="0,0,0,15"/>
+
+                <Grid Grid.Row="2">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <Border Grid.Column="0" Background="#434C5E" CornerRadius="6" Padding="10">
+                        <TextBlock x:Name="ExtensionKeyText" Text="Loading key..." Foreground="White" 
+                                   FontFamily="Consolas" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
+                    </Border>
+
+                    <Button Grid.Column="1" x:Name="CopyKeyButton" Content="Copy Key" Margin="10,0,0,0" Padding="15,10"
+                            Background="#5E81AC" Foreground="White" BorderThickness="0" FontWeight="SemiBold"
+                            Click="CopyKeyButton_Click" Cursor="Hand">
+                        <Button.Resources>
+                            <Style TargetType="Border">
+                                <Setter Property="CornerRadius" Value="6"/>
+                            </Style>
+                        </Button.Resources>
+                    </Button>
+                </Grid>
+            </Grid>
+        </Border>
     </Grid>
 </UserControl>

@@ -127,7 +127,7 @@
                         </Grid.RowDefinitions>
 
                         <TextBlock x:Name="WelcomeText" Grid.Row="0" Text="Welcome to CyberVault" 
-                                   FontWeight="Bold" FontSize="24" Foreground="#2E3440" Margin="25,25,25,15"/>
+                                   FontWeight="Bold" FontSize="24" Foreground="#2E3440" Margin="25,25,10,15"/>
 
                         <ContentControl x:Name="DashboardContent" Margin="25,0,25,10" Grid.Row="1"/>
                     </Grid>

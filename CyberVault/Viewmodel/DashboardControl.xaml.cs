@@ -19,7 +19,7 @@ namespace CyberVault
             username = user;
             encryptionKey = key;
             WelcomeText.Text = $"Welcome to CyberVault, {username}!";
-            DashboardContent.Content = new HomeDashboardControl();
+            DashboardContent.Content = new HomeDashboardControl(username, encryptionKey);
         }
         private void TopBar_MouseDown(object sender, MouseButtonEventArgs e)
         {
@@ -36,7 +36,7 @@ namespace CyberVault
         private void Home_Click(object sender, RoutedEventArgs e)
         {
             WelcomeText.Text = $"Welcome to CyberVault, {username}!";
-            DashboardContent.Content = null;
+            DashboardContent.Content = new HomeDashboardControl(username, encryptionKey);
         }
         private void PasswordManagerButton_Click(object sender, RoutedEventArgs e)
         {
@@ -46,11 +46,22 @@ namespace CyberVault
 
         private void AuthenticatorButton_Click(object sender, RoutedEventArgs e)
         {
-            DashboardContent.Content = new AuthenticatorControl();
+            DashboardContent.Content = null;
+
+            WelcomeText.Text = "Two-Factor Authentication";
+
+            var authenticatorControl = new AuthenticatorControl();
+            authenticatorControl.Initialize(username, encryptionKey);
+
+            DashboardContent.Content = authenticatorControl;
         }
         private void LogoutButton_Click(object sender, RoutedEventArgs e)
         {
-            
+            typeof(LoginControl).GetProperty("CurrentEncryptionKey",
+                System.Reflection.BindingFlags.NonPublic |
+                System.Reflection.BindingFlags.Static)?.SetValue(null, null);
+
+            username = string.Empty;
             mainWindow.Navigate(new LoginControl(mainWindow));
         }
 
