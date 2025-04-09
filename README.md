@@ -47,5 +47,5 @@ CyberNilsen
 Big shoutout to our awesome testers who helped us debug and refine **CyberVault**:
 
 - **Matvey 1**
-- **Ådne 1**
+- **Ådne 2**
 - **Fredrik 3**
