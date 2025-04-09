@@ -55,6 +55,13 @@ namespace CyberVault
 
             DashboardContent.Content = authenticatorControl;
         }
+
+        private void Settings_Click(object sender, RoutedEventArgs e)
+        {
+            WelcomeText.Text = "Settings";
+            DashboardContent.Content = new Settings();
+        }
+
         private void LogoutButton_Click(object sender, RoutedEventArgs e)
         {
             typeof(LoginControl).GetProperty("CurrentEncryptionKey",
@@ -65,5 +72,6 @@ namespace CyberVault
             mainWindow.Navigate(new LoginControl(mainWindow));
         }
 
+        
     }
 }
