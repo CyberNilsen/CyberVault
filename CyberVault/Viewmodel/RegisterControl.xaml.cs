@@ -22,6 +22,14 @@ namespace CyberVault
             mainWindow = mw;
         }
 
+        private void TopBar_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            if (e.LeftButton == MouseButtonState.Pressed)
+            {
+                Window.GetWindow(this).DragMove();
+            }
+        }
+
         private void RegisterButton_Click(object sender, RoutedEventArgs e)
         {
             string username = UsernameInput.Text;

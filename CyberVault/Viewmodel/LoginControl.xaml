@@ -8,6 +8,10 @@
             <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
 
+        <Border Grid.Column="0" Grid.ColumnSpan="2" Height="30" VerticalAlignment="Top" 
+                Background="Transparent" MouseDown="TopBar_MouseDown" 
+                Panel.ZIndex="100" />
+
         <Border Grid.Column="0" Background="#2E3440" CornerRadius="10,0,0,10">
             <Grid>
                 <StackPanel VerticalAlignment="Center" MaxWidth="400">
@@ -52,7 +56,7 @@
 
                                 <Button x:Name="TogglePasswordButton" Grid.Column="1" 
                                         Style="{StaticResource ImageButtonStyle}" 
-                                        Click="TogglePasswordButton_Click">
+                                        Click="TogglePasswordButton_Click" HorizontalAlignment="Left">
                                     <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE7B3;" FontSize="24" Foreground="White"/>
                                 </Button>
 

@@ -66,14 +66,6 @@ namespace CyberVault
             }
         }
 
-        private void Window_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
-        {
-            if (e.ButtonState == MouseButtonState.Pressed)
-            {
-                this.DragMove();
-            }
-        }
-
         private void Window_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
             if (!IsInteractiveElement(e.OriginalSource as DependencyObject))

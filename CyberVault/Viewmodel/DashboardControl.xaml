@@ -129,7 +129,7 @@
                         <TextBlock x:Name="WelcomeText" Grid.Row="0" Text="Welcome to CyberVault" 
                                    FontWeight="Bold" FontSize="24" Foreground="#2E3440" Margin="25,25,10,15"/>
 
-                        <ContentControl x:Name="DashboardContent" Margin="25,0,25,10" Grid.Row="1"/>
+                        <ContentControl x:Name="DashboardContent" Margin="25,62,25,10" Grid.RowSpan="2"/>
                     </Grid>
                 </Border>
             </Grid>
