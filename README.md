@@ -42,7 +42,7 @@ Contact
 CyberHansen
 CyberNilsen
 
-Thanks to Testers
+## Thanks to Testers
 Huge shoutout to our amazing testers who helped squash bugs and polish the app:
 
 [Matvey]
