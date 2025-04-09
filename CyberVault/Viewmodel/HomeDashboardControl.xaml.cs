@@ -19,7 +19,7 @@ namespace CyberVault.Viewmodel
     {
         private string _accessToken;
         private LocalWebServer _webServer;
-        private readonly string _currentVersion = "v2.0";
+        private string _currentVersion = "v3.0";
         private readonly string _githubRepoUrl = "https://github.com/CyberNilsen/CyberVault";
         private readonly string _githubApiReleaseUrl = "https://api.github.com/repos/CyberNilsen/CyberVault/releases/latest";
         private bool _updateAvailable = false;
@@ -28,13 +28,14 @@ namespace CyberVault.Viewmodel
         private bool _isDownloading = false;
         private readonly string _tempDownloadPath;
         private readonly string _applicationPath;
-        private Window _updateProgressWindow;
-        private TextBlock _updateProgressText;
-        private ProgressBar _updateProgressBar;
+        private UpdateProgressWindow _updateProgressWindow;
 
         public HomeDashboardControl(string username, byte[] encryptionKey)
         {
             InitializeComponent();
+
+            // Read current version from a file or configuration
+            LoadCurrentVersion();
 
             // Get application path
             _applicationPath = AppDomain.CurrentDomain.BaseDirectory;
@@ -44,6 +45,27 @@ namespace CyberVault.Viewmodel
             LoadExtensionKey();
             SetRandomQuote();
             CurrentVersionText.Text = _currentVersion;
+        }
+
+        private void LoadCurrentVersion()
+        {
+            // Try to read version from a file or configuration
+            try
+            {
+                string versionFilePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "version.txt");
+                if (File.Exists(versionFilePath))
+                {
+                    string versionFromFile = File.ReadAllText(versionFilePath).Trim();
+                    if (!string.IsNullOrEmpty(versionFromFile) && versionFromFile.StartsWith("v"))
+                    {
+                        _currentVersion = versionFromFile;
+                    }
+                }
+            }
+            catch (Exception)
+            {
+                // If there's an error, fall back to the hardcoded version
+            }
         }
 
         private void UserControl_Loaded(object sender, RoutedEventArgs e)
@@ -283,59 +305,6 @@ namespace CyberVault.Viewmodel
             }
         }
 
-        private void CreateUpdateProgressWindow()
-        {
-            _updateProgressWindow = new Window
-            {
-                Title = "CyberVault Update",
-                Width = 400,
-                Height = 180,
-                WindowStartupLocation = WindowStartupLocation.CenterScreen,
-                ResizeMode = ResizeMode.NoResize,
-                WindowStyle = WindowStyle.ToolWindow
-            };
-
-            // Create grid layout
-            Grid grid = new Grid
-            {
-                Margin = new Thickness(20)
-            };
-            grid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
-            grid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
-            grid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
-
-            // Add title
-            TextBlock titleText = new TextBlock
-            {
-                Text = $"Updating CyberVault to {_latestVersion}",
-                FontSize = 16,
-                FontWeight = FontWeights.Bold,
-                Margin = new Thickness(0, 0, 0, 15)
-            };
-            Grid.SetRow(titleText, 0);
-            grid.Children.Add(titleText);
-
-            // Add progress bar
-            _updateProgressBar = new ProgressBar
-            {
-                Height = 20,
-                Margin = new Thickness(0, 0, 0, 10)
-            };
-            Grid.SetRow(_updateProgressBar, 1);
-            grid.Children.Add(_updateProgressBar);
-
-            // Add status text
-            _updateProgressText = new TextBlock
-            {
-                Text = "Preparing update...",
-                Margin = new Thickness(0, 5, 0, 0)
-            };
-            Grid.SetRow(_updateProgressText, 2);
-            grid.Children.Add(_updateProgressText);
-
-            _updateProgressWindow.Content = grid;
-        }
-
         private async void UpdateNowButton_Click(object sender, RoutedEventArgs e)
         {
             if (_updateAvailable && !string.IsNullOrEmpty(_downloadUrl) && !_isDownloading)
@@ -357,10 +326,10 @@ namespace CyberVault.Viewmodel
                     _isDownloading = true;
                     UpdateNowButton.IsEnabled = false;
                     CheckUpdateButton.IsEnabled = false;
-                    UpdateStatusText.Text = "Downloading update...";
 
-                    // Create update progress window
-                    CreateUpdateProgressWindow();
+                    // Show the progress window
+                    _updateProgressWindow = new UpdateProgressWindow();
+                    _updateProgressWindow.TitleText.Text = $"Updating CyberVault to {_latestVersion}";
                     _updateProgressWindow.Show();
 
                     // Create temp directory if it doesn't exist
@@ -373,41 +342,23 @@ namespace CyberVault.Viewmodel
                     string zipPath = Path.Combine(_tempDownloadPath, "update.zip");
                     await DownloadFileAsync(_downloadUrl, zipPath);
 
-                    // Ask user if they want to install now
-                    _updateProgressText.Text = "Download complete. Ready to install.";
+                    // Update progress window
+                    _updateProgressWindow.StatusText.Text = "Download complete. Installing update...";
 
-                    MessageBoxResult result = MessageBox.Show(
-                        $"Update {_latestVersion} has been downloaded. The application will restart to apply the update. Continue?",
-                        "Update Ready",
-                        MessageBoxButton.YesNo,
-                        MessageBoxImage.Question);
-
-                    if (result == MessageBoxResult.Yes)
+                    // Save the latest version to a file to ensure we know the correct version after update
+                    try
                     {
-                        _updateProgressText.Text = "Installing update...";
-
-                        // Create updater PowerShell script
-                        CreateUpdaterScript(zipPath);
-
-                        // Run the updater script and exit the application
-                        RunUpdaterInBackground();
-                        Application.Current.Shutdown();
+                        // Create version file in the temp directory to be copied during update
+                        File.WriteAllText(Path.Combine(_tempDownloadPath, "version.txt"), _latestVersion);
                     }
-                    else
-                    {
-                        // If user cancels, clean up
-                        try
-                        {
-                            Directory.Delete(_tempDownloadPath, true);
-                            _updateProgressWindow.Close();
-                        }
-                        catch { /* Ignore cleanup errors */ }
+                    catch { /* Continue even if version file couldn't be created */ }
 
-                        _isDownloading = false;
-                        UpdateNowButton.IsEnabled = true;
-                        CheckUpdateButton.IsEnabled = true;
-                        UpdateStatusText.Text = $"Update available: {_latestVersion}";
-                    }
+                    // Create updater PowerShell script
+                    CreateUpdaterScript(zipPath);
+
+                    // Run the updater script and exit the application
+                    RunUpdaterInBackground();
+                    Application.Current.Shutdown();
                 }
                 catch (Exception ex)
                 {
@@ -417,7 +368,10 @@ namespace CyberVault.Viewmodel
                     UpdateStatusText.Text = $"Update failed: {ex.Message}";
 
                     if (_updateProgressWindow != null && _updateProgressWindow.IsVisible)
+                    {
                         _updateProgressWindow.Close();
+                        _updateProgressWindow = null;
+                    }
 
                     MessageBox.Show($"Failed to download update: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
@@ -429,7 +383,7 @@ namespace CyberVault.Viewmodel
             // Path to the PowerShell script file
             string psScriptPath = Path.Combine(_tempDownloadPath, "update.ps1");
 
-            // Build the PowerShell script content
+            // Build the PowerShell script content with automatic update and direct extraction
             string psScriptContent = @"
 # Log function
 function Write-Log {
@@ -446,29 +400,75 @@ try {
     Start-Sleep -Seconds 2
     Write-Log ""Waiting for application to close completely""
     
-    # Create extraction directory if it doesn't exist
-    $extractPath = ""$EXTRACTPATH$""
-    if (Test-Path -Path $extractPath) {
-        Remove-Item -Path $extractPath -Recurse -Force
+    # Save version file if it exists
+    $versionFile = ""$TEMPPATH$\version.txt""
+    if (Test-Path -Path $versionFile) {
+        Write-Log ""Found version file, will restore after update""
+        $versionContent = Get-Content -Path $versionFile -Raw
     }
-    New-Item -ItemType Directory -Path $extractPath -Force | Out-Null
-    Write-Log ""Created extraction directory""
     
-    # Extract the zip file
-    Write-Log ""Extracting update from $ZIPPATH$""
-    Expand-Archive -Path ""$ZIPPATH$"" -DestinationPath $extractPath -Force
+    # Create a backup of critical files that should be preserved
+    Write-Log ""Creating backup of critical files""
+    $backupDir = ""$TEMPPATH$\backup""
+    if (Test-Path -Path $backupDir) {
+        Remove-Item -Path $backupDir -Recurse -Force
+    }
+    New-Item -ItemType Directory -Path $backupDir -Force | Out-Null
+    
+    # List of files/directories to preserve (add any configuration or data files here)
+    $filesToPreserve = @(
+        # Example: ""config.xml"",
+        # Example: ""userdata.db""
+    )
+    
+    foreach ($file in $filesToPreserve) {
+        $sourcePath = Join-Path ""$APPPATH$"" $file
+        if (Test-Path -Path $sourcePath) {
+            $destPath = Join-Path $backupDir $file
+            Copy-Item -Path $sourcePath -Destination $destPath -Force -Recurse
+            Write-Log ""Backed up: $file""
+        }
+    }
+    
+    # Delete everything in the application directory except the updater folder
+    Write-Log ""Cleaning application directory""
+    Get-ChildItem -Path ""$APPPATH$"" -Exclude ""CyberVaultUpdate"" | ForEach-Object {
+        if ($_.FullName -ne $backupDir) {
+            Remove-Item -Path $_.FullName -Recurse -Force
+            Write-Log ""Removed: $($_.Name)""
+        }
+    }
+    
+    # Extract files directly to the application directory
+    Write-Log ""Extracting update to application directory""
+    Expand-Archive -Path ""$ZIPPATH$"" -DestinationPath ""$APPPATH$"" -Force
     Write-Log ""Extraction complete""
     
-    # Copy files to application directory
-    Write-Log ""Copying files to $APPPATH$""
-    Copy-Item -Path ""$extractPath\*"" -Destination ""$APPPATH$"" -Recurse -Force
-    Write-Log ""Files copied successfully""
+    # Restore version file
+    if ($versionContent) {
+        Write-Log ""Restoring version file""
+        Set-Content -Path ""$APPPATH$\version.txt"" -Value $versionContent
+    }
     
-    # Cleanup extraction directory
-    Remove-Item -Path $extractPath -Recurse -Force
-    Write-Log ""Cleaned up extraction directory""
+    # Restore preserved files
+    Write-Log ""Restoring preserved files""
+    foreach ($file in $filesToPreserve) {
+        $sourcePath = Join-Path $backupDir $file
+        if (Test-Path -Path $sourcePath) {
+            $destPath = Join-Path ""$APPPATH$"" $file
+            Copy-Item -Path $sourcePath -Destination $destPath -Force -Recurse
+            Write-Log ""Restored: $file""
+        }
+    }
     
-    # Start the application
+    # Cleanup temporary directories
+    Write-Log ""Cleaning up temporary directories""
+    if (Test-Path -Path $backupDir) {
+        Remove-Item -Path $backupDir -Recurse -Force
+    }
+    Write-Log ""Cleanup complete""
+    
+    # Start the application automatically
     Write-Log ""Starting application""
     Start-Process -FilePath ""$APPPATH$\CyberVault.exe""
     Write-Log ""Application started""
@@ -485,12 +485,11 @@ catch {
 
             // Replace placeholders with actual paths
             string logFilePath = Path.Combine(_tempDownloadPath, "update_log.txt");
-            string extractPath = Path.Combine(_tempDownloadPath, "extracted");
 
             psScriptContent = psScriptContent.Replace("$LOGFILE$", logFilePath.Replace("\\", "\\\\"));
-            psScriptContent = psScriptContent.Replace("$EXTRACTPATH$", extractPath.Replace("\\", "\\\\"));
             psScriptContent = psScriptContent.Replace("$ZIPPATH$", zipPath.Replace("\\", "\\\\"));
             psScriptContent = psScriptContent.Replace("$APPPATH$", _applicationPath.Replace("\\", "\\\\"));
+            psScriptContent = psScriptContent.Replace("$TEMPPATH$", _tempDownloadPath.Replace("\\", "\\\\"));
 
             // Write PowerShell script to file
             File.WriteAllText(psScriptPath, psScriptContent);
@@ -534,14 +533,12 @@ exit";
 
                 // Create progress reporter
                 var progress = new Progress<double>(percent => {
-                    // Update progress in both the UI and the progress window
-                    UpdateStatusText.Text = $"Downloading update: {percent:P0}";
-
+                    // Only update the dedicated progress window, not the main UI
                     if (_updateProgressWindow != null && _updateProgressWindow.IsVisible)
                     {
                         Application.Current.Dispatcher.Invoke(() => {
-                            _updateProgressBar.Value = percent * 100;
-                            _updateProgressText.Text = $"Downloading update: {percent:P0}";
+                            _updateProgressWindow.UpdateProgressBar.Value = percent * 100;
+                            _updateProgressWindow.StatusText.Text = $"Downloading update: {percent:P0}";
                         });
                     }
                 });
