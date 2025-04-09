@@ -44,7 +44,7 @@ CyberNilsen
 
 ## 🙌 Thanks to Testers
 
-Big shoutout to our awesome testers who helped us debug and refine **CyberVault**:
+Big shoutout to our awesome testers who helped us squash bugs and improve **CyberVault**:
 
 - Matvey
 - Ådne 
