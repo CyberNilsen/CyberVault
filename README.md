@@ -42,11 +42,10 @@ Contact
 CyberHansen
 CyberNilsen
 
-## Thanks to Testers
-Huge shoutout to our amazing testers who helped squash bugs and polish the app:
+## 🙌 Thanks to Testers
 
-[Matvey]
+Big shoutout to our awesome testers who helped us debug and refine **CyberVault**:
 
-[Fredrik]
-
-We appreciate you!
+- **Matvey 1**
+- **Ådne 1**
+- **Fredrik 3**
