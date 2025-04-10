@@ -153,7 +153,6 @@ namespace CyberVault.Viewmodel
         {
             // Reset all toggle controls to default state
             TwoFactorToggle.IsChecked = false;
-            StartWithWindowsToggle.IsChecked = false;
             MinimizeToTrayToggle.IsChecked = false;
             DarkModeToggle.IsChecked = false;
             CloudSyncToggle.IsChecked = false;
