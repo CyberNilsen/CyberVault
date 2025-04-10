@@ -5,6 +5,7 @@ using Microsoft.Win32;
 using System.Windows.Forms;
 using System.Drawing;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement.StartPanel;
+using IWshRuntimeLibrary;
 
 
 namespace CyberVault.Viewmodel
@@ -26,7 +27,6 @@ namespace CyberVault.Viewmodel
         {
             username = user;
             encryptionKey = key;
-
         }
 
         private void TwoFactorToggle_Checked(object sender, RoutedEventArgs e)
@@ -40,12 +40,78 @@ namespace CyberVault.Viewmodel
 
         private void StartWithWindowsToggle_Checked(object sender, RoutedEventArgs e)
         {
-            // Implementation for enabling start with Windows
+            try
+            {
+                // Get the startup folder path
+                string startupFolderPath = Path.Combine(
+                    Environment.GetFolderPath(Environment.SpecialFolder.Startup));
+
+                // Define the shortcut path in the startup folder
+                string shortcutPath = Path.Combine(startupFolderPath, "CyberVault.lnk");
+
+                // If the shortcut doesn't exist, create it
+                if (!System.IO.File.Exists(shortcutPath))
+                {
+                    // Get the path to the executable
+                    string exePath = System.Reflection.Assembly.GetExecutingAssembly().Location;
+
+                    // Create a shortcut
+                    WshShell shell = new WshShell();
+                    IWshShortcut shortcut = (IWshShortcut)shell.CreateShortcut(shortcutPath);
+
+                    shortcut.TargetPath = exePath;
+                    shortcut.WorkingDirectory = Path.GetDirectoryName(exePath);
+                    shortcut.Description = "CyberVault Password Manager";
+                    shortcut.Save();
+                }
+
+                // Save the setting to the user's settings file
+                SaveUserSetting("StartWithWindows", "true");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error setting up startup: {ex.Message}");
+                System.Windows.MessageBox.Show($"Failed to set up startup: {ex.Message}",
+                    "Error", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
+
+                // Uncheck the toggle without triggering the event
+                StartWithWindowsToggle.Checked -= StartWithWindowsToggle_Checked;
+                StartWithWindowsToggle.IsChecked = false;
+                StartWithWindowsToggle.Checked += StartWithWindowsToggle_Checked;
+            }
         }
 
         private void StartWithWindowsToggle_Unchecked(object sender, RoutedEventArgs e)
         {
-            // Implementation for disabling start with Windows
+            try
+            {
+                // Get the startup folder path
+                string startupFolderPath = Path.Combine(
+                    Environment.GetFolderPath(Environment.SpecialFolder.Startup));
+
+                // Define the shortcut path in the startup folder
+                string shortcutPath = Path.Combine(startupFolderPath, "CyberVault.lnk");
+
+                // If the shortcut exists, delete it
+                if (System.IO.File.Exists(shortcutPath))
+                {
+                    System.IO.File.Delete(shortcutPath);
+                }
+
+                // Save the setting to the user's settings file
+                SaveUserSetting("StartWithWindows", "false");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error removing startup: {ex.Message}");
+                System.Windows.MessageBox.Show($"Failed to remove startup: {ex.Message}",
+                    "Error", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
+
+                // Check the toggle without triggering the event
+                StartWithWindowsToggle.Unchecked -= StartWithWindowsToggle_Unchecked;
+                StartWithWindowsToggle.IsChecked = true;
+                StartWithWindowsToggle.Unchecked += StartWithWindowsToggle_Unchecked;
+            }
         }
 
         private void PrivacyPolicy_Click(object sender, RoutedEventArgs e)
@@ -112,9 +178,9 @@ namespace CyberVault.Viewmodel
                 string cyberVaultPath = Path.Combine(appDataPath, "CyberVault");
                 string settingsFilePath = Path.Combine(cyberVaultPath, $"{App.CurrentUsername}_settings.ini");
 
-                if (File.Exists(settingsFilePath))
+                if (System.IO.File.Exists(settingsFilePath))
                 {
-                    string[] lines = File.ReadAllLines(settingsFilePath);
+                    string[] lines = System.IO.File.ReadAllLines(settingsFilePath);
 
                     foreach (string line in lines)
                     {
@@ -158,9 +224,9 @@ namespace CyberVault.Viewmodel
                 string cyberVaultPath = Path.Combine(appDataPath, "CyberVault");
                 string settingsFilePath = Path.Combine(cyberVaultPath, $"{App.CurrentUsername}_settings.ini");
 
-                if (File.Exists(settingsFilePath))
+                if (System.IO.File.Exists(settingsFilePath))
                 {
-                    List<string> lines = File.ReadAllLines(settingsFilePath).ToList();
+                    List<string> lines = System.IO.File.ReadAllLines(settingsFilePath).ToList();
 
                     bool settingFound = false;
                     for (int i = 0; i < lines.Count; i++)
@@ -178,7 +244,7 @@ namespace CyberVault.Viewmodel
                         lines.Add($"{settingName}={value}");
                     }
 
-                    File.WriteAllLines(settingsFilePath, lines);
+                    System.IO.File.WriteAllLines(settingsFilePath, lines);
                 }
             }
             catch (Exception ex)
@@ -192,7 +258,7 @@ namespace CyberVault.Viewmodel
             try
             {
                 string sourceDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "CyberVault");
-                if (!Directory.Exists(sourceDir))
+                if (!System.IO.Directory.Exists(sourceDir))
                 {
                     System.Windows.MessageBox.Show("No files available to export. The CyberVault directory does not exist.",
                         "Export Error", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Warning);
@@ -207,7 +273,7 @@ namespace CyberVault.Viewmodel
 
                 if (result == System.Windows.MessageBoxResult.Cancel)
                 {
-                    return; 
+                    return;
                 }
 
                 string destinationDir;
@@ -215,9 +281,9 @@ namespace CyberVault.Viewmodel
                 if (result == System.Windows.MessageBoxResult.Yes)
                 {
                     destinationDir = defaultExportDir;
-                    if (!Directory.Exists(destinationDir))
+                    if (!System.IO.Directory.Exists(destinationDir))
                     {
-                        Directory.CreateDirectory(destinationDir);
+                        System.IO.Directory.CreateDirectory(destinationDir);
                     }
                 }
                 else
@@ -230,17 +296,18 @@ namespace CyberVault.Viewmodel
 
                     if (folderDialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
                     {
-                        destinationDir = folderDialog.SelectedPath;
+                        string selectedPath = folderDialog.SelectedPath;
+                        destinationDir = Path.Combine(selectedPath, "CyberVault_Export");
                     }
                     else
                     {
-                        return; 
+                        return;
                     }
                 }
 
-                if (!Directory.Exists(destinationDir))
+                if (!System.IO.Directory.Exists(destinationDir))
                 {
-                    Directory.CreateDirectory(destinationDir);
+                    System.IO.Directory.CreateDirectory(destinationDir);
                 }
 
                 bool foundUserData = false;
@@ -248,14 +315,14 @@ namespace CyberVault.Viewmodel
                 string userExportFile = Path.Combine(destinationDir, $"{username}_exported.txt");
                 string credentialsPath = Path.Combine(sourceDir, "credentials.txt");
 
-                if (File.Exists(credentialsPath))
+                if (System.IO.File.Exists(credentialsPath))
                 {
-                    string[] allCredentials = File.ReadAllLines(credentialsPath);
+                    string[] allCredentials = System.IO.File.ReadAllLines(credentialsPath);
                     foreach (string line in allCredentials)
                     {
                         if (line.StartsWith(username + ","))
                         {
-                            File.WriteAllText(userExportFile, line);
+                            System.IO.File.WriteAllText(userExportFile, line);
                             foundUserData = true;
                             break;
                         }
@@ -263,27 +330,39 @@ namespace CyberVault.Viewmodel
                 }
 
                 string passwordFile = Path.Combine(sourceDir, $"passwords_{username}.dat");
-                if (File.Exists(passwordFile))
+                if (System.IO.File.Exists(passwordFile))
                 {
                     string destPasswordFile = Path.Combine(destinationDir, $"passwords_{username}.dat");
-                    File.Copy(passwordFile, destPasswordFile, true);
+                    System.IO.File.Copy(passwordFile, destPasswordFile, true);
                     foundUserData = true;
                 }
 
                 string settingsIniFile = Path.Combine(sourceDir, $"{username}_settings.ini");
-                if (File.Exists(settingsIniFile))
+                if (System.IO.File.Exists(settingsIniFile))
                 {
                     string destSettingsIniFile = Path.Combine(destinationDir, $"{username}_settings.ini");
-                    File.Copy(settingsIniFile, destSettingsIniFile, true);
+                    System.IO.File.Copy(settingsIniFile, destSettingsIniFile, true);
                     foundUserData = true;
                 }
 
                 string authEncFile = Path.Combine(sourceDir, $"{username}.authenticators.enc");
-                if (File.Exists(authEncFile))
+                if (System.IO.File.Exists(authEncFile))
                 {
                     string destAuthEncFile = Path.Combine(destinationDir, $"{username}.authenticators.enc");
-                    File.Copy(authEncFile, destAuthEncFile, true);
+                    System.IO.File.Copy(authEncFile, destAuthEncFile, true);
                     foundUserData = true;
+                }
+
+                string[] encFiles = System.IO.Directory.GetFiles(sourceDir, $"{username}*.enc");
+                foreach (string encFile in encFiles)
+                {
+                    string fileName = Path.GetFileName(encFile);
+                    string destEncFile = Path.Combine(destinationDir, fileName);
+                    if (!System.IO.File.Exists(destEncFile))
+                    {
+                        System.IO.File.Copy(encFile, destEncFile, true);
+                        foundUserData = true;
+                    }
                 }
 
                 if (foundUserData)
@@ -306,11 +385,7 @@ namespace CyberVault.Viewmodel
 
         private void ImportData_Click(object sender, RoutedEventArgs e)
         {
-           
-
-            
         }
-
 
         private void DarkModeToggle_Checked(object sender, RoutedEventArgs e)
         {
