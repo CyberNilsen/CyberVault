@@ -46,6 +46,6 @@ CyberNilsen
 
 Big shoutout to our awesome testers who helped us squash bugs and improve **CyberVault**:
 
-- Matvey
-- Ådne 
-- Fredrik
+- [Matvey](https://github.com/JahBoiMat)
+- [Ådne](https://github.com/Adnelilleskare)
+- [Fredrik](https://github.com/JahnTeigen)
