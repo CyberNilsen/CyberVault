@@ -59,19 +59,34 @@ namespace CyberVault
         private void Settings_Click(object sender, RoutedEventArgs e)
         {
             WelcomeText.Text = "Settings";
-            DashboardContent.Content = new Settings();
+            var settings = new Settings();
+            settings.Initialize(username, encryptionKey);
+            DashboardContent.Content = settings;
         }
 
         private void LogoutButton_Click(object sender, RoutedEventArgs e)
         {
-            typeof(LoginControl).GetProperty("CurrentEncryptionKey",
-                System.Reflection.BindingFlags.NonPublic |
-                System.Reflection.BindingFlags.Static)?.SetValue(null, null);
+            try
+            {
+                // Reset application-wide settings
+                App.MinimizeToTrayEnabled = false;
+                App.CurrentUsername = null;
 
-            username = string.Empty;
-            mainWindow.Navigate(new LoginControl(mainWindow));
+                // Clear sensitive data
+                typeof(LoginControl).GetProperty("CurrentEncryptionKey",
+                    System.Reflection.BindingFlags.NonPublic |
+                    System.Reflection.BindingFlags.Static)?.SetValue(null, null);
+
+                // Navigate back to login
+                mainWindow.Navigate(new LoginControl(mainWindow));
+            }
+            catch (Exception ex)
+            {
+                System.Windows.MessageBox.Show($"Error during logout: {ex.Message}",
+                    "Logout Error", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
+            }
         }
 
-        
+
     }
 }

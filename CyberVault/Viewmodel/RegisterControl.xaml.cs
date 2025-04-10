@@ -75,6 +75,10 @@ namespace CyberVault
                 }
 
                 PasswordStorage.SavePasswords(new List<PasswordItem>(), username, encryptionKey);
+
+                // Create settings file for the new user
+                CreateUserSettingsFile(username, cyberVaultPath);
+
                 MessageBox.Show("Registration successful!", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
 
                 UsernameInput.Clear();
@@ -84,6 +88,31 @@ namespace CyberVault
             catch (Exception ex)
             {
                 MessageBox.Show($"An error occurred: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        private void CreateUserSettingsFile(string username, string cyberVaultPath)
+        {
+            try
+            {
+                string settingsFileName = $"{username}_settings.ini";
+                string settingsFilePath = Path.Combine(cyberVaultPath, settingsFileName);
+
+                // Create default settings with all toggles initially set to false
+                string defaultSettings = "[Settings]\n" +
+                                        "TwoFactorEnabled=false\n" +
+                                        "StartWithWindows=false\n" +
+                                        "MinimizeToTray=false\n" +
+                                        "DarkModeEnabled=false\n" +
+                                        "CloudSyncEnabled=false\n" +
+                                        "BiometricEnabled=false\n";
+
+                File.WriteAllText(settingsFilePath, defaultSettings);
+            }
+            catch (Exception ex)
+            {
+                // Log the error but don't interrupt the registration flow
+                Console.WriteLine($"Error creating settings file: {ex.Message}");
             }
         }
 

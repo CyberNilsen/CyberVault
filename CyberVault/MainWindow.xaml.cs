@@ -3,6 +3,9 @@ using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.ComponentModel;
+using Hardcodet.Wpf.TaskbarNotification; // WPF NotifyIcon implementation
+using System.IO;
 
 namespace CyberVault
 {
@@ -10,11 +13,77 @@ namespace CyberVault
     {
         private const double NormalTopBarHeight = 40;
         private const double MaximizedTopBarHeight = 44;
+        private TaskbarIcon trayIcon;
+
         public MainWindow()
         {
             InitializeComponent();
             Loaded += MainWindow_Loaded;
             MainContent.Content = new LoginControl(this);
+            InitializeTrayIcon();
+
+            // Handle the window closing event
+            Closing += MainWindow_Closing;
+        }
+
+        private void InitializeTrayIcon()
+        {
+            trayIcon = new TaskbarIcon
+            {
+                Icon = new System.Drawing.Icon(System.Windows.Application.GetResourceStream(
+                    new System.Uri("pack://application:,,,/Images/CyberVault.ico")).Stream),
+                ToolTipText = "CyberVault",
+                Visibility = Visibility.Hidden
+            };
+
+            // Create context menu
+            var contextMenu = new ContextMenu();
+
+            var openMenuItem = new MenuItem { Header = "Open" };
+            openMenuItem.Click += (s, e) => ShowMainWindow();
+
+            var exitMenuItem = new MenuItem { Header = "Exit" };
+            exitMenuItem.Click += (s, e) => ExitApplication();
+
+            contextMenu.Items.Add(openMenuItem);
+            contextMenu.Items.Add(exitMenuItem);
+
+            trayIcon.ContextMenu = contextMenu;
+
+            // Double-click to restore
+            trayIcon.TrayMouseDoubleClick += (s, e) => ShowMainWindow();
+        }
+
+        private void ShowMainWindow()
+        {
+            this.Show();
+            this.WindowState = WindowState.Normal;
+            this.Activate();
+        }
+
+        private void ExitApplication()
+        {
+            trayIcon.Dispose();
+            System.Windows.Application.Current.Shutdown();
+        }
+
+        private void MainWindow_Closing(object sender, CancelEventArgs e)
+        {
+            if (App.MinimizeToTrayEnabled)
+            {
+                // Cancel the close and minimize to tray instead
+                e.Cancel = true;
+                this.Hide();
+                trayIcon.Visibility = Visibility.Visible;
+            }
+            else
+            {
+                // Normal close, ensure tray icon is cleaned up
+                if (trayIcon != null)
+                {
+                    trayIcon.Dispose();
+                }
+            }
         }
 
         private void MainWindow_Loaded(object sender, RoutedEventArgs e)
@@ -45,10 +114,20 @@ namespace CyberVault
 
         private void CloseButton_Click(object sender, RoutedEventArgs e)
         {
-            Window window = Window.GetWindow(this);
-            if (window != null)
+            if (App.MinimizeToTrayEnabled)
             {
-                window.Close();
+                // If minimize to tray is enabled, hide the window
+                this.Hide();
+                trayIcon.Visibility = Visibility.Visible;
+            }
+            else
+            {
+                // Normal close behavior
+                Window window = Window.GetWindow(this);
+                if (window != null)
+                {
+                    window.Close();
+                }
             }
         }
 
@@ -76,18 +155,16 @@ namespace CyberVault
 
         private bool IsInteractiveElement(DependencyObject element)
         {
-
             if (element == null)
                 return false;
 
             if (element is Button || element is TextBox || element is ComboBox ||
                 element is CheckBox || element is RadioButton || element is ListBox ||
                 element is ListView || element is Slider || element is ScrollBar ||
-                element is TextBlock) 
+                element is TextBlock)
             {
                 return true;
             }
-
 
             DependencyObject parent = VisualTreeHelper.GetParent(element);
             if (parent != null && IsInteractiveElement(parent))

@@ -1,28 +1,32 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.IO;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
+using Microsoft.Win32;
+using System.Windows.Forms;
+using System.Drawing;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.StartPanel;
+
 
 namespace CyberVault.Viewmodel
 {
     /// <summary>
     /// Interaction logic for SettingsControl.xaml
     /// </summary>
-    public partial class Settings : UserControl
+    public partial class Settings : System.Windows.Controls.UserControl
     {
+        private string username;
+        private byte[] encryptionKey;
+
         public Settings()
         {
             InitializeComponent();
+        }
+
+        public void Initialize(string user, byte[] key)
+        {
+            username = user;
+            encryptionKey = key;
+
         }
 
         private void TwoFactorToggle_Checked(object sender, RoutedEventArgs e)
@@ -51,23 +55,262 @@ namespace CyberVault.Viewmodel
 
         private void MinimizeToTrayToggle_Checked(object sender, RoutedEventArgs e)
         {
-            // Implementation for enabling minimize to tray
+            // Update the application-wide setting
+            App.MinimizeToTrayEnabled = true;
+            SaveUserSetting("MinimizeToTray", "true");
         }
 
         private void MinimizeToTrayToggle_Unchecked(object sender, RoutedEventArgs e)
         {
-            // Implementation for disabling minimize to tray
+            // Update the application-wide setting
+            App.MinimizeToTrayEnabled = false;
+            SaveUserSetting("MinimizeToTray", "false");
         }
 
-        private void ImportData_Click(object sender, RoutedEventArgs e)
+        // Add this if you need to maintain state when navigating back to Settings
+        private void Settings_Loaded(object sender, RoutedEventArgs e)
         {
-            // Implementation for importing data
+            // Only load settings if there's a current user
+            if (!string.IsNullOrEmpty(App.CurrentUsername))
+            {
+                MinimizeToTrayToggle.IsChecked = App.MinimizeToTrayEnabled;
+                LoadOtherSettingsFromFile();
+            }
+            else
+            {
+                // Reset all UI elements if no user is logged in
+                ResetSettingsUI();
+            }
+        }
+
+        private void ResetSettingsUI()
+        {
+            // Reset all toggle controls to default state
+            TwoFactorToggle.IsChecked = false;
+            StartWithWindowsToggle.IsChecked = false;
+            MinimizeToTrayToggle.IsChecked = false;
+            DarkModeToggle.IsChecked = false;
+            CloudSyncToggle.IsChecked = false;
+            BiometricToggle.IsChecked = false;
+
+            // Reset any combo boxes if needed
+            if (BackupFrequencyComboBox != null)
+                BackupFrequencyComboBox.SelectedIndex = 0;
+
+            if (AutoLockComboBox != null)
+                AutoLockComboBox.SelectedIndex = 0;
+        }
+
+        private void LoadOtherSettingsFromFile()
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(App.CurrentUsername))
+                    return;
+
+                string appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+                string cyberVaultPath = Path.Combine(appDataPath, "CyberVault");
+                string settingsFilePath = Path.Combine(cyberVaultPath, $"{App.CurrentUsername}_settings.ini");
+
+                if (File.Exists(settingsFilePath))
+                {
+                    string[] lines = File.ReadAllLines(settingsFilePath);
+
+                    foreach (string line in lines)
+                    {
+                        if (line.StartsWith("TwoFactorEnabled="))
+                        {
+                            TwoFactorToggle.IsChecked = bool.Parse(line.Substring("TwoFactorEnabled=".Length));
+                        }
+                        else if (line.StartsWith("StartWithWindows="))
+                        {
+                            StartWithWindowsToggle.IsChecked = bool.Parse(line.Substring("StartWithWindows=".Length));
+                        }
+                        else if (line.StartsWith("DarkModeEnabled="))
+                        {
+                            DarkModeToggle.IsChecked = bool.Parse(line.Substring("DarkModeEnabled=".Length));
+                        }
+                        else if (line.StartsWith("CloudSyncEnabled="))
+                        {
+                            CloudSyncToggle.IsChecked = bool.Parse(line.Substring("CloudSyncEnabled=".Length));
+                        }
+                        else if (line.StartsWith("BiometricEnabled="))
+                        {
+                            BiometricToggle.IsChecked = bool.Parse(line.Substring("BiometricEnabled=".Length));
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error loading settings: {ex.Message}");
+            }
+        }
+
+        private void SaveUserSetting(string settingName, string value)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(App.CurrentUsername))
+                    return;
+
+                string appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+                string cyberVaultPath = Path.Combine(appDataPath, "CyberVault");
+                string settingsFilePath = Path.Combine(cyberVaultPath, $"{App.CurrentUsername}_settings.ini");
+
+                if (File.Exists(settingsFilePath))
+                {
+                    List<string> lines = File.ReadAllLines(settingsFilePath).ToList();
+
+                    bool settingFound = false;
+                    for (int i = 0; i < lines.Count; i++)
+                    {
+                        if (lines[i].StartsWith($"{settingName}="))
+                        {
+                            lines[i] = $"{settingName}={value}";
+                            settingFound = true;
+                            break;
+                        }
+                    }
+
+                    if (!settingFound)
+                    {
+                        lines.Add($"{settingName}={value}");
+                    }
+
+                    File.WriteAllLines(settingsFilePath, lines);
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error saving user setting: {ex.Message}");
+            }
         }
 
         private void ExportData_Click(object sender, RoutedEventArgs e)
         {
-            // Implementation for exporting data
+            try
+            {
+                string sourceDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "CyberVault");
+                if (!Directory.Exists(sourceDir))
+                {
+                    System.Windows.MessageBox.Show("No files available to export. The CyberVault directory does not exist.",
+                        "Export Error", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Warning);
+                    return;
+                }
+
+                string defaultExportDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "CyberVault_Export");
+
+                var result = System.Windows.MessageBox.Show(
+                    $"Do you want to export to the default location?\n\n{defaultExportDir}\n\nClick 'Yes' to use default location or 'No' to choose a custom location.",
+                    "Export Location", System.Windows.MessageBoxButton.YesNoCancel, System.Windows.MessageBoxImage.Question);
+
+                if (result == System.Windows.MessageBoxResult.Cancel)
+                {
+                    return; 
+                }
+
+                string destinationDir;
+
+                if (result == System.Windows.MessageBoxResult.Yes)
+                {
+                    destinationDir = defaultExportDir;
+                    if (!Directory.Exists(destinationDir))
+                    {
+                        Directory.CreateDirectory(destinationDir);
+                    }
+                }
+                else
+                {
+                    var folderDialog = new FolderBrowserDialog
+                    {
+                        Description = "Select destination folder for exported user data",
+                        UseDescriptionForTitle = true
+                    };
+
+                    if (folderDialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+                    {
+                        destinationDir = folderDialog.SelectedPath;
+                    }
+                    else
+                    {
+                        return; 
+                    }
+                }
+
+                if (!Directory.Exists(destinationDir))
+                {
+                    Directory.CreateDirectory(destinationDir);
+                }
+
+                bool foundUserData = false;
+
+                string userExportFile = Path.Combine(destinationDir, $"{username}_exported.txt");
+                string credentialsPath = Path.Combine(sourceDir, "credentials.txt");
+
+                if (File.Exists(credentialsPath))
+                {
+                    string[] allCredentials = File.ReadAllLines(credentialsPath);
+                    foreach (string line in allCredentials)
+                    {
+                        if (line.StartsWith(username + ","))
+                        {
+                            File.WriteAllText(userExportFile, line);
+                            foundUserData = true;
+                            break;
+                        }
+                    }
+                }
+
+                string passwordFile = Path.Combine(sourceDir, $"passwords_{username}.dat");
+                if (File.Exists(passwordFile))
+                {
+                    string destPasswordFile = Path.Combine(destinationDir, $"passwords_{username}.dat");
+                    File.Copy(passwordFile, destPasswordFile, true);
+                    foundUserData = true;
+                }
+
+                string settingsIniFile = Path.Combine(sourceDir, $"{username}_settings.ini");
+                if (File.Exists(settingsIniFile))
+                {
+                    string destSettingsIniFile = Path.Combine(destinationDir, $"{username}_settings.ini");
+                    File.Copy(settingsIniFile, destSettingsIniFile, true);
+                    foundUserData = true;
+                }
+
+                string authEncFile = Path.Combine(sourceDir, $"{username}.authenticators.enc");
+                if (File.Exists(authEncFile))
+                {
+                    string destAuthEncFile = Path.Combine(destinationDir, $"{username}.authenticators.enc");
+                    File.Copy(authEncFile, destAuthEncFile, true);
+                    foundUserData = true;
+                }
+
+                if (foundUserData)
+                {
+                    System.Windows.MessageBox.Show($"User data for '{username}' exported successfully to:\n{destinationDir}",
+                        "Export Complete", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Information);
+                }
+                else
+                {
+                    System.Windows.MessageBox.Show($"No data found for user '{username}'.",
+                        "Export Information", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Warning);
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Windows.MessageBox.Show($"Error exporting user data: {ex.Message}",
+                    "Export Error", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
+            }
         }
+
+        private void ImportData_Click(object sender, RoutedEventArgs e)
+        {
+           
+
+            
+        }
+
 
         private void DarkModeToggle_Checked(object sender, RoutedEventArgs e)
         {

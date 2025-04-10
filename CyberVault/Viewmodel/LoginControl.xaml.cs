@@ -79,11 +79,55 @@ namespace CyberVault
                 }
 
                 CurrentEncryptionKey = KeyDerivation.DeriveKey(password, salt);
+
+                // Set current username in App
+                App.CurrentUsername = username;
+
+                // Load user settings
+                LoadUserSettings(username);
+
                 mainWindow.Navigate(new DashboardControl(mainWindow, username, CurrentEncryptionKey));
             }
             catch (Exception ex)
             {
                 MessageBox.Show($"An error occurred: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        private void LoadUserSettings(string username)
+        {
+            try
+            {
+                string appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+                string cyberVaultPath = Path.Combine(appDataPath, "CyberVault");
+                string settingsFilePath = Path.Combine(cyberVaultPath, $"{username}_settings.ini");
+
+                if (File.Exists(settingsFilePath))
+                {
+                    // Read settings from file
+                    string[] lines = File.ReadAllLines(settingsFilePath);
+
+                    foreach (string line in lines)
+                    {
+                        if (line.StartsWith("MinimizeToTray="))
+                        {
+                            string value = line.Substring("MinimizeToTray=".Length);
+                            App.MinimizeToTrayEnabled = bool.Parse(value);
+                            break;
+                        }
+                    }
+                }
+                else
+                {
+                    // Default to false if settings file doesn't exist
+                    App.MinimizeToTrayEnabled = false;
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error loading user settings: {ex.Message}");
+                // Default to false if there's an error
+                App.MinimizeToTrayEnabled = false;
             }
         }
 
