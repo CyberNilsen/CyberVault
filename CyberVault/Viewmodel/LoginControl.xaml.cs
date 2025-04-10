@@ -80,11 +80,9 @@ namespace CyberVault
 
                 CurrentEncryptionKey = KeyDerivation.DeriveKey(password, salt);
 
-                // Set current username in App
-                App.CurrentUsername = username;
-
-                // Load user settings
-                LoadUserSettings(username);
+                // After successful login
+                App.CurrentUsername = username; // You should already have this
+                App.LoadUserSettings(username); // Add this line
 
                 mainWindow.Navigate(new DashboardControl(mainWindow, username, CurrentEncryptionKey));
             }

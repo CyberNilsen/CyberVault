@@ -133,18 +133,14 @@ namespace CyberVault.Viewmodel
             SaveUserSetting("MinimizeToTray", "false");
         }
 
-        // Add this if you need to maintain state when navigating back to Settings
         private void Settings_Loaded(object sender, RoutedEventArgs e)
         {
-            // Only load settings if there's a current user
             if (!string.IsNullOrEmpty(App.CurrentUsername))
             {
-                MinimizeToTrayToggle.IsChecked = App.MinimizeToTrayEnabled;
-                LoadOtherSettingsFromFile();
+                LoadSettingsFromFile();
             }
             else
             {
-                // Reset all UI elements if no user is logged in
                 ResetSettingsUI();
             }
         }
@@ -166,49 +162,64 @@ namespace CyberVault.Viewmodel
                 AutoLockComboBox.SelectedIndex = 0;
         }
 
-        private void LoadOtherSettingsFromFile()
+        private void LoadSettingsFromFile()
         {
             try
             {
-                if (string.IsNullOrEmpty(App.CurrentUsername))
-                    return;
-
                 string appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
                 string cyberVaultPath = Path.Combine(appDataPath, "CyberVault");
                 string settingsFilePath = Path.Combine(cyberVaultPath, $"{App.CurrentUsername}_settings.ini");
 
-                if (System.IO.File.Exists(settingsFilePath))
+                if (File.Exists(settingsFilePath))
                 {
-                    string[] lines = System.IO.File.ReadAllLines(settingsFilePath);
+                    Dictionary<string, bool> settings = new Dictionary<string, bool>();
+                    string[] lines = File.ReadAllLines(settingsFilePath);
 
                     foreach (string line in lines)
                     {
-                        if (line.StartsWith("TwoFactorEnabled="))
+                        string[] parts = line.Split('=');
+                        if (parts.Length == 2)
                         {
-                            TwoFactorToggle.IsChecked = bool.Parse(line.Substring("TwoFactorEnabled=".Length));
-                        }
-                        else if (line.StartsWith("StartWithWindows="))
-                        {
-                            StartWithWindowsToggle.IsChecked = bool.Parse(line.Substring("StartWithWindows=".Length));
-                        }
-                        else if (line.StartsWith("DarkModeEnabled="))
-                        {
-                            DarkModeToggle.IsChecked = bool.Parse(line.Substring("DarkModeEnabled=".Length));
-                        }
-                        else if (line.StartsWith("CloudSyncEnabled="))
-                        {
-                            CloudSyncToggle.IsChecked = bool.Parse(line.Substring("CloudSyncEnabled=".Length));
-                        }
-                        else if (line.StartsWith("BiometricEnabled="))
-                        {
-                            BiometricToggle.IsChecked = bool.Parse(line.Substring("BiometricEnabled=".Length));
+                            settings[parts[0]] = bool.Parse(parts[1]);
                         }
                     }
+
+                    // Update UI without triggering events
+                    UpdateToggleWithoutEvent(MinimizeToTrayToggle, settings.GetValueOrDefault("MinimizeToTray", false));
+                    UpdateToggleWithoutEvent(StartWithWindowsToggle, settings.GetValueOrDefault("StartWithWindows", false));
+                    UpdateToggleWithoutEvent(TwoFactorToggle, settings.GetValueOrDefault("TwoFactorEnabled", false));
+                    UpdateToggleWithoutEvent(DarkModeToggle, settings.GetValueOrDefault("DarkModeEnabled", false));
+                    UpdateToggleWithoutEvent(CloudSyncToggle, settings.GetValueOrDefault("CloudSyncEnabled", false));
+                    UpdateToggleWithoutEvent(BiometricToggle, settings.GetValueOrDefault("BiometricEnabled", false));
+
+                    // Update app-wide settings
+                    App.MinimizeToTrayEnabled = settings.GetValueOrDefault("MinimizeToTray", false);
                 }
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"Error loading settings: {ex.Message}");
+            }
+        }
+
+        private void UpdateToggleWithoutEvent(ToggleButton toggle, bool isChecked)
+        {
+            if (toggle != null)
+            {
+                // Store event handlers
+                var checkedHandler = toggle.Checked;
+                var uncheckedHandler = toggle.Unchecked;
+
+                // Remove event handlers
+                toggle.Checked -= checkedHandler;
+                toggle.Unchecked -= uncheckedHandler;
+
+                // Update state
+                toggle.IsChecked = isChecked;
+
+                // Restore event handlers
+                toggle.Checked += checkedHandler;
+                toggle.Unchecked += uncheckedHandler;
             }
         }
 
@@ -223,28 +234,28 @@ namespace CyberVault.Viewmodel
                 string cyberVaultPath = Path.Combine(appDataPath, "CyberVault");
                 string settingsFilePath = Path.Combine(cyberVaultPath, $"{App.CurrentUsername}_settings.ini");
 
-                if (System.IO.File.Exists(settingsFilePath))
-                {
-                    List<string> lines = System.IO.File.ReadAllLines(settingsFilePath).ToList();
+                Dictionary<string, string> settings = new Dictionary<string, string>();
 
-                    bool settingFound = false;
-                    for (int i = 0; i < lines.Count; i++)
+                // Load existing settings
+                if (File.Exists(settingsFilePath))
+                {
+                    foreach (string line in File.ReadAllLines(settingsFilePath))
                     {
-                        if (lines[i].StartsWith($"{settingName}="))
+                        string[] parts = line.Split('=');
+                        if (parts.Length == 2)
                         {
-                            lines[i] = $"{settingName}={value}";
-                            settingFound = true;
-                            break;
+                            settings[parts[0]] = parts[1];
                         }
                     }
-
-                    if (!settingFound)
-                    {
-                        lines.Add($"{settingName}={value}");
-                    }
-
-                    System.IO.File.WriteAllLines(settingsFilePath, lines);
                 }
+
+                // Update or add new setting
+                settings[settingName] = value;
+
+                // Save all settings
+                Directory.CreateDirectory(cyberVaultPath); // Ensure directory exists
+                File.WriteAllLines(settingsFilePath,
+                    settings.Select(kvp => $"{kvp.Key}={kvp.Value}"));
             }
             catch (Exception ex)
             {
