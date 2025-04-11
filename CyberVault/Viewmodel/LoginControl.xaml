@@ -71,6 +71,14 @@
                             <TextBlock Text="Register" Foreground="#88AEEF" FontWeight="SemiBold" Cursor="Hand"
                                      MouseLeftButtonDown="RegisterTextBlock_MouseLeftButtonDown" />
                         </TextBlock>
+
+                        <TextBlock Grid.Row="5" HorizontalAlignment="Center" Margin="0,60,0,0" FontSize="14" Foreground="#88FFFFFF">
+                            <Run Text="Alreadt have an account?" />
+                            <TextBlock Text="Import account" Foreground="#88AEEF" FontWeight="SemiBold" Cursor="Hand"
+                                    MouseLeftButtonDown="ImportTextBlock_MouseLeftButtonDown" />
+                            </TextBlock>
+
+
                     </Grid>
                 </StackPanel>
             </Grid>

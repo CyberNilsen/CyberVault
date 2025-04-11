@@ -3,11 +3,13 @@ using System.IO;
 using System.Security.Cryptography;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Forms;
 using System.Windows.Input;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.StartPanel;
 
 namespace CyberVault
 {
-    public partial class LoginControl : UserControl
+    public partial class LoginControl : System.Windows.Controls.UserControl
     {
         private MainWindow mainWindow;
         public static byte[] CurrentEncryptionKey { get; private set; }
@@ -33,7 +35,7 @@ namespace CyberVault
 
             if (string.IsNullOrWhiteSpace(username) || string.IsNullOrWhiteSpace(password))
             {
-                MessageBox.Show("Username and password cannot be empty!", "Login Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                System.Windows.MessageBox.Show("Username and password cannot be empty!", "Login Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
 
@@ -45,7 +47,7 @@ namespace CyberVault
 
                 if (!File.Exists(credentialsFilePath))
                 {
-                    MessageBox.Show("No user accounts found. Please register first.", "Login Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    System.Windows.MessageBox.Show("No user accounts found. Please register first.", "Login Error", MessageBoxButton.OK, MessageBoxImage.Error);
                     return;
                 }
 
@@ -67,30 +69,195 @@ namespace CyberVault
 
                 if (!userFound)
                 {
-                    MessageBox.Show("Account not found!", "Login Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    System.Windows.MessageBox.Show("Account not found!", "Login Error", MessageBoxButton.OK, MessageBoxImage.Error);
                     return;
                 }
 
                 byte[] inputHash = HashPassword(password, salt);
                 if (!CompareByteArrays(inputHash, storedHash))
                 {
-                    MessageBox.Show("Incorrect password!", "Login Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    System.Windows.MessageBox.Show("Incorrect password!", "Login Error", MessageBoxButton.OK, MessageBoxImage.Error);
                     return;
                 }
 
                 CurrentEncryptionKey = KeyDerivation.DeriveKey(password, salt);
 
-                // After successful login
-                App.CurrentUsername = username; // You should already have this
-                App.LoadUserSettings(username); // Add this line
+                App.CurrentUsername = username; 
+                App.LoadUserSettings(username); 
 
                 mainWindow.Navigate(new DashboardControl(mainWindow, username, CurrentEncryptionKey));
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"An error occurred: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                System.Windows.MessageBox.Show($"An error occurred: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
+
+        private void ImportTextBlock_MouseLeftButtonDown(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                var folderDialog = new FolderBrowserDialog
+                {
+                    Description = "Select folder containing CyberVault exported data",
+                    UseDescriptionForTitle = true
+                };
+
+                if (folderDialog.ShowDialog() != System.Windows.Forms.DialogResult.OK)
+                {
+                    return;
+                }
+
+                string importDir = folderDialog.SelectedPath;
+
+                string[] exportedFiles = System.IO.Directory.GetFiles(importDir, "*_exported.txt");
+                if (exportedFiles.Length == 0)
+                {
+                    System.Windows.MessageBox.Show("No exported user data found in the selected folder.\n" +
+                        "Please select a folder containing CyberVault exported data.",
+                        "Import Error", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Warning);
+                    return;
+                }
+
+                string appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+                string cyberVaultPath = Path.Combine(appDataPath, "CyberVault");
+
+                if (!System.IO.Directory.Exists(cyberVaultPath))
+                {
+                    System.IO.Directory.CreateDirectory(cyberVaultPath);
+                }
+
+                string credentialsPath = Path.Combine(cyberVaultPath, "credentials.txt");
+                List<string> existingUsernames = new List<string>();
+                List<string> existingCredentials = new List<string>();
+
+                if (System.IO.File.Exists(credentialsPath))
+                {
+                    existingCredentials = System.IO.File.ReadAllLines(credentialsPath).ToList();
+                    foreach (string line in existingCredentials)
+                    {
+                        if (!string.IsNullOrWhiteSpace(line) && line.Contains(","))
+                        {
+                            string existingUsername = line.Split(',')[0];
+                            existingUsernames.Add(existingUsername);
+                        }
+                    }
+                }
+
+                int importedUsers = 0;
+                List<string> importedUserNames = new List<string>();
+                List<string> skippedUserNames = new List<string>();
+                List<string> updatedCredentials = new List<string>(existingCredentials);
+
+                foreach (string exportedFile in exportedFiles)
+                {
+                    try
+                    {
+                        string exportedCredential = System.IO.File.ReadAllText(exportedFile).Trim();
+
+                        if (string.IsNullOrWhiteSpace(exportedCredential))
+                        {
+                            continue;
+                        }
+
+                        string[] parts = exportedCredential.Split(',');
+                        if (parts.Length < 2)
+                        {
+                            continue;
+                        }
+
+                        string importUsername = parts[0];
+
+                        if (existingUsernames.Contains(importUsername))
+                        {
+                            skippedUserNames.Add(importUsername);
+                            continue;
+                        }
+
+                        updatedCredentials.Add(exportedCredential);
+                        existingUsernames.Add(importUsername);
+
+                        string fileName = Path.GetFileName(exportedFile);
+                        string userBaseName = fileName.Replace("_exported.txt", "");
+
+                        string passwordFile = Path.Combine(importDir, $"passwords_{userBaseName}.dat");
+                        if (System.IO.File.Exists(passwordFile))
+                        {
+                            string destPasswordFile = Path.Combine(cyberVaultPath, $"passwords_{userBaseName}.dat");
+                            System.IO.File.Copy(passwordFile, destPasswordFile, true);
+                        }
+
+                        string settingsFile = Path.Combine(importDir, $"{userBaseName}_settings.ini");
+                        if (System.IO.File.Exists(settingsFile))
+                        {
+                            string destSettingsFile = Path.Combine(cyberVaultPath, $"{userBaseName}_settings.ini");
+                            System.IO.File.Copy(settingsFile, destSettingsFile, true);
+                        }
+
+                        string authFile = Path.Combine(importDir, $"{userBaseName}.authenticators.enc");
+                        if (System.IO.File.Exists(authFile))
+                        {
+                            string destAuthFile = Path.Combine(cyberVaultPath, $"{userBaseName}.authenticators.enc");
+                            System.IO.File.Copy(authFile, destAuthFile, true);
+                        }
+
+                        string[] encFiles = System.IO.Directory.GetFiles(importDir, $"{userBaseName}*.enc");
+                        foreach (string encFile in encFiles)
+                        {
+                            string encFileName = Path.GetFileName(encFile);
+                            string destEncFile = Path.Combine(cyberVaultPath, encFileName);
+                            if (!System.IO.File.Exists(destEncFile))
+                            {
+                                System.IO.File.Copy(encFile, destEncFile, true);
+                            }
+                        }
+
+                        importedUsers++;
+                        importedUserNames.Add(importUsername);
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"Error importing file {exportedFile}: {ex.Message}");
+                    }
+                }
+
+                if (importedUsers > 0)
+                {
+                    System.IO.File.WriteAllLines(credentialsPath, updatedCredentials);
+                }
+
+                if (importedUsers > 0)
+                {
+                    string message = $"Successfully imported {importedUsers} user(s):\n• {string.Join("\n• ", importedUserNames)}";
+
+                    if (skippedUserNames.Count > 0)
+                    {
+                        message += $"\n\nSkipped {skippedUserNames.Count} existing user(s):\n• {string.Join("\n• ", skippedUserNames)}";
+                    }
+
+                    System.Windows.MessageBox.Show(message, "Import Complete",
+                        System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Information);
+                }
+                else if (skippedUserNames.Count > 0)
+                {
+                    System.Windows.MessageBox.Show(
+                        $"All users already exist in the system. Skipped {skippedUserNames.Count} user(s):\n• {string.Join("\n• ", skippedUserNames)}",
+                        "Import Information", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Information);
+                }
+                else
+                {
+                    System.Windows.MessageBox.Show("No valid user data was found to import.",
+                        "Import Information", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Warning);
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Windows.MessageBox.Show($"Error importing user data: {ex.Message}",
+                    "Import Error", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
+            }
+        
+        }
+
 
         private void LoadUserSettings(string username)
         {
