@@ -1,19 +1,16 @@
-﻿using System.IO;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using Microsoft.Win32;
 using System.Windows.Forms;
-using System.Drawing;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement.StartPanel;
 using IWshRuntimeLibrary;
 using System.Windows.Controls.Primitives;
 
-
 namespace CyberVault.Viewmodel
 {
-    /// <summary>
-    /// Interaction logic for SettingsControl.xaml
-    /// </summary>
     public partial class Settings : System.Windows.Controls.UserControl
     {
         private string username;
@@ -36,27 +33,21 @@ namespace CyberVault.Viewmodel
 
         private void TwoFactorToggle_Unchecked(object sender, RoutedEventArgs e)
         {
-            // Implementation for disabling two-factor authentication
         }
 
         private void StartWithWindowsToggle_Checked(object sender, RoutedEventArgs e)
         {
             try
             {
-                // Get the startup folder path
                 string startupFolderPath = Path.Combine(
                     Environment.GetFolderPath(Environment.SpecialFolder.Startup));
 
-                // Define the shortcut path in the startup folder
                 string shortcutPath = Path.Combine(startupFolderPath, "CyberVault.lnk");
 
-                // If the shortcut doesn't exist, create it
                 if (!System.IO.File.Exists(shortcutPath))
                 {
-                    // Get the path to the executable
                     string exePath = System.Reflection.Assembly.GetExecutingAssembly().Location;
 
-                    // Create a shortcut
                     WshShell shell = new WshShell();
                     IWshShortcut shortcut = (IWshShortcut)shell.CreateShortcut(shortcutPath);
 
@@ -66,7 +57,6 @@ namespace CyberVault.Viewmodel
                     shortcut.Save();
                 }
 
-                // Save the setting to the user's settings file
                 SaveUserSetting("StartWithWindows", "true");
             }
             catch (Exception ex)
@@ -75,7 +65,6 @@ namespace CyberVault.Viewmodel
                 System.Windows.MessageBox.Show($"Failed to set up startup: {ex.Message}",
                     "Error", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
 
-                // Uncheck the toggle without triggering the event
                 StartWithWindowsToggle.Checked -= StartWithWindowsToggle_Checked;
                 StartWithWindowsToggle.IsChecked = false;
                 StartWithWindowsToggle.Checked += StartWithWindowsToggle_Checked;
@@ -86,20 +75,16 @@ namespace CyberVault.Viewmodel
         {
             try
             {
-                // Get the startup folder path
                 string startupFolderPath = Path.Combine(
                     Environment.GetFolderPath(Environment.SpecialFolder.Startup));
 
-                // Define the shortcut path in the startup folder
                 string shortcutPath = Path.Combine(startupFolderPath, "CyberVault.lnk");
 
-                // If the shortcut exists, delete it
                 if (System.IO.File.Exists(shortcutPath))
                 {
                     System.IO.File.Delete(shortcutPath);
                 }
 
-                // Save the setting to the user's settings file
                 SaveUserSetting("StartWithWindows", "false");
             }
             catch (Exception ex)
@@ -108,7 +93,6 @@ namespace CyberVault.Viewmodel
                 System.Windows.MessageBox.Show($"Failed to remove startup: {ex.Message}",
                     "Error", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
 
-                // Check the toggle without triggering the event
                 StartWithWindowsToggle.Unchecked -= StartWithWindowsToggle_Unchecked;
                 StartWithWindowsToggle.IsChecked = true;
                 StartWithWindowsToggle.Unchecked += StartWithWindowsToggle_Unchecked;
@@ -117,19 +101,16 @@ namespace CyberVault.Viewmodel
 
         private void PrivacyPolicy_Click(object sender, RoutedEventArgs e)
         {
-            // Implementation for opening privacy policy
         }
 
         private void MinimizeToTrayToggle_Checked(object sender, RoutedEventArgs e)
         {
-            // Update the application-wide setting
             App.MinimizeToTrayEnabled = true;
             SaveUserSetting("MinimizeToTray", "true");
         }
 
         private void MinimizeToTrayToggle_Unchecked(object sender, RoutedEventArgs e)
         {
-            // Update the application-wide setting
             App.MinimizeToTrayEnabled = false;
             SaveUserSetting("MinimizeToTray", "false");
         }
@@ -148,14 +129,12 @@ namespace CyberVault.Viewmodel
 
         private void ResetSettingsUI()
         {
-            // Reset all toggle controls to default state
             TwoFactorToggle.IsChecked = false;
             MinimizeToTrayToggle.IsChecked = false;
             DarkModeToggle.IsChecked = false;
             CloudSyncToggle.IsChecked = false;
             BiometricToggle.IsChecked = false;
 
-            // Reset any combo boxes if needed
             if (BackupFrequencyComboBox != null)
                 BackupFrequencyComboBox.SelectedIndex = 0;
 
@@ -185,15 +164,13 @@ namespace CyberVault.Viewmodel
                         }
                     }
 
-                    // Update UI without triggering events
-                    UpdateToggleWithoutEvent(MinimizeToTrayToggle, settings.GetValueOrDefault("MinimizeToTray", false));
-                    UpdateToggleWithoutEvent(StartWithWindowsToggle, settings.GetValueOrDefault("StartWithWindows", false));
-                    UpdateToggleWithoutEvent(TwoFactorToggle, settings.GetValueOrDefault("TwoFactorEnabled", false));
-                    UpdateToggleWithoutEvent(DarkModeToggle, settings.GetValueOrDefault("DarkModeEnabled", false));
-                    UpdateToggleWithoutEvent(CloudSyncToggle, settings.GetValueOrDefault("CloudSyncEnabled", false));
-                    UpdateToggleWithoutEvent(BiometricToggle, settings.GetValueOrDefault("BiometricEnabled", false));
+                    UpdateToggleWithoutEvent(MinimizeToTrayToggle, MinimizeToTrayToggle_Checked, MinimizeToTrayToggle_Unchecked, settings.GetValueOrDefault("MinimizeToTray", false));
+                    UpdateToggleWithoutEvent(StartWithWindowsToggle, StartWithWindowsToggle_Checked, StartWithWindowsToggle_Unchecked, settings.GetValueOrDefault("StartWithWindows", false));
+                    UpdateToggleWithoutEvent(TwoFactorToggle, TwoFactorToggle_Checked, TwoFactorToggle_Unchecked, settings.GetValueOrDefault("TwoFactorEnabled", false));
+                    UpdateToggleWithoutEvent(DarkModeToggle, DarkModeToggle_Checked, DarkModeToggle_Unchecked, settings.GetValueOrDefault("DarkModeEnabled", false));
+                    UpdateToggleWithoutEvent(CloudSyncToggle, CloudSyncToggle_Checked, CloudSyncToggle_Unchecked, settings.GetValueOrDefault("CloudSyncEnabled", false));
+                    UpdateToggleWithoutEvent(BiometricToggle, BiometricToggle_Checked, BiometricToggle_Unchecked, settings.GetValueOrDefault("BiometricEnabled", false));
 
-                    // Update app-wide settings
                     App.MinimizeToTrayEnabled = settings.GetValueOrDefault("MinimizeToTray", false);
                 }
             }
@@ -203,13 +180,10 @@ namespace CyberVault.Viewmodel
             }
         }
 
-        private void UpdateToggleWithoutEvent(ToggleButton toggle, bool isChecked)
+        private void UpdateToggleWithoutEvent(ToggleButton toggle, RoutedEventHandler checkedHandler, RoutedEventHandler uncheckedHandler, bool isChecked)
         {
             if (toggle != null)
             {
-                var checkedHandler = toggle.Checked;
-                var uncheckedHandler = toggle.Unchecked;
-
                 toggle.Checked -= checkedHandler;
                 toggle.Unchecked -= uncheckedHandler;
 
@@ -233,7 +207,6 @@ namespace CyberVault.Viewmodel
 
                 Dictionary<string, string> settings = new Dictionary<string, string>();
 
-                // Load existing settings
                 if (System.IO.File.Exists(settingsFilePath))
                 {
                     foreach (string line in System.IO.File.ReadAllLines(settingsFilePath))
@@ -246,11 +219,9 @@ namespace CyberVault.Viewmodel
                     }
                 }
 
-                // Update or add new setting
                 settings[settingName] = value;
 
-                // Save all settings
-                Directory.CreateDirectory(cyberVaultPath); // Ensure directory exists
+                Directory.CreateDirectory(cyberVaultPath);
                 System.IO.File.WriteAllLines(settingsFilePath,
                     settings.Select(kvp => $"{kvp.Key}={kvp.Value}"));
             }
@@ -396,57 +367,46 @@ namespace CyberVault.Viewmodel
 
         private void DarkModeToggle_Checked(object sender, RoutedEventArgs e)
         {
-            // Implementation for enabling dark mode
         }
 
         private void DarkModeToggle_Unchecked(object sender, RoutedEventArgs e)
         {
-            // Implementation for disabling dark mode
         }
 
         private void CloudSyncToggle_Checked(object sender, RoutedEventArgs e)
         {
-            // Implementation for enabling cloud sync
         }
 
         private void CloudSyncToggle_Unchecked(object sender, RoutedEventArgs e)
         {
-            // Implementation for disabling cloud sync
         }
 
         private void CheckForUpdates_Click(object sender, RoutedEventArgs e)
         {
-            // Implementation for checking for updates
         }
 
         private void ChangeMasterPassword_Click(object sender, RoutedEventArgs e)
         {
-            // Implementation for changing master password
         }
 
         private void BiometricToggle_Checked(object sender, RoutedEventArgs e)
         {
-            // Implementation for enabling biometric authentication
         }
 
         private void BiometricToggle_Unchecked(object sender, RoutedEventArgs e)
         {
-            // Implementation for disabling biometric authentication
         }
 
         private void BackupLocation_Click(object sender, RoutedEventArgs e)
         {
-            // Implementation for selecting backup location
         }
 
         private void BackupFrequencyComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            // Implementation for changing backup frequency
         }
 
         private void AutoLockComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            // Implementation for changing auto lock settings
         }
     }
 }
