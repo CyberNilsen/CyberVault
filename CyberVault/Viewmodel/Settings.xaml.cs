@@ -6,6 +6,7 @@ using System.Windows.Forms;
 using System.Drawing;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement.StartPanel;
 using IWshRuntimeLibrary;
+using System.Windows.Controls.Primitives;
 
 
 namespace CyberVault.Viewmodel
@@ -170,10 +171,10 @@ namespace CyberVault.Viewmodel
                 string cyberVaultPath = Path.Combine(appDataPath, "CyberVault");
                 string settingsFilePath = Path.Combine(cyberVaultPath, $"{App.CurrentUsername}_settings.ini");
 
-                if (File.Exists(settingsFilePath))
+                if (System.IO.File.Exists(settingsFilePath))
                 {
                     Dictionary<string, bool> settings = new Dictionary<string, bool>();
-                    string[] lines = File.ReadAllLines(settingsFilePath);
+                    string[] lines = System.IO.File.ReadAllLines(settingsFilePath);
 
                     foreach (string line in lines)
                     {
@@ -206,18 +207,14 @@ namespace CyberVault.Viewmodel
         {
             if (toggle != null)
             {
-                // Store event handlers
                 var checkedHandler = toggle.Checked;
                 var uncheckedHandler = toggle.Unchecked;
 
-                // Remove event handlers
                 toggle.Checked -= checkedHandler;
                 toggle.Unchecked -= uncheckedHandler;
 
-                // Update state
                 toggle.IsChecked = isChecked;
 
-                // Restore event handlers
                 toggle.Checked += checkedHandler;
                 toggle.Unchecked += uncheckedHandler;
             }
@@ -237,9 +234,9 @@ namespace CyberVault.Viewmodel
                 Dictionary<string, string> settings = new Dictionary<string, string>();
 
                 // Load existing settings
-                if (File.Exists(settingsFilePath))
+                if (System.IO.File.Exists(settingsFilePath))
                 {
-                    foreach (string line in File.ReadAllLines(settingsFilePath))
+                    foreach (string line in System.IO.File.ReadAllLines(settingsFilePath))
                     {
                         string[] parts = line.Split('=');
                         if (parts.Length == 2)
@@ -254,7 +251,7 @@ namespace CyberVault.Viewmodel
 
                 // Save all settings
                 Directory.CreateDirectory(cyberVaultPath); // Ensure directory exists
-                File.WriteAllLines(settingsFilePath,
+                System.IO.File.WriteAllLines(settingsFilePath,
                     settings.Select(kvp => $"{kvp.Key}={kvp.Value}"));
             }
             catch (Exception ex)
