@@ -4,7 +4,7 @@ using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.ComponentModel;
-using Hardcodet.Wpf.TaskbarNotification; // WPF NotifyIcon implementation
+using Hardcodet.Wpf.TaskbarNotification;
 using System.IO;
 
 namespace CyberVault
@@ -36,7 +36,6 @@ namespace CyberVault
                 Visibility = Visibility.Hidden
             };
 
-            // Create context menu
             var contextMenu = new ContextMenu();
 
             var openMenuItem = new MenuItem { Header = "Open" };
@@ -50,7 +49,6 @@ namespace CyberVault
 
             trayIcon.ContextMenu = contextMenu;
 
-            // Double-click to restore
             trayIcon.TrayMouseDoubleClick += (s, e) => ShowMainWindow();
         }
 
@@ -71,14 +69,12 @@ namespace CyberVault
         {
             if (App.MinimizeToTrayEnabled)
             {
-                // Cancel the close and minimize to tray instead
                 e.Cancel = true;
                 this.Hide();
                 trayIcon.Visibility = Visibility.Visible;
             }
             else
             {
-                // Normal close, ensure tray icon is cleaned up
                 if (trayIcon != null)
                 {
                     trayIcon.Dispose();
@@ -116,13 +112,11 @@ namespace CyberVault
         {
             if (App.MinimizeToTrayEnabled)
             {
-                // If minimize to tray is enabled, hide the window
                 this.Hide();
                 trayIcon.Visibility = Visibility.Visible;
             }
             else
             {
-                // Normal close behavior
                 Window window = Window.GetWindow(this);
                 if (window != null)
                 {
@@ -145,37 +139,7 @@ namespace CyberVault
             }
         }
 
-        private void Window_MouseDoubleClick(object sender, MouseButtonEventArgs e)
-        {
-            if (!IsInteractiveElement(e.OriginalSource as DependencyObject))
-            {
-                ToggleWindowState();
-            }
-        }
-
-        private bool IsInteractiveElement(DependencyObject element)
-        {
-            if (element == null)
-                return false;
-
-            if (element is Button || element is TextBox || element is ComboBox ||
-                element is CheckBox || element is RadioButton || element is ListBox ||
-                element is ListView || element is Slider || element is ScrollBar ||
-                element is TextBlock)
-            {
-                return true;
-            }
-
-            DependencyObject parent = VisualTreeHelper.GetParent(element);
-            if (parent != null && IsInteractiveElement(parent))
-            {
-                return true;
-            }
-
-            return false;
-        }
-
-        private void ToggleWindowState()
+        public void ToggleWindowState()
         {
             if (this.WindowState == WindowState.Maximized)
             {

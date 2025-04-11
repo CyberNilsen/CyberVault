@@ -23,9 +23,16 @@ namespace CyberVault
         }
         private void TopBar_MouseDown(object sender, MouseButtonEventArgs e)
         {
-            if (e.LeftButton == MouseButtonState.Pressed)
+            if (e.ChangedButton == MouseButton.Left)
             {
-                Window.GetWindow(this).DragMove();
+                if (e.ClickCount == 2)
+                {
+                    mainWindow.ToggleWindowState();
+                }
+                else if (e.LeftButton == MouseButtonState.Pressed)
+                {
+                    Window.GetWindow(this).DragMove();
+                }
             }
         }
         public void SetTopBarHeight(double height)

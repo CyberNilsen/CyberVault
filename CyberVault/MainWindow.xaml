@@ -13,7 +13,6 @@
         AllowsTransparency="True"
         WindowStartupLocation="CenterScreen"
         Icon="pack://application:,,,/Images/CyberVault.ico"
-        MouseDoubleClick="Window_MouseDoubleClick"
         >
     <WindowChrome.WindowChrome>
         <WindowChrome CaptionHeight="0" ResizeBorderThickness="5" />
