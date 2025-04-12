@@ -17,8 +17,8 @@
     {
         public partial class HomeDashboardControl : UserControl
         {
-            private string _accessToken;
-            private LocalWebServer _webServer;
+            private string ?_accessToken;
+            private LocalWebServer ?_webServer;
             private string _currentVersion = "v3.0";
             private readonly string _githubRepoUrl = "https://github.com/CyberNilsen/CyberVault";
             private readonly string _githubApiReleaseUrl = "https://api.github.com/repos/CyberNilsen/CyberVault/releases/latest";
@@ -28,7 +28,7 @@
             private bool _isDownloading = false;
             private readonly string _tempDownloadPath;
             private readonly string _applicationPath;
-            private UpdateProgressWindow _updateProgressWindow;
+            private UpdateProgressWindow ?_updateProgressWindow;
 
             public HomeDashboardControl(string username, byte[] encryptionKey)
             {
@@ -61,7 +61,7 @@
                 }
                 catch (Exception)
                 {
-
+                    return;
                 }
             }
 
@@ -160,7 +160,7 @@
 
             private void ShowCopySuccess()
             {
-                string originalContent = CopyKeyButton.Content.ToString();
+                string? originalContent = CopyKeyButton.Content.ToString();
                 CopyKeyButton.Content = "Copied!";
                 CopyKeyButton.Background = System.Windows.Media.Brushes.Green;
 

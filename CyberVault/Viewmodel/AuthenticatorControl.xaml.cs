@@ -13,11 +13,11 @@ namespace CyberVault.Viewmodel
 {
     public partial class AuthenticatorControl : UserControl
     {
-        private string _username;
-        private byte[] _encryptionKey;
-        private string _authFilePath;
-        private ObservableCollection<AuthenticatorEntry> _authenticatorEntries;
-        private DispatcherTimer _timer;
+        private string ?_username;
+        private byte[] ?_encryptionKey;
+        private string ?_authFilePath;
+        private ObservableCollection<AuthenticatorEntry> ?_authenticatorEntries;
+        private DispatcherTimer ?_timer;
 
         public class AuthenticatorEntry
         {
@@ -58,7 +58,7 @@ namespace CyberVault.Viewmodel
 
             _timer = new DispatcherTimer();
             _timer.Interval = TimeSpan.FromSeconds(1);
-            _timer.Tick += Timer_Tick;
+            _timer.Tick += Timer_Tick!;
             _timer.Start();
         }
 
@@ -77,7 +77,7 @@ namespace CyberVault.Viewmodel
                 byte[] actualEncryptedData = new byte[encryptedData.Length - 16];
                 Array.Copy(encryptedData, 16, actualEncryptedData, 0, actualEncryptedData.Length);
 
-                string decryptedData = AesEncryption.Decrypt(actualEncryptedData, _encryptionKey, iv);
+                string decryptedData = AesEncryption.Decrypt(actualEncryptedData, _encryptionKey!, iv);
 
                 string[] entries = decryptedData.Split(new[] { "||ENTRY||" }, StringSplitOptions.RemoveEmptyEntries);
 
@@ -89,7 +89,7 @@ namespace CyberVault.Viewmodel
                         string name = parts[0];
                         string secret = parts[1];
 
-                        _authenticatorEntries.Add(new AuthenticatorEntry(name, secret));
+                        _authenticatorEntries!.Add(new AuthenticatorEntry(name, secret));
                     }
                 }
             }
@@ -111,7 +111,7 @@ namespace CyberVault.Viewmodel
 
                 StringBuilder sb = new StringBuilder();
 
-                foreach (var entry in _authenticatorEntries)
+                foreach (var entry in _authenticatorEntries!)
                 {
                     if (sb.Length > 0)
                         sb.Append("||ENTRY||");
@@ -123,13 +123,13 @@ namespace CyberVault.Viewmodel
 
                 byte[] iv = AesEncryption.GenerateIV();
 
-                byte[] encryptedData = AesEncryption.Encrypt(sb.ToString(), _encryptionKey, iv);
+                byte[] encryptedData = AesEncryption.Encrypt(sb.ToString(), _encryptionKey!, iv);
 
                 byte[] dataToSave = new byte[iv.Length + encryptedData.Length];
                 Array.Copy(iv, 0, dataToSave, 0, iv.Length);
                 Array.Copy(encryptedData, 0, dataToSave, iv.Length, encryptedData.Length);
 
-                File.WriteAllBytes(_authFilePath, dataToSave);
+                File.WriteAllBytes(_authFilePath!, dataToSave);
             }
             catch (Exception ex)
             {
@@ -139,7 +139,7 @@ namespace CyberVault.Viewmodel
 
         private void Timer_Tick(object sender, EventArgs e)
         {
-            foreach (var entry in _authenticatorEntries)
+            foreach (var entry in _authenticatorEntries!)
             {
                 entry.SecondsRemaining = 30 - (int)(DateTime.UtcNow.Ticks / TimeSpan.TicksPerSecond % 30);
                 entry.CurrentCode = GenerateTOTPCode(entry.Secret);
@@ -225,8 +225,8 @@ namespace CyberVault.Viewmodel
             dialog.Owner = Window.GetWindow(this);
             if (dialog.ShowDialog() == true)
             {
-                string name = dialog.AuthenticatorName;
-                string secret = dialog.AuthenticatorSecret.Replace(" ", "").ToUpperInvariant();
+                string name = dialog.AuthenticatorName!;
+                string secret = dialog.AuthenticatorSecret!.Replace(" ", "").ToUpperInvariant();
 
                 try
                 {
@@ -239,7 +239,7 @@ namespace CyberVault.Viewmodel
                     return;
                 }
 
-                _authenticatorEntries.Add(new AuthenticatorEntry(name, secret));
+                _authenticatorEntries!.Add(new AuthenticatorEntry(name, secret));
 
                 SaveAuthenticators();
             }
@@ -254,7 +254,7 @@ namespace CyberVault.Viewmodel
 
                 if (result == MessageBoxResult.Yes)
                 {
-                    _authenticatorEntries.Remove(selectedEntry);
+                    _authenticatorEntries!.Remove(selectedEntry);
                     SaveAuthenticators();
                 }
             }
@@ -290,24 +290,37 @@ namespace CyberVault.Viewmodel
         private TextBox nameTextBox;
         private TextBox secretTextBox;
 
-        public string AuthenticatorName { get; private set; }
-        public string AuthenticatorSecret { get; private set; }
+        public string ?AuthenticatorName { get; private set; }
+        public string ?AuthenticatorSecret { get; private set; }
 
         public AddAuthenticatorDialog()
         {
             Title = "Add New Authenticator";
-            Width = 400;
-            Height = 320;
+            Width = 420;
+            Height = 390;
             WindowStartupLocation = WindowStartupLocation.CenterOwner;
             ResizeMode = ResizeMode.NoResize;
             Background = new SolidColorBrush(Color.FromRgb(236, 239, 244));
             BorderThickness = new Thickness(1);
-            BorderBrush = new SolidColorBrush(Color.FromRgb(76, 86, 106));
-            
+            BorderBrush = new SolidColorBrush(Color.FromRgb(236, 239, 244));
+
+            Grid mainGrid = new Grid();
+            Content = mainGrid;
+            mainGrid.Margin = new Thickness(25);
+
+            Border contentBorder = new Border
+            {
+                Background = new SolidColorBrush(Colors.White),
+                CornerRadius = new CornerRadius(8),
+                Padding = new Thickness(20),
+                BorderBrush = new SolidColorBrush(Color.FromRgb(216, 222, 233)),
+                BorderThickness = new Thickness(1)
+            };
+
+            mainGrid.Children.Add(contentBorder);
 
             Grid grid = new Grid();
-            Content = grid;
-            grid.Margin = new Thickness(20);
+            contentBorder.Child = grid;
 
             grid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) });
             grid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) });
@@ -315,57 +328,135 @@ namespace CyberVault.Viewmodel
             grid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) });
             grid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) });
             grid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) });
+
+            StackPanel headerPanel = new StackPanel
+            {
+                Orientation = Orientation.Horizontal,
+                Margin = new Thickness(0, 0, 0, 20)
+            };
+            grid.Children.Add(headerPanel);
+            Grid.SetRow(headerPanel, 0);
+
+            TextBlock iconBlock = new TextBlock
+            {
+                Text = "🔐",
+                FontSize = 24,
+                VerticalAlignment = VerticalAlignment.Center,
+                Margin = new Thickness(0, 0, 10, 0)
+            };
+            headerPanel.Children.Add(iconBlock);
 
             TextBlock titleBlock = new TextBlock
             {
                 Text = "Add New Authenticator",
-                FontSize = 18,
-                FontWeight = FontWeights.Bold,
-                Margin = new Thickness(0, 0, 0, 15),
-                Foreground = new SolidColorBrush(Color.FromRgb(46, 52, 64))
+                FontSize = 20,
+                FontWeight = FontWeights.SemiBold,
+                VerticalAlignment = VerticalAlignment.Center,
+                Foreground = new SolidColorBrush(Color.FromRgb(46, 52, 64)),
+
             };
-            grid.Children.Add(titleBlock);
-            Grid.SetRow(titleBlock, 0);
+            headerPanel.Children.Add(titleBlock);
+
+            StackPanel namePanel = new StackPanel
+            {
+                Orientation = Orientation.Horizontal,
+                Margin = new Thickness(0, 0, 0, 5)
+            };
+            grid.Children.Add(namePanel);
+            Grid.SetRow(namePanel, 1);
+
+            TextBlock nameIcon = new TextBlock
+            {
+                Text = "🏢",
+                FontSize = 14,
+                Margin = new Thickness(0, 0, 5, 0),
+                VerticalAlignment = VerticalAlignment.Center
+            };
+            namePanel.Children.Add(nameIcon);
 
             TextBlock nameLabel = new TextBlock
             {
                 Text = "Service Name:",
-                Margin = new Thickness(0, 0, 0, 5),
+                FontWeight = FontWeights.Medium,
+                VerticalAlignment = VerticalAlignment.Center,
                 Foreground = new SolidColorBrush(Color.FromRgb(46, 52, 64))
             };
-            grid.Children.Add(nameLabel);
-            Grid.SetRow(nameLabel, 1);
+            namePanel.Children.Add(nameLabel);
+
+            Border nameBorder = new Border
+            {
+                CornerRadius = new CornerRadius(4),
+                BorderBrush = new SolidColorBrush(Color.FromRgb(236, 239, 244)),
+                BorderThickness = new Thickness(1),
+                Margin = new Thickness(0, 0, 0, 15)
+            };
+            grid.Children.Add(nameBorder);
+            Grid.SetRow(nameBorder, 2);
 
             nameTextBox = new TextBox
             {
-                Margin = new Thickness(0, 0, 0, 15),
-                Padding = new Thickness(8),
+                Padding = new Thickness(10),
                 FontSize = 14,
-                BorderThickness = new Thickness(1),
-                BorderBrush = new SolidColorBrush(Color.FromRgb(76, 86, 106))
+                BorderThickness = new Thickness(0),
+                Background = new SolidColorBrush(Color.FromRgb(236, 239, 244))
             };
-            grid.Children.Add(nameTextBox);
-            Grid.SetRow(nameTextBox, 2);
+            nameBorder.Child = nameTextBox;
+
+            StackPanel secretPanel = new StackPanel
+            {
+                Orientation = Orientation.Horizontal,
+                Margin = new Thickness(0, 0, 0, 5)
+            };
+            grid.Children.Add(secretPanel);
+            Grid.SetRow(secretPanel, 3);
+
+            TextBlock secretIcon = new TextBlock
+            {
+                Text = "🔑",
+                FontSize = 14,
+                Margin = new Thickness(0, 0, 5, 0),
+                VerticalAlignment = VerticalAlignment.Center
+            };
+            secretPanel.Children.Add(secretIcon);
 
             TextBlock secretLabel = new TextBlock
             {
                 Text = "Secret Key:",
-                Margin = new Thickness(0, 0, 0, 5),
+                FontWeight = FontWeights.Medium,
+                VerticalAlignment = VerticalAlignment.Center,
                 Foreground = new SolidColorBrush(Color.FromRgb(46, 52, 64))
             };
-            grid.Children.Add(secretLabel);
-            Grid.SetRow(secretLabel, 3);
+            secretPanel.Children.Add(secretLabel);
+
+            Border secretBorder = new Border
+            {
+                CornerRadius = new CornerRadius(4),
+                BorderBrush = new SolidColorBrush(Color.FromRgb(236, 239, 244)),
+                BorderThickness = new Thickness(1),
+                Margin = new Thickness(0, 0, 0, 15)
+            };
+            grid.Children.Add(secretBorder);
+            Grid.SetRow(secretBorder, 4);
 
             secretTextBox = new TextBox
             {
-                Margin = new Thickness(0, 0, 0, 15),
-                Padding = new Thickness(8),
+                Padding = new Thickness(10),
                 FontSize = 14,
-                BorderThickness = new Thickness(1),
-                BorderBrush = new SolidColorBrush(Color.FromRgb(76, 86, 106))
+                BorderThickness = new Thickness(0),
+                Background = new SolidColorBrush(Color.FromRgb(236, 239, 244))
             };
-            grid.Children.Add(secretTextBox);
-            Grid.SetRow(secretTextBox, 4);
+            secretBorder.Child = secretTextBox;
+
+            TextBlock hintBlock = new TextBlock
+            {
+                Text = "Enter the secret key exactly as provided by the service",
+                FontSize = 11,
+                Margin = new Thickness(5, -10, 0, 15),
+                Foreground = new SolidColorBrush(Color.FromRgb(94, 129, 172)),
+                FontStyle = FontStyles.Italic
+            };
+            grid.Children.Add(hintBlock);
+            Grid.SetRow(hintBlock, 5);
 
             StackPanel buttonPanel = new StackPanel
             {
@@ -376,32 +467,66 @@ namespace CyberVault.Viewmodel
             grid.Children.Add(buttonPanel);
             Grid.SetRow(buttonPanel, 5);
 
-            Button okButton = new Button
-            {
-                Content = "Save",
-                Padding = new Thickness(20, 8, 20, 8),
-                Margin = new Thickness(0, 0, 10, 0),
-                Background = new SolidColorBrush(Color.FromRgb(136, 192, 208)),
-                Foreground = new SolidColorBrush(Color.FromRgb(46, 52, 64)),
-                BorderThickness = new Thickness(0),
-                FontWeight = FontWeights.SemiBold,
-                IsDefault = true
-            };
-            okButton.Click += OkButton_Click;
-            buttonPanel.Children.Add(okButton);
-
             Button cancelButton = new Button
             {
                 Content = "Cancel",
-                Padding = new Thickness(20, 8, 20, 8),
-                Background = new SolidColorBrush(Color.FromRgb(67, 76, 94)),
-                Foreground = new SolidColorBrush(Colors.White),
+                Padding = new Thickness(20, 10, 20, 10),
+                Margin = new Thickness(0, 0, 10, 0),
+                Background = new SolidColorBrush(Color.FromRgb(229, 233, 240)),
+                Foreground = new SolidColorBrush(Color.FromRgb(59, 66, 82)),
                 BorderThickness = new Thickness(0),
-                FontWeight = FontWeights.SemiBold,
+                FontWeight = FontWeights.Medium,
                 IsCancel = true
             };
+
+            cancelButton.Template = CreateButtonTemplateWithHover(
+                new SolidColorBrush(Color.FromRgb(229, 233, 240)),
+                new SolidColorBrush(Color.FromRgb(216, 222, 233)));
             cancelButton.Click += CancelButton_Click;
             buttonPanel.Children.Add(cancelButton);
+
+            Button okButton = new Button
+            {
+                Content = "Save",
+                Padding = new Thickness(25, 10, 25, 10),
+                Background = new SolidColorBrush(Color.FromRgb(129, 161, 193)),
+                Foreground = new SolidColorBrush(Colors.White),
+                BorderThickness = new Thickness(0),
+                FontWeight = FontWeights.Medium,
+                IsDefault = true
+            };
+
+            okButton.Template = CreateButtonTemplateWithHover(
+                new SolidColorBrush(Color.FromRgb(129, 161, 193)),
+                new SolidColorBrush(Color.FromRgb(94, 129, 172)));
+            okButton.Click += OkButton_Click;
+            buttonPanel.Children.Add(okButton);
+        }
+
+        private ControlTemplate CreateButtonTemplateWithHover(SolidColorBrush normalBrush, SolidColorBrush hoverBrush)
+        {
+            ControlTemplate template = new ControlTemplate(typeof(Button));
+
+            FrameworkElementFactory borderFactory = new FrameworkElementFactory(typeof(Border));
+            borderFactory.SetValue(Border.CornerRadiusProperty, new CornerRadius(4));
+            borderFactory.SetValue(Border.BackgroundProperty, normalBrush);
+            borderFactory.SetValue(Border.BorderThicknessProperty, new Thickness(0));
+            borderFactory.Name = "border";
+
+            FrameworkElementFactory contentPresenterFactory = new FrameworkElementFactory(typeof(ContentPresenter));
+            contentPresenterFactory.SetValue(ContentPresenter.HorizontalAlignmentProperty, HorizontalAlignment.Center);
+            contentPresenterFactory.SetValue(ContentPresenter.VerticalAlignmentProperty, VerticalAlignment.Center);
+            contentPresenterFactory.SetValue(ContentPresenter.MarginProperty, new Thickness(8));
+
+            borderFactory.AppendChild(contentPresenterFactory);
+            template.VisualTree = borderFactory;
+
+            Trigger hoverTrigger = new Trigger { Property = UIElement.IsMouseOverProperty, Value = true };
+            hoverTrigger.Setters.Add(new Setter { Property = Border.BackgroundProperty, Value = hoverBrush, TargetName = "border" });
+
+            template.Triggers.Add(hoverTrigger);
+
+            return template;
         }
 
         private void OkButton_Click(object sender, RoutedEventArgs e)

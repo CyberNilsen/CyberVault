@@ -15,7 +15,6 @@
         <Border Grid.Column="0" Background="#2E3440" CornerRadius="10,0,0,10">
             <Grid>
                 <StackPanel VerticalAlignment="Center" MaxWidth="400">
-                    <Image Source="/Images/coffe.png" Width="120" Height="120" HorizontalAlignment="Center"/>
                     <TextBlock Text="Register" HorizontalAlignment="Center" Margin="0,20,0,40" 
                              FontSize="36" FontWeight="SemiBold" FontFamily="Segoe UI" Foreground="White"/>
 
@@ -92,16 +91,15 @@
             </Grid>
         </Border>
 
-        <Border Grid.Column="1" Background="#ECEFF4" CornerRadius="0,10,10,0">
+        <Border Grid.Column="1" Background="White" CornerRadius="0,10,10,0">
             <Grid>
                 <StackPanel VerticalAlignment="Center">
                     <Viewbox MaxHeight="250" MaxWidth="250" Margin="0,0,0,30">
-                        <Image Source="/Images/coffe.png"/>
+                        <Image Source="pack://application:,,,/Images/CyberVault.jpg"/>
                     </Viewbox>
-                    <TextBlock Text="Welcome to" FontSize="36" Foreground="#4C566A" 
+                    <TextBlock Text="Welcome to a Secure Vault" FontSize="36" Foreground="#4C566A" 
                              HorizontalAlignment="Center" Margin="0,0,0,10"/>
-                    <TextBlock Text="CyberVault" FontSize="54" FontWeight="Bold" Foreground="#5E81AC" 
-                             HorizontalAlignment="Center" Margin="0,0,0,20"/>
+                    
                     <TextBlock Text="Create your secure account" FontSize="18" Foreground="#4C566A" 
                              HorizontalAlignment="Center"/>
                 </StackPanel>

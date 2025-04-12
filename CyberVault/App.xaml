@@ -98,6 +98,16 @@
                 <ColorAnimation Storyboard.TargetProperty="Background.Color" To="#3B4252" Duration="0:0:0.2"/>
             </Storyboard>
 
+            <Style x:Key="UACOverlayStyle" TargetType="{x:Type Border}">
+                <Setter Property="Background" Value="#CC000000"/>
+                <Setter Property="Opacity" Value="0"/>
+                <Style.Triggers>
+                    <DataTrigger Binding="{Binding IsUACActive}" Value="True">
+                        <Setter Property="Opacity" Value="0.6"/>
+                    </DataTrigger>
+                </Style.Triggers>
+            </Style>
+
             <Style x:Key="ModernTextBox" TargetType="{x:Type TextBox}">
                 <Setter Property="Background" Value="Transparent" />
                 <Setter Property="BorderThickness" Value="0" />
@@ -136,29 +146,31 @@
                                 <Trigger Property="IsMouseOver" Value="True">
                                     <Setter Property="Background" TargetName="Border" Value="#3B4252"/>
                                     <Setter Property="BorderBrush" TargetName="Border" Value="#88AEEF"/>
-                                    <Setter Property="Effect" TargetName="Border">
-                                        <Setter.Value>
-                                            <DropShadowEffect Color="#5E81AC" Direction="270" BlurRadius="8" ShadowDepth="2" Opacity="0.3"/>
-                                        </Setter.Value>
-                                    </Setter>
                                 </Trigger>
                                 <Trigger Property="IsPressed" Value="True">
                                     <Setter Property="Background" TargetName="Border" Value="#5E81AC"/>
                                     <Setter Property="BorderBrush" TargetName="Border" Value="#3B4252"/>
-                                    <Setter Property="Effect" TargetName="Border">
-                                        <Setter.Value>
-                                            <DropShadowEffect Color="#5E81AC" Direction="270" BlurRadius="4" ShadowDepth="1" Opacity="0.5"/>
-                                        </Setter.Value>
-                                    </Setter>
                                 </Trigger>
                             </ControlTemplate.Triggers>
                         </ControlTemplate>
                     </Setter.Value>
                 </Setter>
             </Style>
-            
-            
-            
+
+            <Storyboard x:Key="MenuItemHover">
+                <ColorAnimation Storyboard.TargetProperty="(Border.Background).(SolidColorBrush.Color)" 
+                     To="#4C566A" Duration="0:0:0.2"/>
+                <DoubleAnimation Storyboard.TargetProperty="Effect.Opacity" 
+                      To="0.6" Duration="0:0:0.2"/>
+            </Storyboard>
+
+            <Storyboard x:Key="MenuItemLeave">
+                <ColorAnimation Storyboard.TargetProperty="(Border.Background).(SolidColorBrush.Color)" 
+                     To="#3B4252" Duration="0:0:0.2"/>
+                <DoubleAnimation Storyboard.TargetProperty="Effect.Opacity" 
+                      To="0.3" Duration="0:0:0.2"/>
+            </Storyboard>
+
             <Style x:Key="HomeDashboardButton" TargetType="{x:Type Button}">
                 <Setter Property="Foreground" Value="White"/>
                 <Setter Property="FontWeight" Value="SemiBold"/>
@@ -169,39 +181,20 @@
                     <Setter.Value>
                         <ControlTemplate TargetType="{x:Type Button}">
                             <Border x:Name="border" Background="{TemplateBinding Background}" CornerRadius="6" 
-                     BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}">
+                                    BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}">
                                 <Border.Triggers>
-                                    <EventTrigger RoutedEvent="Border.MouseEnter">
-                                        <BeginStoryboard>
-                                            <Storyboard>
-                                                <DoubleAnimation Storyboard.TargetProperty="Opacity" From="1.0" To="1.1" Duration="0:0:0.2"/>
-                                            </Storyboard>
-                                        </BeginStoryboard>
-                                    </EventTrigger>
-                                    <EventTrigger RoutedEvent="Border.MouseLeave">
-                                        <BeginStoryboard>
-                                            <Storyboard>
-                                                <DoubleAnimation Storyboard.TargetProperty="Opacity" From="1.1" To="1.0" Duration="0:0:0.2"/>
-                                            </Storyboard>
-                                        </BeginStoryboard>
-                                    </EventTrigger>
                                 </Border.Triggers>
                                 <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" Margin="{TemplateBinding Padding}"/>
                             </Border>
                             <ControlTemplate.Triggers>
                                 <Trigger Property="IsMouseOver" Value="True">
                                     <Setter TargetName="border" Property="Background" Value="#81A1C1"/>
-                                    <Setter TargetName="border" Property="Effect">
-                                        <Setter.Value>
-                                            <DropShadowEffect ShadowDepth="0" BlurRadius="10" Opacity="0.5" Color="#88AEEF"/>
-                                        </Setter.Value>
-                                    </Setter>
                                     <Setter TargetName="border" Property="BorderBrush" Value="#88AEEF"/>
-                                    <Setter TargetName="border" Property="BorderThickness" Value="1.5"/>
+                                    <Setter TargetName="border" Property="BorderThickness" Value="1"/>
                                 </Trigger>
                                 <Trigger Property="IsPressed" Value="True">
                                     <Setter TargetName="border" Property="Background" Value="#4C6A92"/>
-                                    <Setter TargetName="border" Property="Opacity" Value="0.9"/>
+                                    <Setter TargetName="border" Property="Opacity" Value="1"/>
                                 </Trigger>
                             </ControlTemplate.Triggers>
                         </ControlTemplate>
@@ -220,22 +213,12 @@
                             <ControlTemplate.Triggers>
                                 <Trigger Property="IsMouseOver" Value="True">
                                     <Setter TargetName="border" Property="Background" Value="#4CAF50"/>
-                                    <Setter TargetName="border" Property="Effect">
-                                        <Setter.Value>
-                                            <DropShadowEffect ShadowDepth="0" BlurRadius="8" Opacity="0.4" Color="#4CAF50"/>
-                                        </Setter.Value>
-                                    </Setter>
                                     <Setter TargetName="border" Property="BorderBrush" Value="#A5D6A7"/>
                                     <Setter TargetName="border" Property="BorderThickness" Value="1"/>
                                 </Trigger>
                                 <Trigger Property="IsPressed" Value="True">
                                     <Setter TargetName="border" Property="Background" Value="#2E7D32"/>
-                                    <Setter TargetName="border" Property="Opacity" Value="0.9"/>
-                                    <Setter TargetName="border" Property="Effect">
-                                        <Setter.Value>
-                                            <DropShadowEffect ShadowDepth="0" BlurRadius="4" Opacity="0.2" Color="#2E7D32"/>
-                                        </Setter.Value>
-                                    </Setter>
+                                    <Setter TargetName="border" Property="Opacity" Value="1"/>
                                 </Trigger>
                             </ControlTemplate.Triggers>
                         </ControlTemplate>
@@ -260,11 +243,6 @@
                                                 <GradientStop Color="#81A1C1" Offset="0"/>
                                                 <GradientStop Color="#88C0D0" Offset="1"/>
                                             </LinearGradientBrush>
-                                        </Setter.Value>
-                                    </Setter>
-                                    <Setter TargetName="border" Property="Effect">
-                                        <Setter.Value>
-                                            <DropShadowEffect ShadowDepth="0" BlurRadius="15" Opacity="0.5" Color="#88AEEF"/>
                                         </Setter.Value>
                                     </Setter>
                                     <Setter TargetName="border" Property="RenderTransform">
@@ -332,15 +310,7 @@
                                                        Storyboard.TargetProperty="Margin"
                                                        From="-30,0,0,0" To="300,0,-1000,0" 
                                                        Duration="0:0:0.6" />
-
-                                                <ObjectAnimationUsingKeyFrames Storyboard.TargetName="mainBorder" 
-                                                                  Storyboard.TargetProperty="Effect">
-                                                    <DiscreteObjectKeyFrame KeyTime="0:0:0">
-                                                        <DiscreteObjectKeyFrame.Value>
-                                                            <DropShadowEffect ShadowDepth="0" BlurRadius="15" Opacity="0.6" Color="#88AEEF"/>
-                                                        </DiscreteObjectKeyFrame.Value>
-                                                    </DiscreteObjectKeyFrame>
-                                                </ObjectAnimationUsingKeyFrames>
+                                                
                                             </Storyboard>
                                         </BeginStoryboard>
                                     </Trigger.EnterActions>
@@ -357,14 +327,6 @@
                                                 <DoubleAnimation Storyboard.TargetName="highlight" 
                                                      Storyboard.TargetProperty="Opacity"
                                                      To="0" Duration="0:0:0.2"/>
-                                                <ObjectAnimationUsingKeyFrames Storyboard.TargetName="mainBorder" 
-                                                                  Storyboard.TargetProperty="Effect">
-                                                    <DiscreteObjectKeyFrame KeyTime="0:0:0">
-                                                        <DiscreteObjectKeyFrame.Value>
-                                                            <DropShadowEffect ShadowDepth="0" BlurRadius="0" Opacity="0"/>
-                                                        </DiscreteObjectKeyFrame.Value>
-                                                    </DiscreteObjectKeyFrame>
-                                                </ObjectAnimationUsingKeyFrames>
                                             </Storyboard>
                                         </BeginStoryboard>
                                     </Trigger.ExitActions>
@@ -372,11 +334,6 @@
 
                                 <Trigger Property="IsPressed" Value="True">
                                     <Setter TargetName="mainBorder" Property="Background" Value="#4C6A92"/>
-                                    <Setter TargetName="mainBorder" Property="Effect">
-                                        <Setter.Value>
-                                            <DropShadowEffect ShadowDepth="0" BlurRadius="8" Opacity="0.3" Color="#5E81AC"/>
-                                        </Setter.Value>
-                                    </Setter>
                                 </Trigger>
                             </ControlTemplate.Triggers>
                         </ControlTemplate>
@@ -405,11 +362,6 @@
                                                 <GradientStop Color="#BF616A" Offset="0"/>
                                                 <GradientStop Color="#d08792" Offset="1"/>
                                             </LinearGradientBrush>
-                                        </Setter.Value>
-                                    </Setter>
-                                    <Setter TargetName="border" Property="Effect">
-                                        <Setter.Value>
-                                            <DropShadowEffect ShadowDepth="0" BlurRadius="15" Opacity="0.5" Color="#f01d31"/>
                                         </Setter.Value>
                                     </Setter>
                                     <Setter TargetName="border" Property="RenderTransform">
@@ -489,9 +441,6 @@
                                 <Border x:Name="Indicator" Width="18" Height="18" 
                                         Background="White" CornerRadius="9"
                                         HorizontalAlignment="Left" Margin="2,0,0,0">
-                                    <Border.Effect>
-                                        <DropShadowEffect ShadowDepth="1" BlurRadius="2" Opacity="0.2"/>
-                                    </Border.Effect>
                                 </Border>
                             </Grid>
                             <ControlTemplate.Triggers>
@@ -500,14 +449,6 @@
                                     <Setter TargetName="BackgroundBorder" Property="BorderBrush" Value="#8FBCBB"/>
                                     <Setter TargetName="Indicator" Property="HorizontalAlignment" Value="Right"/>
                                     <Setter TargetName="Indicator" Property="Margin" Value="0,0,2,0"/>
-                                </Trigger>
-                                <Trigger Property="IsMouseOver" Value="True">
-                                    <Setter TargetName="Indicator" Property="Effect">
-                                        <Setter.Value>
-                                            <DropShadowEffect ShadowDepth="1" BlurRadius="4" Opacity="0.3"/>
-                                        </Setter.Value>
-                                    </Setter>
-                                    <Setter TargetName="BackgroundBorder" Property="BorderThickness" Value="1.5"/>
                                 </Trigger>
                             </ControlTemplate.Triggers>
                         </ControlTemplate>
@@ -536,11 +477,6 @@
                             <ControlTemplate.Triggers>
                                 <Trigger Property="IsMouseOver" Value="True">
                                     <Setter TargetName="border" Property="Background" Value="#81A1C1"/>
-                                    <Setter TargetName="border" Property="Effect">
-                                        <Setter.Value>
-                                            <DropShadowEffect ShadowDepth="1" BlurRadius="4" Opacity="0.2"/>
-                                        </Setter.Value>
-                                    </Setter>
                                 </Trigger>
                                 <Trigger Property="IsPressed" Value="True">
                                     <Setter TargetName="border" Property="Background" Value="#4C6A92"/>
@@ -556,27 +492,6 @@
                 <Setter Property="CornerRadius" Value="10"/>
                 <Setter Property="Padding" Value="20"/>
                 <Setter Property="Margin" Value="0,0,0,15"/>
-                <Setter Property="Effect">
-                    <Setter.Value>
-                        <DropShadowEffect ShadowDepth="2" BlurRadius="6" Opacity="0.15" Color="#4C566A"/>
-                    </Setter.Value>
-                </Setter>
-                <Style.Triggers>
-                    <EventTrigger RoutedEvent="Border.MouseEnter">
-                        <BeginStoryboard>
-                            <Storyboard>
-                                <ColorAnimation Storyboard.TargetProperty="Background.Color" To="#F7F9FC" Duration="0:0:0.2"/>
-                            </Storyboard>
-                        </BeginStoryboard>
-                    </EventTrigger>
-                    <EventTrigger RoutedEvent="Border.MouseLeave">
-                        <BeginStoryboard>
-                            <Storyboard>
-                                <ColorAnimation Storyboard.TargetProperty="Background.Color" To="White" Duration="0:0:0.2"/>
-                            </Storyboard>
-                        </BeginStoryboard>
-                    </EventTrigger>
-                </Style.Triggers>
             </Style>
 
 

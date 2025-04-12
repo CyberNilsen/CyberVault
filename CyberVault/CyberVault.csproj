@@ -7,6 +7,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
     <ApplicationIcon>Images\CyberVaultLogo.ico</ApplicationIcon>
+    <Platforms>AnyCPU;x86</Platforms>
   </PropertyGroup>
 
   <ItemGroup>
@@ -17,6 +18,8 @@
     <None Remove="Images\copy.png" />
     <None Remove="Images\CyberVault.ico" />
     <None Remove="Images\CyberVault.jpg" />
+    <None Remove="Images\CyberVault2.jpg" />
+    <None Remove="Images\CyberVault2.png" />
     <None Remove="Images\CyberVaultLogo.ico" />
     <None Remove="Images\eye2.png" />
     <None Remove="Images\eye3.svg" />
@@ -61,9 +64,17 @@
     </Resource>
     <Resource Include="Images\CyberVault.ico" />
     <Resource Include="Images\CyberVault.jpg" />
+    <Resource Include="Images\CyberVault2.jpg" />
+    <Resource Include="Images\CyberVaultcornerrounded.png" />
     <Resource Include="Images\wrench.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Resource>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="CyberVault.jpg">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 </Project>

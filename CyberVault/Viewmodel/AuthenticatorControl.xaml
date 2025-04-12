@@ -20,7 +20,7 @@
                     Margin="0,0,0,15">
             <Button x:Name="AddButton" 
                     
-                    Content="Add New" 
+                    Content="➕Add New" 
                     Width="110" 
                     Height="38" 
                     Click="AddButton_Click" 
@@ -62,10 +62,11 @@
             </Button>
 
             <Button x:Name="RemoveButton" 
-                    Content="Remove" 
+                    Content="🗑️Remove" 
                     Width="110" 
                     Height="38" 
-                    Click="RemoveButton_Click" 
+                    Click="RemoveButton_Click"
+                    
                     Background="#BF616A" 
                     Foreground="White" 
                     FontSize="14" 
@@ -81,7 +82,7 @@
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="buttonBorder" Property="Background" Value="#D08770"/>
+                                <Setter TargetName="buttonBorder" Property="Background" Value="#d08792"/>
                                 <Setter TargetName="buttonBorder" Property="Effect">
                                     <Setter.Value>
                                         <DropShadowEffect ShadowDepth="1" BlurRadius="8" Opacity="0.3"/>

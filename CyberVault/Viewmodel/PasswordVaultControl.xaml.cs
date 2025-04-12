@@ -14,7 +14,7 @@ namespace CyberVault.View
     {
         private string _username;
         private byte[] _encryptionKey;
-        private TextBox passwordTextBox;
+        private TextBox ?passwordTextBox;
         public ObservableCollection<PasswordItem> SavedPasswords { get; set; }
         private MainWindow mainWindow;
         public bool IsUACActive { get; set; }
@@ -82,7 +82,7 @@ namespace CyberVault.View
             {
                 if (_encryptionKey == null)
                 {
-                    _encryptionKey = LoginControl.CurrentEncryptionKey;
+                    _encryptionKey = LoginControl.CurrentEncryptionKey!;
                     if (_encryptionKey == null)
                     {
                         MessageBox.Show("Session expired. Please log in again.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
@@ -143,7 +143,7 @@ namespace CyberVault.View
 
         private void CreateSavePassword_Click(object sender, RoutedEventArgs e)
         {
-            OpenPasswordForm(null);
+            OpenPasswordForm(null!);
             WelcomeGrid.Visibility = Visibility.Collapsed;
         }
 
