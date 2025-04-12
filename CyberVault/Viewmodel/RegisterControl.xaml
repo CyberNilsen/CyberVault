@@ -78,8 +78,8 @@
                                  FontSize="13" Foreground="#88FFFFFF" 
                                  FontFamily="Segoe UI" Margin="0,0,0,25"/>
 
-                        <Button Grid.Row="6" Content="Register" Style="{StaticResource ActionButton}" 
-                              Background="#5E81AC" Height="50" 
+                        <Button Grid.Row="6" Content="Register" Style="{StaticResource LoginButton}" 
+                              Background="#5E81AC" Foreground="White" Height="50" 
                               Click="RegisterButton_Click"/>
 
                         <TextBlock Grid.Row="7" HorizontalAlignment="Center" Margin="0,25,0,0" FontSize="14" Foreground="#88FFFFFF">

@@ -156,7 +156,9 @@
                     </Setter.Value>
                 </Setter>
             </Style>
-
+            
+            
+            
             <Style x:Key="HomeDashboardButton" TargetType="{x:Type Button}">
                 <Setter Property="Foreground" Value="White"/>
                 <Setter Property="FontWeight" Value="SemiBold"/>
@@ -242,20 +244,6 @@
             </Style>
 
             <Style x:Key="ActionButton" TargetType="{x:Type Button}">
-                <Setter Property="Foreground" Value="White"/>
-                <Setter Property="FontSize" Value="16"/>
-                <Setter Property="FontWeight" Value="SemiBold"/>
-                <Setter Property="Padding" Value="20,10"/>
-                <Setter Property="BorderThickness" Value="0"/>
-                <Setter Property="Cursor" Value="Hand"/>
-                <Setter Property="Background">
-                    <Setter.Value>
-                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-                            <GradientStop Color="#5E81AC" Offset="0"/>
-                            <GradientStop Color="#81A1C1" Offset="1"/>
-                        </LinearGradientBrush>
-                    </Setter.Value>
-                </Setter>
                 <Setter Property="Template">
                     <Setter.Value>
                         <ControlTemplate TargetType="{x:Type Button}">
@@ -281,23 +269,112 @@
                                     </Setter>
                                     <Setter TargetName="border" Property="RenderTransform">
                                         <Setter.Value>
-                                            <ScaleTransform ScaleX="1.03" ScaleY="1.03"/>
+                                            <ScaleTransform ScaleX="1.05" ScaleY="1.05"/>
                                         </Setter.Value>
                                     </Setter>
                                     <Setter TargetName="border" Property="RenderTransformOrigin" Value="0.5,0.5"/>
                                 </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
+            <Style x:Key="LoginButton" TargetType="{x:Type Button}">
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="{x:Type Button}">
+                            <Grid>
+                                <Border x:Name="mainBorder" Background="{TemplateBinding Background}" 
+                                        CornerRadius="8" Padding="{TemplateBinding Padding}">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                        </Grid.ColumnDefinitions>
+
+                                        <Border x:Name="flashEffect" Width="30" Background="#AAFFFFFF" 
+                                                CornerRadius="8" Opacity="0" HorizontalAlignment="Left">
+                                            <Border.Effect>
+                                                <BlurEffect Radius="20" />
+                                            </Border.Effect>
+                                        </Border>
+
+                                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+
+                                        <Path x:Name="highlight" Stretch="Fill" Fill="#336D98CC" Opacity="0"
+                                            Data="M 0,50 C 25,20 75,20 100,50" 
+                                            Height="0" VerticalAlignment="Top"/>
+                                    </Grid>
+                                </Border>
+                            </Grid>
+
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Trigger.EnterActions>
+                                        <BeginStoryboard>
+                                            <Storyboard>
+                                                <ColorAnimation Storyboard.TargetName="mainBorder" 
+                                                   Storyboard.TargetProperty="(Border.Background).(SolidColorBrush.Color)"
+                                                   To="#7297C7" Duration="0:0:0.2"/>
+
+                                                <DoubleAnimation Storyboard.TargetName="highlight" 
+                                                     Storyboard.TargetProperty="Height"
+                                                     From="0" To="50" Duration="0:0:0.2"/>
+                                                <DoubleAnimation Storyboard.TargetName="highlight" 
+                                                     Storyboard.TargetProperty="Opacity"
+                                                     From="0" To="1" Duration="0:0:0.2"/>
+
+                                                <DoubleAnimation Storyboard.TargetName="flashEffect" 
+                                                    Storyboard.TargetProperty="Opacity"
+                                                    From="0" To="0.7" Duration="0:0:0.3"
+                                                    AutoReverse="True" />
+                                                <ThicknessAnimation Storyboard.TargetName="flashEffect" 
+                                                       Storyboard.TargetProperty="Margin"
+                                                       From="-30,0,0,0" To="300,0,-1000,0" 
+                                                       Duration="0:0:0.6" />
+
+                                                <ObjectAnimationUsingKeyFrames Storyboard.TargetName="mainBorder" 
+                                                                  Storyboard.TargetProperty="Effect">
+                                                    <DiscreteObjectKeyFrame KeyTime="0:0:0">
+                                                        <DiscreteObjectKeyFrame.Value>
+                                                            <DropShadowEffect ShadowDepth="0" BlurRadius="15" Opacity="0.6" Color="#88AEEF"/>
+                                                        </DiscreteObjectKeyFrame.Value>
+                                                    </DiscreteObjectKeyFrame>
+                                                </ObjectAnimationUsingKeyFrames>
+                                            </Storyboard>
+                                        </BeginStoryboard>
+                                    </Trigger.EnterActions>
+
+                                    <Trigger.ExitActions>
+                                        <BeginStoryboard>
+                                            <Storyboard>
+                                                <ColorAnimation Storyboard.TargetName="mainBorder" 
+                                                   Storyboard.TargetProperty="(Border.Background).(SolidColorBrush.Color)"
+                                                   To="#5E81AC" Duration="0:0:0.3"/>
+                                                <DoubleAnimation Storyboard.TargetName="highlight" 
+                                                     Storyboard.TargetProperty="Height"
+                                                     To="0" Duration="0:0:0.2"/>
+                                                <DoubleAnimation Storyboard.TargetName="highlight" 
+                                                     Storyboard.TargetProperty="Opacity"
+                                                     To="0" Duration="0:0:0.2"/>
+                                                <ObjectAnimationUsingKeyFrames Storyboard.TargetName="mainBorder" 
+                                                                  Storyboard.TargetProperty="Effect">
+                                                    <DiscreteObjectKeyFrame KeyTime="0:0:0">
+                                                        <DiscreteObjectKeyFrame.Value>
+                                                            <DropShadowEffect ShadowDepth="0" BlurRadius="0" Opacity="0"/>
+                                                        </DiscreteObjectKeyFrame.Value>
+                                                    </DiscreteObjectKeyFrame>
+                                                </ObjectAnimationUsingKeyFrames>
+                                            </Storyboard>
+                                        </BeginStoryboard>
+                                    </Trigger.ExitActions>
+                                </Trigger>
+
                                 <Trigger Property="IsPressed" Value="True">
-                                    <Setter TargetName="border" Property="Background">
+                                    <Setter TargetName="mainBorder" Property="Background" Value="#4C6A92"/>
+                                    <Setter TargetName="mainBorder" Property="Effect">
                                         <Setter.Value>
-                                            <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-                                                <GradientStop Color="#4C6A92" Offset="0"/>
-                                                <GradientStop Color="#5E81AC" Offset="1"/>
-                                            </LinearGradientBrush>
-                                        </Setter.Value>
-                                    </Setter>
-                                    <Setter TargetName="border" Property="RenderTransform">
-                                        <Setter.Value>
-                                            <ScaleTransform ScaleX="0.98" ScaleY="0.98"/>
+                                            <DropShadowEffect ShadowDepth="0" BlurRadius="8" Opacity="0.3" Color="#5E81AC"/>
                                         </Setter.Value>
                                     </Setter>
                                 </Trigger>
@@ -305,16 +382,13 @@
                         </ControlTemplate>
                     </Setter.Value>
                 </Setter>
-                <Setter Property="RenderTransformOrigin" Value="0.5,0.5"/>
+                <Setter Property="Cursor" Value="Hand"/>
+                <Setter Property="Foreground" Value="White"/>
+                <Setter Property="FontWeight" Value="SemiBold"/>
+                <Setter Property="FontSize" Value="16"/>
             </Style>
 
             <Style x:Key="LogoutButton" TargetType="{x:Type Button}">
-                <Setter Property="Foreground" Value="White"/>
-                <Setter Property="FontSize" Value="16"/>
-                <Setter Property="FontWeight" Value="SemiBold"/>
-                <Setter Property="Padding" Value="20,10"/>
-                <Setter Property="BorderThickness" Value="0"/>
-                <Setter Property="Cursor" Value="Hand"/>
                 <Setter Property="Template">
                     <Setter.Value>
                         <ControlTemplate TargetType="{x:Type Button}">
@@ -325,6 +399,14 @@
                             </Grid>
                             <ControlTemplate.Triggers>
                                 <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter TargetName="border" Property="Background">
+                                        <Setter.Value>
+                                            <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                                                <GradientStop Color="#BF616A" Offset="0"/>
+                                                <GradientStop Color="#d08792" Offset="1"/>
+                                            </LinearGradientBrush>
+                                        </Setter.Value>
+                                    </Setter>
                                     <Setter TargetName="border" Property="Effect">
                                         <Setter.Value>
                                             <DropShadowEffect ShadowDepth="0" BlurRadius="15" Opacity="0.5" Color="#f01d31"/>
@@ -332,33 +414,15 @@
                                     </Setter>
                                     <Setter TargetName="border" Property="RenderTransform">
                                         <Setter.Value>
-                                            <ScaleTransform ScaleX="1.03" ScaleY="1.03"/>
+                                            <ScaleTransform ScaleX="1.05" ScaleY="1.05"/>
                                         </Setter.Value>
                                     </Setter>
                                     <Setter TargetName="border" Property="RenderTransformOrigin" Value="0.5,0.5"/>
-                                    <Setter TargetName="border" Property="Opacity" Value="1.1"/>
-                                    <Setter TargetName="border" Property="BorderThickness" Value="1"/>
-                                    <Setter TargetName="border" Property="BorderBrush" Value="#BF616A"/>
-                                </Trigger>
-                                <Trigger Property="IsPressed" Value="True">
-                                    <Setter TargetName="border" Property="Opacity" Value="0.8"/>
-                                    <Setter TargetName="border" Property="RenderTransform">
-                                        <Setter.Value>
-                                            <ScaleTransform ScaleX="0.98" ScaleY="0.98"/>
-                                        </Setter.Value>
-                                    </Setter>
-                                    <Setter TargetName="border" Property="RenderTransformOrigin" Value="0.5,0.5"/>
-                                    <Setter TargetName="border" Property="Effect">
-                                        <Setter.Value>
-                                            <DropShadowEffect ShadowDepth="0" BlurRadius="5" Opacity="0.3" Color="#f01d31"/>
-                                        </Setter.Value>
-                                    </Setter>
                                 </Trigger>
                             </ControlTemplate.Triggers>
                         </ControlTemplate>
                     </Setter.Value>
                 </Setter>
-                <Setter Property="RenderTransformOrigin" Value="0.5,0.5"/>
             </Style>
 
             <Style x:Key="MenuButton" TargetType="Button">
@@ -421,10 +485,10 @@
                         <ControlTemplate TargetType="ToggleButton">
                             <Grid>
                                 <Border x:Name="BackgroundBorder" Width="44" Height="22" 
-                    Background="#D8DEE9" CornerRadius="11" BorderThickness="1" BorderBrush="#E5E9F0"/>
+                                                Background="#D8DEE9" CornerRadius="11" BorderThickness="1" BorderBrush="#E5E9F0"/>
                                 <Border x:Name="Indicator" Width="18" Height="18" 
-                    Background="White" CornerRadius="9"
-                    HorizontalAlignment="Left" Margin="2,0,0,0">
+                                        Background="White" CornerRadius="9"
+                                        HorizontalAlignment="Left" Margin="2,0,0,0">
                                     <Border.Effect>
                                         <DropShadowEffect ShadowDepth="1" BlurRadius="2" Opacity="0.2"/>
                                     </Border.Effect>

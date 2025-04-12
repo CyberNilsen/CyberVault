@@ -63,8 +63,8 @@
                             </Grid>
                         </Border>
 
-                        <Button Grid.Row="4" Content="Login" Style="{StaticResource ActionButton}"
-                              Background="#5E81AC" Height="50" Click="LoginButton_Click" />
+                        <Button Grid.Row="4" Content="Login" Style="{StaticResource LoginButton}"
+                              Background="#5E81AC" Height="50" Click="LoginButton_Click" Foreground="White" />
 
                         <TextBlock Grid.Row="5" HorizontalAlignment="Center" Margin="0,25,0,0" FontSize="14" Foreground="#88FFFFFF">
                             <Run Text="Don't have an account? " />

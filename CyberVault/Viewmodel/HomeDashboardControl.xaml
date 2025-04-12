@@ -15,41 +15,13 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
-
         <TextBlock Grid.Row="0" x:Name="QuoteText" Text="☕ Strong passwords and strong coffee: two things you should never compromise." 
-                   FontSize="14" Foreground="#2E3440" TextWrapping="Wrap" Margin="0,0,0,0">
-            <TextBlock.Effect>
-                <DropShadowEffect ShadowDepth="1" BlurRadius="1" Opacity="0.1" Color="#4C566A"/>
-            </TextBlock.Effect>
-        </TextBlock>
+                   FontSize="14" Foreground="#2E3440" TextWrapping="Wrap" Margin="0,0,0,0"/>
 
         <TextBlock Grid.Row="0" Text="Dashboard Overview" 
-                   FontWeight="Bold" FontSize="20" Foreground="#2E3440" Margin="0,35,0,0">
-            <TextBlock.Effect>
-                <DropShadowEffect ShadowDepth="1" BlurRadius="2" Opacity="0.2" Color="#4C566A"/>
-            </TextBlock.Effect>
-        </TextBlock>
+                   FontWeight="Bold" FontSize="20" Foreground="#2E3440" Margin="0,35,0,0"/>
 
         <Border Grid.Row="3" Background="#3B4252" CornerRadius="8" Margin="0,18,0,20">
-            <Border.Effect>
-                <DropShadowEffect ShadowDepth="3" BlurRadius="10" Opacity="0.3" Color="#2E3440"/>
-            </Border.Effect>
-            <Border.Triggers>
-                <EventTrigger RoutedEvent="Border.MouseEnter">
-                    <BeginStoryboard>
-                        <Storyboard>
-                            <ColorAnimation Storyboard.TargetProperty="Background.Color" To="#434C5E" Duration="0:0:0.2"/>
-                        </Storyboard>
-                    </BeginStoryboard>
-                </EventTrigger>
-                <EventTrigger RoutedEvent="Border.MouseLeave">
-                    <BeginStoryboard>
-                        <Storyboard>
-                            <ColorAnimation Storyboard.TargetProperty="Background.Color" To="#3B4252" Duration="0:0:0.2"/>
-                        </Storyboard>
-                    </BeginStoryboard>
-                </EventTrigger>
-            </Border.Triggers>
             <Grid Margin="20">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
@@ -59,25 +31,6 @@
         </Border>
 
         <Border Grid.Row="1" Background="#3B4252" CornerRadius="8" Margin="0,20,0,0">
-            <Border.Effect>
-                <DropShadowEffect ShadowDepth="3" BlurRadius="10" Opacity="0.3" Color="#2E3440"/>
-            </Border.Effect>
-            <Border.Triggers>
-                <EventTrigger RoutedEvent="Border.MouseEnter">
-                    <BeginStoryboard>
-                        <Storyboard>
-                            <ColorAnimation Storyboard.TargetProperty="Background.Color" To="#434C5E" Duration="0:0:0.2"/>
-                        </Storyboard>
-                    </BeginStoryboard>
-                </EventTrigger>
-                <EventTrigger RoutedEvent="Border.MouseLeave">
-                    <BeginStoryboard>
-                        <Storyboard>
-                            <ColorAnimation Storyboard.TargetProperty="Background.Color" To="#3B4252" Duration="0:0:0.2"/>
-                        </Storyboard>
-                    </BeginStoryboard>
-                </EventTrigger>
-            </Border.Triggers>
             <Grid Margin="20">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
@@ -86,11 +39,7 @@
                 </Grid.RowDefinitions>
 
                 <TextBlock Grid.Row="0" Text="Browser Extension Key" 
-                           FontWeight="SemiBold" FontSize="16" Foreground="White" Margin="0,0,0,10">
-                    <TextBlock.Effect>
-                        <DropShadowEffect ShadowDepth="1" BlurRadius="2" Opacity="0.3" Color="#1A1E26"/>
-                    </TextBlock.Effect>
-                </TextBlock>
+                           FontWeight="SemiBold" FontSize="16" Foreground="White" Margin="0,0,0,10"/>
 
                 <TextBlock Grid.Row="1" Text="Copy the key below to connect your browser extension with CyberVault." 
                            FontSize="14" Foreground="#AAFFFFFF" TextWrapping="Wrap" Margin="0,0,0,15"/>
@@ -103,9 +52,6 @@
                     </Grid.ColumnDefinitions>
 
                     <Border Grid.Column="0" Background="#434C5E" CornerRadius="6" Padding="10" Grid.ColumnSpan="2">
-                        <Border.Effect>
-                            <DropShadowEffect ShadowDepth="1" BlurRadius="4" Opacity="0.2" Color="#1A1E26"/>
-                        </Border.Effect>
                         <Grid>
                             <TextBlock x:Name="ExtensionKeyText" Text="Loading key..." Foreground="White" 
                                    FontFamily="Consolas" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"
@@ -119,63 +65,17 @@
                     <Button Grid.Column="1" x:Name="ToggleKeyVisibilityButton" Margin="10,0,0,0" Padding="10"
                             Background="#434C5E" Foreground="White" BorderThickness="0"
                             Click="ToggleKeyVisibilityButton_Click" Style="{StaticResource ImageButtonStyle}">
-                        <Button.Effect>
-                            <DropShadowEffect ShadowDepth="2" BlurRadius="5" Opacity="0.3" Color="#1A1E26"/>
-                        </Button.Effect>
                         <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE7B3;" FontSize="18" Foreground="White"/>
                     </Button>
 
                     <Button Grid.Column="2" x:Name="CopyKeyButton" Content="Copy Key" Margin="10,0,0,0" Padding="15,10"
                             Background="#5E81AC" Foreground="White" FontWeight="SemiBold"
-                            Click="CopyKeyButton_Click" Style="{StaticResource HomeDashboardButton}">
-                        <Button.Effect>
-                            <DropShadowEffect ShadowDepth="2" BlurRadius="5" Opacity="0.3" Color="#1A1E26"/>
-                        </Button.Effect>
-                        <Button.Triggers>
-                            <EventTrigger RoutedEvent="Button.MouseEnter">
-                                <BeginStoryboard>
-                                    <Storyboard>
-                                        <ColorAnimation Storyboard.TargetProperty="Background.Color" To="#81A1C1" Duration="0:0:0.2"/>
-                                        <DoubleAnimation Storyboard.TargetProperty="Effect.BlurRadius" To="8" Duration="0:0:0.2"/>
-                                        <DoubleAnimation Storyboard.TargetProperty="Effect.Opacity" To="0.5" Duration="0:0:0.2"/>
-                                    </Storyboard>
-                                </BeginStoryboard>
-                            </EventTrigger>
-                            <EventTrigger RoutedEvent="Button.MouseLeave">
-                                <BeginStoryboard>
-                                    <Storyboard>
-                                        <ColorAnimation Storyboard.TargetProperty="Background.Color" To="#5E81AC" Duration="0:0:0.2"/>
-                                        <DoubleAnimation Storyboard.TargetProperty="Effect.BlurRadius" To="5" Duration="0:0:0.2"/>
-                                        <DoubleAnimation Storyboard.TargetProperty="Effect.Opacity" To="0.3" Duration="0:0:0.2"/>
-                                    </Storyboard>
-                                </BeginStoryboard>
-                            </EventTrigger>
-                        </Button.Triggers>
-                    </Button>
+                            Click="CopyKeyButton_Click" Style="{StaticResource HomeDashboardButton}"/>
                 </Grid>
             </Grid>
         </Border>
 
         <Border Grid.Row="2" Background="#3B4252" CornerRadius="8" Margin="0,20,0,0">
-            <Border.Effect>
-                <DropShadowEffect ShadowDepth="3" BlurRadius="10" Opacity="0.3" Color="#2E3440"/>
-            </Border.Effect>
-            <Border.Triggers>
-                <EventTrigger RoutedEvent="Border.MouseEnter">
-                    <BeginStoryboard>
-                        <Storyboard>
-                            <ColorAnimation Storyboard.TargetProperty="Background.Color" To="#434C5E" Duration="0:0:0.2"/>
-                        </Storyboard>
-                    </BeginStoryboard>
-                </EventTrigger>
-                <EventTrigger RoutedEvent="Border.MouseLeave">
-                    <BeginStoryboard>
-                        <Storyboard>
-                            <ColorAnimation Storyboard.TargetProperty="Background.Color" To="#3B4252" Duration="0:0:0.2"/>
-                        </Storyboard>
-                    </BeginStoryboard>
-                </EventTrigger>
-            </Border.Triggers>
             <Grid Margin="20">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
@@ -190,11 +90,7 @@
                     </Grid.ColumnDefinitions>
 
                     <TextBlock Grid.Column="0" Text="Software Updates" 
-                           FontWeight="SemiBold" FontSize="16" Foreground="White" Margin="0,0,0,10">
-                        <TextBlock.Effect>
-                            <DropShadowEffect ShadowDepth="1" BlurRadius="2" Opacity="0.3" Color="#1A1E26"/>
-                        </TextBlock.Effect>
-                    </TextBlock>
+                           FontWeight="SemiBold" FontSize="16" Foreground="White" Margin="0,0,0,10"/>
                     <TextBlock Grid.Column="1" x:Name="CurrentVersionText" Text="v2.0" 
                            FontWeight="Regular" FontSize="14" Foreground="#AAFFFFFF" Margin="0,0,0,10"/>
                 </Grid>
@@ -214,71 +110,11 @@
 
                     <Button Grid.Column="1" x:Name="UpdateNowButton" Content="Update Now" Margin="10,0,0,0" Padding="15,10"
                             Background="Green" Foreground="White" FontWeight="SemiBold"
-                            Click="UpdateNowButton_Click" Style="{StaticResource GreenUpdateButton}" Visibility="Collapsed">
-                        <Button.Resources>
-                            <LinearGradientBrush x:Key="GreenGradient" StartPoint="0,0" EndPoint="1,1">
-                                <GradientStop Color="#43A047" Offset="0"/>
-                                <GradientStop Color="#66BB6A" Offset="1"/>
-                            </LinearGradientBrush>
-                        </Button.Resources>
-                        <Button.Effect>
-                            <DropShadowEffect ShadowDepth="2" BlurRadius="5" Opacity="0.3" Color="#1A1E26"/>
-                        </Button.Effect>
-                        <Button.Triggers>
-                            <EventTrigger RoutedEvent="Button.MouseEnter">
-                                <BeginStoryboard>
-                                    <Storyboard>
-                                        <DoubleAnimation Storyboard.TargetProperty="Effect.BlurRadius" To="8" Duration="0:0:0.2"/>
-                                        <DoubleAnimation Storyboard.TargetProperty="Effect.Opacity" To="0.5" Duration="0:0:0.2"/>
-                                    </Storyboard>
-                                </BeginStoryboard>
-                            </EventTrigger>
-                            <EventTrigger RoutedEvent="Button.MouseLeave">
-                                <BeginStoryboard>
-                                    <Storyboard>
-                                        <DoubleAnimation Storyboard.TargetProperty="Effect.BlurRadius" To="5" Duration="0:0:0.2"/>
-                                        <DoubleAnimation Storyboard.TargetProperty="Effect.Opacity" To="0.3" Duration="0:0:0.2"/>
-                                    </Storyboard>
-                                </BeginStoryboard>
-                            </EventTrigger>
-                        </Button.Triggers>
-                    </Button>
+                            Click="UpdateNowButton_Click" Style="{StaticResource GreenUpdateButton}" Visibility="Collapsed"/>
 
                     <Button Grid.Column="2" x:Name="CheckUpdateButton" Content="Check Now" Padding="15,10"
                             Background="#5E81AC" Foreground="White" FontWeight="SemiBold"
-                            Click="CheckUpdateButton_Click" Style="{StaticResource HomeDashboardButton}" Margin="10,0,0,0">
-                        <Button.Effect>
-                            <DropShadowEffect ShadowDepth="2" BlurRadius="5" Opacity="0.3" Color="#1A1E26"/>
-                        </Button.Effect>
-                        <Button.Resources>
-                            <LinearGradientBrush x:Key="MainGradient" StartPoint="0,0" EndPoint="1,1">
-                                <GradientStop Color="#5E81AC" Offset="0"/>
-                                <GradientStop Color="#81A1C1" Offset="1"/>
-                            </LinearGradientBrush>
-                            <LinearGradientBrush x:Key="HoverGradient" StartPoint="0,0" EndPoint="1,1">
-                                <GradientStop Color="#81A1C1" Offset="0"/>
-                                <GradientStop Color="#88C0D0" Offset="1"/>
-                            </LinearGradientBrush>
-                        </Button.Resources>
-                        <Button.Triggers>
-                            <EventTrigger RoutedEvent="Button.MouseEnter">
-                                <BeginStoryboard>
-                                    <Storyboard>
-                                        <DoubleAnimation Storyboard.TargetProperty="Effect.BlurRadius" To="8" Duration="0:0:0.2"/>
-                                        <DoubleAnimation Storyboard.TargetProperty="Effect.Opacity" To="0.5" Duration="0:0:0.2"/>
-                                    </Storyboard>
-                                </BeginStoryboard>
-                            </EventTrigger>
-                            <EventTrigger RoutedEvent="Button.MouseLeave">
-                                <BeginStoryboard>
-                                    <Storyboard>
-                                        <DoubleAnimation Storyboard.TargetProperty="Effect.BlurRadius" To="5" Duration="0:0:0.2"/>
-                                        <DoubleAnimation Storyboard.TargetProperty="Effect.Opacity" To="0.3" Duration="0:0:0.2"/>
-                                    </Storyboard>
-                                </BeginStoryboard>
-                            </EventTrigger>
-                        </Button.Triggers>
-                    </Button>
+                            Click="CheckUpdateButton_Click" Style="{StaticResource HomeDashboardButton}" Margin="10,0,0,0"/>
                 </Grid>
             </Grid>
         </Border>
