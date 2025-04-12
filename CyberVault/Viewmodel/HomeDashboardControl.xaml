@@ -7,6 +7,7 @@
              Loaded="UserControl_Loaded"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
+
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -16,10 +17,10 @@
         </Grid.RowDefinitions>
         <TextBlock Grid.Row="0" x:Name="QuoteText" Text="☕ Strong passwords and strong coffee: two things you should never compromise." 
                    FontSize="14" Foreground="#2E3440" TextWrapping="Wrap" Margin="0,0,0,0"/>
-        
+
         <TextBlock Grid.Row="0" Text="Dashboard Overview" 
                    FontWeight="Bold" FontSize="20" Foreground="#2E3440" Margin="0,35,0,0"/>
-        
+
         <Border Grid.Row="3" Background="#3B4252" CornerRadius="8" Margin="0,18,0,20">
             <Grid Margin="20">
                 <Grid.RowDefinitions>
@@ -28,7 +29,7 @@
                 </Grid.RowDefinitions>
             </Grid>
         </Border>
-        
+
         <Border Grid.Row="1" Background="#3B4252" CornerRadius="8" Margin="0,20,0,0">
             <Grid Margin="20">
                 <Grid.RowDefinitions>
@@ -36,20 +37,20 @@
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
-                
+
                 <TextBlock Grid.Row="0" Text="Browser Extension Key" 
                            FontWeight="SemiBold" FontSize="16" Foreground="White" Margin="0,0,0,10"/>
-                
+
                 <TextBlock Grid.Row="1" Text="Copy the key below to connect your browser extension with CyberVault." 
                            FontSize="14" Foreground="#AAFFFFFF" TextWrapping="Wrap" Margin="0,0,0,15"/>
-                
+
                 <Grid Grid.Row="2">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="Auto"/>
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
-                    
+
                     <Border Grid.Column="0" Background="#434C5E" CornerRadius="6" Padding="10" Grid.ColumnSpan="2">
                         <Grid>
                             <TextBlock x:Name="ExtensionKeyText" Text="Loading key..." Foreground="White" 
@@ -60,30 +61,20 @@
                                    Visibility="Visible"/>
                         </Grid>
                     </Border>
+
                     <Button Grid.Column="1" x:Name="ToggleKeyVisibilityButton" Margin="10,0,0,0" Padding="10"
                             Background="#434C5E" Foreground="White" BorderThickness="0"
-                            Click="ToggleKeyVisibilityButton_Click" Cursor="Hand">
-                        <Button.Resources>
-                            <Style TargetType="Border">
-                                <Setter Property="CornerRadius" Value="6"/>
-                            </Style>
-                        </Button.Resources>
+                            Click="ToggleKeyVisibilityButton_Click" Style="{StaticResource ImageButtonStyle}">
                         <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE7B3;" FontSize="18" Foreground="White"/>
                     </Button>
 
                     <Button Grid.Column="2" x:Name="CopyKeyButton" Content="Copy Key" Margin="10,0,0,0" Padding="15,10"
-                            Background="#5E81AC" Foreground="White" BorderThickness="0" FontWeight="SemiBold"
-                            Click="CopyKeyButton_Click" Cursor="Hand">
-                        <Button.Resources>
-                            <Style TargetType="Border">
-                                <Setter Property="CornerRadius" Value="6"/>
-                            </Style>
-                        </Button.Resources>
-                    </Button>
+                            Background="#5E81AC" Foreground="White" FontWeight="SemiBold"
+                            Click="CopyKeyButton_Click" Style="{StaticResource HomeDashboardButton}"/>
                 </Grid>
             </Grid>
         </Border>
-        
+
         <Border Grid.Row="2" Background="#3B4252" CornerRadius="8" Margin="0,20,0,0">
             <Grid Margin="20">
                 <Grid.RowDefinitions>
@@ -91,48 +82,39 @@
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
-                
+
                 <Grid Grid.Row="0">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
-                    
+
                     <TextBlock Grid.Column="0" Text="Software Updates" 
                            FontWeight="SemiBold" FontSize="16" Foreground="White" Margin="0,0,0,10"/>
                     <TextBlock Grid.Column="1" x:Name="CurrentVersionText" Text="v2.0" 
                            FontWeight="Regular" FontSize="14" Foreground="#AAFFFFFF" Margin="0,0,0,10"/>
                 </Grid>
+
                 <TextBlock Grid.Row="1" Text="CyberVault automatically checks for updates." 
                            FontSize="14" Foreground="#AAFFFFFF" TextWrapping="Wrap" Margin="0,0,0,15"/>
+
                 <Grid Grid.Row="2">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="Auto"/>
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
+
                     <TextBlock x:Name="UpdateStatusText" Text="Checking for updates..." Foreground="White" 
                                VerticalAlignment="Center" TextWrapping="Wrap" Margin="0,0,291,0"/>
 
                     <Button Grid.Column="1" x:Name="UpdateNowButton" Content="Update Now" Margin="10,0,0,0" Padding="15,10"
-                            Background="Green" Foreground="White" BorderThickness="0" FontWeight="SemiBold"
-                            Click="UpdateNowButton_Click" Cursor="Hand" Visibility="Collapsed">
-                        <Button.Resources>
-                            <Style TargetType="Border">
-                                <Setter Property="CornerRadius" Value="6"/>
-                            </Style>
-                        </Button.Resources>
-                    </Button>
-                    
+                            Background="Green" Foreground="White" FontWeight="SemiBold"
+                            Click="UpdateNowButton_Click" Style="{StaticResource GreenUpdateButton}" Visibility="Collapsed"/>
+
                     <Button Grid.Column="2" x:Name="CheckUpdateButton" Content="Check Now" Padding="15,10"
-                            Background="#5E81AC" Foreground="White" BorderThickness="0" FontWeight="SemiBold"
-                            Click="CheckUpdateButton_Click" Cursor="Hand" Margin="10,0,0,0">
-                        <Button.Resources>
-                            <Style TargetType="Border">
-                                <Setter Property="CornerRadius" Value="6"/>
-                            </Style>
-                        </Button.Resources>
-                    </Button>
+                            Background="#5E81AC" Foreground="White" FontWeight="SemiBold"
+                            Click="CheckUpdateButton_Click" Style="{StaticResource HomeDashboardButton}" Margin="10,0,0,0"/>
                 </Grid>
             </Grid>
         </Border>

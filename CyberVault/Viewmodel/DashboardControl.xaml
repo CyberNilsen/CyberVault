@@ -81,7 +81,7 @@
                         </ScrollViewer>
 
                         <Border Grid.Row="2" Background="#3B4252" CornerRadius="8" Margin="15,10,15,15">
-                            <Button Content="Logout" Height="42" Style="{StaticResource ActionButton}" 
+                            <Button Content="Logout" Height="42" Style="{StaticResource LogoutButton}" 
                                    Background="#BF616A" Click="LogoutButton_Click"/>
                         </Border>
                     </Grid>

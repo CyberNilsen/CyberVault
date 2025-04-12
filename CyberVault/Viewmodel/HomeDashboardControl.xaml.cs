@@ -147,7 +147,7 @@
                     ExtensionKeyText.Visibility = Visibility.Visible;
                     MaskedKeyText.Visibility = Visibility.Collapsed;
 
-                    ((TextBlock)ToggleKeyVisibilityButton.Content).Text = "\uE7AA";
+                    ((TextBlock)ToggleKeyVisibilityButton.Content).Text = "\uE7B3";
                 }
                 else
                 {
