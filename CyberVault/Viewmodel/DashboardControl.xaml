@@ -4,40 +4,7 @@
              xmlns:view="clr-namespace:CyberVault.View"
              MinHeight="500" MinWidth="800">
     <UserControl.Resources>
-        <Style x:Key="ActionButton" TargetType="{x:Type Button}">
-            <Setter Property="Foreground" Value="White"/>
-            <Setter Property="FontSize" Value="16"/>
-            <Setter Property="FontWeight" Value="SemiBold"/>
-            <Setter Property="Padding" Value="20,10"/>
-            <Setter Property="BorderThickness" Value="0"/>
-            <Setter Property="Cursor" Value="Hand"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="{x:Type Button}">
-                        <Border x:Name="border" Background="{TemplateBinding Background}" CornerRadius="8">
-                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                        </Border>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="border" Property="Effect">
-                                    <Setter.Value>
-                                        <DropShadowEffect ShadowDepth="1" BlurRadius="8" Opacity="0.3"/>
-                                    </Setter.Value>
-                                </Setter>
-                            </Trigger>
-                            <Trigger Property="IsPressed" Value="True">
-                                <Setter TargetName="border" Property="Opacity" Value="0.8"/>
-                                <Setter TargetName="border" Property="RenderTransform">
-                                    <Setter.Value>
-                                        <ScaleTransform ScaleX="0.98" ScaleY="0.98"/>
-                                    </Setter.Value>
-                                </Setter>
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
+      
     </UserControl.Resources>
 
     <Border CornerRadius="10" ClipToBounds="True">
@@ -86,23 +53,24 @@
                                 <TextBlock Text="MENU" Foreground="#88FFFFFF" 
                                          FontSize="13" FontWeight="SemiBold" Margin="5,0,0,12"/>
 
-                                <Border Background="#3B4252" CornerRadius="8" Margin="0,0,0,8">
+                                <Border x:Name="HomeBorder" Background="#3B4252" CornerRadius="8" Margin="0,0,0,8">
                                     <Button Content="Home" Height="42" Style="{StaticResource ActionButton}" 
                                         Background="#434C5E" Click="Home_Click"/>
                                 </Border>
 
-                                <Border Background="#3B4252" CornerRadius="8" Margin="0,0,0,8">
+                                <Border x:Name="PasswordBorder" Background="#3B4252" CornerRadius="8" Margin="0,0,0,8">
                                     <Button Content="Password Manager" Height="42" Style="{StaticResource ActionButton}" 
                                            Background="#434C5E" Click="PasswordManagerButton_Click"/>
                                 </Border>
 
-                                <Border Background="#3B4252" CornerRadius="8" Margin="0,0,0,8">
+                                <Border x:Name="AuthBorder" Background="#3B4252" CornerRadius="8" Margin="0,0,0,8">
                                     <Button Content="Authenticator" Height="42" Style="{StaticResource ActionButton}" 
                                            Background="#434C5E" Click="AuthenticatorButton_Click"/>
                                 </Border>
 
-                                <Border Background="#3B4252" CornerRadius="8" Margin="0,0,0,8">
+                                <Border x:Name="SettingsBorder" Background="#3B4252" CornerRadius="8" Margin="0,0,0,8">
                                     <Button Height="42" Style="{StaticResource ActionButton}" Background="#434C5E" Click="Settings_Click">
+                                        
                                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
                                             <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE713;" FontSize="14" Margin="0,0,5,0"/>
                                             <TextBlock Text="Settings" FontSize="13" Foreground="White"/>
