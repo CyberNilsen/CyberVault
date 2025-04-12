@@ -13,7 +13,7 @@ namespace CyberVault
     {
         private const double NormalTopBarHeight = 40;
         private const double MaximizedTopBarHeight = 44;
-        private TaskbarIcon trayIcon;
+        private TaskbarIcon ?trayIcon;
 
         public MainWindow()
         {
@@ -22,8 +22,7 @@ namespace CyberVault
             MainContent.Content = new LoginControl(this);
             InitializeTrayIcon();
 
-            // Handle the window closing event
-            Closing += MainWindow_Closing;
+            Closing += MainWindow_Closing!;
         }
 
         private void InitializeTrayIcon()
@@ -61,7 +60,7 @@ namespace CyberVault
 
         private void ExitApplication()
         {
-            trayIcon.Dispose();
+            trayIcon!.Dispose();
             System.Windows.Application.Current.Shutdown();
         }
 
@@ -71,7 +70,7 @@ namespace CyberVault
             {
                 e.Cancel = true;
                 this.Hide();
-                trayIcon.Visibility = Visibility.Visible;
+                trayIcon!.Visibility = Visibility.Visible;
             }
             else
             {
@@ -113,7 +112,7 @@ namespace CyberVault
             if (App.MinimizeToTrayEnabled)
             {
                 this.Hide();
-                trayIcon.Visibility = Visibility.Visible;
+                trayIcon!.Visibility = Visibility.Visible;
             }
             else
             {

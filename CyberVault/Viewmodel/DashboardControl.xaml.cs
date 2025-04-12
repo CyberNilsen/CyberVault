@@ -1,4 +1,5 @@
-﻿using System.Windows;
+﻿using System.IO;
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using CyberVault.View;
@@ -12,6 +13,7 @@ namespace CyberVault
         private string username;
         private byte[] encryptionKey;
         public Border TopBar => Dashboardtopbar;
+
         public DashboardControl(MainWindow mw, string user, byte[] key)
         {
             InitializeComponent();
@@ -21,6 +23,7 @@ namespace CyberVault
             WelcomeText.Text = $"Welcome to CyberVault, {username}!";
             DashboardContent.Content = new HomeDashboardControl(username, encryptionKey);
         }
+
         private void TopBar_MouseDown(object sender, MouseButtonEventArgs e)
         {
             if (e.ChangedButton == MouseButton.Left)
@@ -35,6 +38,7 @@ namespace CyberVault
                 }
             }
         }
+
         public void SetTopBarHeight(double height)
         {
             Dashboardtopbar.Height = height;
@@ -45,6 +49,7 @@ namespace CyberVault
             WelcomeText.Text = $"Welcome to CyberVault, {username}!";
             DashboardContent.Content = new HomeDashboardControl(username, encryptionKey);
         }
+
         private void PasswordManagerButton_Click(object sender, RoutedEventArgs e)
         {
             WelcomeText.Text = "Password Manager";
@@ -66,8 +71,7 @@ namespace CyberVault
         private void Settings_Click(object sender, RoutedEventArgs e)
         {
             WelcomeText.Text = "Settings";
-            var settings = new Settings();
-            settings.Initialize(username, encryptionKey);
+            var settings = new  Settings(username, encryptionKey);
             DashboardContent.Content = settings;
         }
 
@@ -75,16 +79,13 @@ namespace CyberVault
         {
             try
             {
-                // Reset application-wide settings
                 App.MinimizeToTrayEnabled = false;
-                App.CurrentUsername = null;
+                App.CurrentUsername = null!;
 
-                // Clear sensitive data
                 typeof(LoginControl).GetProperty("CurrentEncryptionKey",
                     System.Reflection.BindingFlags.NonPublic |
                     System.Reflection.BindingFlags.Static)?.SetValue(null, null);
 
-                // Navigate back to login
                 mainWindow.Navigate(new LoginControl(mainWindow));
             }
             catch (Exception ex)
@@ -93,7 +94,5 @@ namespace CyberVault
                     "Logout Error", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
             }
         }
-
-
     }
 }

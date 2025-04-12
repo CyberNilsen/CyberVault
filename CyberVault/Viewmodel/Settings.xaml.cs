@@ -1,38 +1,176 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
+﻿using System.IO;
 using System.Windows;
 using System.Windows.Controls;
-using Microsoft.Win32;
 using System.Windows.Forms;
 using IWshRuntimeLibrary;
-using System.Windows.Controls.Primitives;
+
 
 namespace CyberVault.Viewmodel
 {
     public partial class Settings : System.Windows.Controls.UserControl
     {
-        private string username;
-        private byte[] encryptionKey;
+        private string? username;
+        private byte[]? encryptionKey;
 
-        public Settings()
+        public Settings(string user, byte[] key)
         {
             InitializeComponent();
-        }
-
-        public void Initialize(string user, byte[] key)
-        {
             username = user;
             encryptionKey = key;
         }
 
+        private void Settings_Loaded(object sender, RoutedEventArgs e)
+        {
+            if (!string.IsNullOrEmpty(username))
+            {
+                LoadSettingsFromFileAndAppState();
+            }
+        }
+
+        private void LoadSettingsFromFileAndAppState()
+        {
+            try
+            {
+                Dictionary<string, bool> settings = new Dictionary<string, bool>();
+
+                string appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+                string cyberVaultPath = Path.Combine(appDataPath, "CyberVault");
+                string settingsFilePath = Path.Combine(cyberVaultPath, $"{username}_settings.ini");
+
+                if (System.IO.File.Exists(settingsFilePath))
+                {
+                    string[] lines = System.IO.File.ReadAllLines(settingsFilePath);
+
+                    foreach (string line in lines)
+                    {
+                        string[] parts = line.Split('=');
+                        if (parts.Length == 2)
+                        {
+                            bool success = bool.TryParse(parts[1], out bool value);
+                            if (success)
+                            {
+                                settings[parts[0]] = value;
+                            }
+                        }
+                    }
+                }
+
+                settings["MinimizeToTray"] = App.MinimizeToTrayEnabled;
+
+                TemporarilyDisableToggleEvents();
+
+                MinimizeToTrayToggle.IsChecked = settings.GetValueOrDefault("MinimizeToTray", false);
+                StartWithWindowsToggle.IsChecked = settings.GetValueOrDefault("StartWithWindows", false);
+                TwoFactorToggle.IsChecked = settings.GetValueOrDefault("TwoFactorEnabled", false);
+                DarkModeToggle.IsChecked = settings.GetValueOrDefault("DarkModeEnabled", false);
+                CloudSyncToggle.IsChecked = settings.GetValueOrDefault("CloudSyncEnabled", false);
+                BiometricToggle.IsChecked = settings.GetValueOrDefault("BiometricEnabled", false);
+
+                ReattachToggleEvents();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error loading settings: {ex.Message}");
+            }
+        }
+
+        private void TemporarilyDisableToggleEvents()
+        {
+            MinimizeToTrayToggle.Checked -= MinimizeToTrayToggle_Checked;
+            MinimizeToTrayToggle.Unchecked -= MinimizeToTrayToggle_Unchecked;
+
+            StartWithWindowsToggle.Checked -= StartWithWindowsToggle_Checked;
+            StartWithWindowsToggle.Unchecked -= StartWithWindowsToggle_Unchecked;
+
+            TwoFactorToggle.Checked -= TwoFactorToggle_Checked;
+            TwoFactorToggle.Unchecked -= TwoFactorToggle_Unchecked;
+
+            DarkModeToggle.Checked -= DarkModeToggle_Checked;
+            DarkModeToggle.Unchecked -= DarkModeToggle_Unchecked;
+
+            CloudSyncToggle.Checked -= CloudSyncToggle_Checked;
+            CloudSyncToggle.Unchecked -= CloudSyncToggle_Unchecked;
+
+            BiometricToggle.Checked -= BiometricToggle_Checked;
+            BiometricToggle.Unchecked -= BiometricToggle_Unchecked;
+        }
+
+        private void ReattachToggleEvents()
+        {
+            MinimizeToTrayToggle.Checked += MinimizeToTrayToggle_Checked;
+            MinimizeToTrayToggle.Unchecked += MinimizeToTrayToggle_Unchecked;
+
+            StartWithWindowsToggle.Checked += StartWithWindowsToggle_Checked;
+            StartWithWindowsToggle.Unchecked += StartWithWindowsToggle_Unchecked;
+
+            TwoFactorToggle.Checked += TwoFactorToggle_Checked;
+            TwoFactorToggle.Unchecked += TwoFactorToggle_Unchecked;
+
+            DarkModeToggle.Checked += DarkModeToggle_Checked;
+            DarkModeToggle.Unchecked += DarkModeToggle_Unchecked;
+
+            CloudSyncToggle.Checked += CloudSyncToggle_Checked;
+            CloudSyncToggle.Unchecked += CloudSyncToggle_Unchecked;
+
+            BiometricToggle.Checked += BiometricToggle_Checked;
+            BiometricToggle.Unchecked += BiometricToggle_Unchecked;
+        }
+
+        private void SaveUserSetting(string settingName, string value)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(username))
+                    return;
+
+                string appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+                string cyberVaultPath = Path.Combine(appDataPath, "CyberVault");
+                string settingsFilePath = Path.Combine(cyberVaultPath, $"{username}_settings.ini");
+
+                Dictionary<string, string> settings = new Dictionary<string, string>();
+
+                if (System.IO.File.Exists(settingsFilePath))
+                {
+                    foreach (string line in System.IO.File.ReadAllLines(settingsFilePath))
+                    {
+                        string[] parts = line.Split('=');
+                        if (parts.Length == 2)
+                        {
+                            settings[parts[0]] = parts[1];
+                        }
+                    }
+                }
+
+                settings[settingName] = value;
+
+                Directory.CreateDirectory(cyberVaultPath);
+                System.IO.File.WriteAllLines(settingsFilePath,
+                    settings.Select(kvp => $"{kvp.Key}={kvp.Value}"));
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error saving user setting: {ex.Message}");
+            }
+        }
+
+        private void DarkModeToggle_Checked(object sender, RoutedEventArgs e)
+        {
+            SaveUserSetting("DarkModeEnabled", "True");
+        }
+
+        private void DarkModeToggle_Unchecked(object sender, RoutedEventArgs e)
+        {
+            SaveUserSetting("DarkModeEnabled", "False");
+        }
+
         private void TwoFactorToggle_Checked(object sender, RoutedEventArgs e)
         {
+            SaveUserSetting("TwoFactorEnabled", "True");
         }
 
         private void TwoFactorToggle_Unchecked(object sender, RoutedEventArgs e)
         {
+            SaveUserSetting("TwoFactorEnabled", "False");
         }
 
         private void StartWithWindowsToggle_Checked(object sender, RoutedEventArgs e)
@@ -57,7 +195,7 @@ namespace CyberVault.Viewmodel
                     shortcut.Save();
                 }
 
-                SaveUserSetting("StartWithWindows", "true");
+                SaveUserSetting("StartWithWindows", "True");
             }
             catch (Exception ex)
             {
@@ -85,7 +223,7 @@ namespace CyberVault.Viewmodel
                     System.IO.File.Delete(shortcutPath);
                 }
 
-                SaveUserSetting("StartWithWindows", "false");
+                SaveUserSetting("StartWithWindows", "False");
             }
             catch (Exception ex)
             {
@@ -106,129 +244,13 @@ namespace CyberVault.Viewmodel
         private void MinimizeToTrayToggle_Checked(object sender, RoutedEventArgs e)
         {
             App.MinimizeToTrayEnabled = true;
-            SaveUserSetting("MinimizeToTray", "true");
+            SaveUserSetting("MinimizeToTray", "True");
         }
 
         private void MinimizeToTrayToggle_Unchecked(object sender, RoutedEventArgs e)
         {
             App.MinimizeToTrayEnabled = false;
-            SaveUserSetting("MinimizeToTray", "false");
-        }
-
-        private void Settings_Loaded(object sender, RoutedEventArgs e)
-        {
-            if (!string.IsNullOrEmpty(App.CurrentUsername))
-            {
-                LoadSettingsFromFile();
-            }
-            else
-            {
-                ResetSettingsUI();
-            }
-        }
-
-        private void ResetSettingsUI()
-        {
-            TwoFactorToggle.IsChecked = false;
-            MinimizeToTrayToggle.IsChecked = false;
-            DarkModeToggle.IsChecked = false;
-            CloudSyncToggle.IsChecked = false;
-            BiometricToggle.IsChecked = false;
-
-            if (BackupFrequencyComboBox != null)
-                BackupFrequencyComboBox.SelectedIndex = 0;
-
-            if (AutoLockComboBox != null)
-                AutoLockComboBox.SelectedIndex = 0;
-        }
-
-        private void LoadSettingsFromFile()
-        {
-            try
-            {
-                string appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-                string cyberVaultPath = Path.Combine(appDataPath, "CyberVault");
-                string settingsFilePath = Path.Combine(cyberVaultPath, $"{App.CurrentUsername}_settings.ini");
-
-                if (System.IO.File.Exists(settingsFilePath))
-                {
-                    Dictionary<string, bool> settings = new Dictionary<string, bool>();
-                    string[] lines = System.IO.File.ReadAllLines(settingsFilePath);
-
-                    foreach (string line in lines)
-                    {
-                        string[] parts = line.Split('=');
-                        if (parts.Length == 2)
-                        {
-                            settings[parts[0]] = bool.Parse(parts[1]);
-                        }
-                    }
-
-                    UpdateToggleWithoutEvent(MinimizeToTrayToggle, MinimizeToTrayToggle_Checked, MinimizeToTrayToggle_Unchecked, settings.GetValueOrDefault("MinimizeToTray", false));
-                    UpdateToggleWithoutEvent(StartWithWindowsToggle, StartWithWindowsToggle_Checked, StartWithWindowsToggle_Unchecked, settings.GetValueOrDefault("StartWithWindows", false));
-                    UpdateToggleWithoutEvent(TwoFactorToggle, TwoFactorToggle_Checked, TwoFactorToggle_Unchecked, settings.GetValueOrDefault("TwoFactorEnabled", false));
-                    UpdateToggleWithoutEvent(DarkModeToggle, DarkModeToggle_Checked, DarkModeToggle_Unchecked, settings.GetValueOrDefault("DarkModeEnabled", false));
-                    UpdateToggleWithoutEvent(CloudSyncToggle, CloudSyncToggle_Checked, CloudSyncToggle_Unchecked, settings.GetValueOrDefault("CloudSyncEnabled", false));
-                    UpdateToggleWithoutEvent(BiometricToggle, BiometricToggle_Checked, BiometricToggle_Unchecked, settings.GetValueOrDefault("BiometricEnabled", false));
-
-                    App.MinimizeToTrayEnabled = settings.GetValueOrDefault("MinimizeToTray", false);
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error loading settings: {ex.Message}");
-            }
-        }
-
-        private void UpdateToggleWithoutEvent(ToggleButton toggle, RoutedEventHandler checkedHandler, RoutedEventHandler uncheckedHandler, bool isChecked)
-        {
-            if (toggle != null)
-            {
-                toggle.Checked -= checkedHandler;
-                toggle.Unchecked -= uncheckedHandler;
-
-                toggle.IsChecked = isChecked;
-
-                toggle.Checked += checkedHandler;
-                toggle.Unchecked += uncheckedHandler;
-            }
-        }
-
-        private void SaveUserSetting(string settingName, string value)
-        {
-            try
-            {
-                if (string.IsNullOrEmpty(App.CurrentUsername))
-                    return;
-
-                string appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-                string cyberVaultPath = Path.Combine(appDataPath, "CyberVault");
-                string settingsFilePath = Path.Combine(cyberVaultPath, $"{App.CurrentUsername}_settings.ini");
-
-                Dictionary<string, string> settings = new Dictionary<string, string>();
-
-                if (System.IO.File.Exists(settingsFilePath))
-                {
-                    foreach (string line in System.IO.File.ReadAllLines(settingsFilePath))
-                    {
-                        string[] parts = line.Split('=');
-                        if (parts.Length == 2)
-                        {
-                            settings[parts[0]] = parts[1];
-                        }
-                    }
-                }
-
-                settings[settingName] = value;
-
-                Directory.CreateDirectory(cyberVaultPath);
-                System.IO.File.WriteAllLines(settingsFilePath,
-                    settings.Select(kvp => $"{kvp.Key}={kvp.Value}"));
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error saving user setting: {ex.Message}");
-            }
+            SaveUserSetting("MinimizeToTray", "False");
         }
 
         private void ExportData_Click(object sender, RoutedEventArgs e)
@@ -431,7 +453,7 @@ namespace CyberVault.Viewmodel
                         string[] parts = exportedCredential.Split(',');
                         if (parts.Length < 2)
                         {
-                            continue; 
+                            continue;
                         }
 
                         string importUsername = parts[0];
@@ -443,7 +465,7 @@ namespace CyberVault.Viewmodel
                         }
 
                         updatedCredentials.Add(exportedCredential);
-                        existingUsernames.Add(importUsername); 
+                        existingUsernames.Add(importUsername);
 
                         string fileName = Path.GetFileName(exportedFile);
                         string userBaseName = fileName.Replace("_exported.txt", "");
@@ -525,21 +547,14 @@ namespace CyberVault.Viewmodel
             }
         }
 
-
-        private void DarkModeToggle_Checked(object sender, RoutedEventArgs e)
-        {
-        }
-
-        private void DarkModeToggle_Unchecked(object sender, RoutedEventArgs e)
-        {
-        }
-
         private void CloudSyncToggle_Checked(object sender, RoutedEventArgs e)
         {
+            SaveUserSetting("CloudSyncEnabled", "True");
         }
 
         private void CloudSyncToggle_Unchecked(object sender, RoutedEventArgs e)
         {
+            SaveUserSetting("CloudSyncEnabled", "False");
         }
 
         private void CheckForUpdates_Click(object sender, RoutedEventArgs e)
@@ -552,10 +567,12 @@ namespace CyberVault.Viewmodel
 
         private void BiometricToggle_Checked(object sender, RoutedEventArgs e)
         {
+            SaveUserSetting("BiometricEnabled", "True");
         }
 
         private void BiometricToggle_Unchecked(object sender, RoutedEventArgs e)
         {
+            SaveUserSetting("BiometricEnabled", "False");
         }
 
         private void BackupLocation_Click(object sender, RoutedEventArgs e)
@@ -564,10 +581,18 @@ namespace CyberVault.Viewmodel
 
         private void BackupFrequencyComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
+            if (BackupFrequencyComboBox.SelectedItem is ComboBoxItem selectedItem)
+            {
+                SaveUserSetting("BackupFrequency", selectedItem.Content.ToString()!);
+            }
         }
 
         private void AutoLockComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
+            if (AutoLockComboBox.SelectedItem is ComboBoxItem selectedItem)
+            {
+                SaveUserSetting("AutoLockTime", selectedItem.Content.ToString()!);
+            }
         }
     }
 }

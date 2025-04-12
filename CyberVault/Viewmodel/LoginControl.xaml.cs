@@ -13,7 +13,7 @@ namespace CyberVault
     public partial class LoginControl : System.Windows.Controls.UserControl
     {
         private MainWindow mainWindow;
-        public static byte[] CurrentEncryptionKey { get; private set; }
+        public static byte[] ?CurrentEncryptionKey { get; private set; }
 
         public LoginControl(MainWindow mw)
         {
@@ -61,8 +61,8 @@ namespace CyberVault
                 }
 
                 bool userFound = false;
-                byte[] salt = null;
-                byte[] storedHash = null;
+                byte[] salt = null!;
+                byte[] storedHash = null!;
 
                 foreach (string line in File.ReadAllLines(credentialsFilePath))
                 {
@@ -82,19 +82,20 @@ namespace CyberVault
                     return;
                 }
 
-                byte[] inputHash = HashPassword(password, salt);
-                if (!CompareByteArrays(inputHash, storedHash))
+                byte[] inputHash = HashPassword(password, salt!);
+                if (!CompareByteArrays(inputHash, storedHash!))
                 {
                     System.Windows.MessageBox.Show("Incorrect password!", "Login Error", MessageBoxButton.OK, MessageBoxImage.Error);
                     return;
                 }
 
-                CurrentEncryptionKey = KeyDerivation.DeriveKey(password, salt);
+                CurrentEncryptionKey = KeyDerivation.DeriveKey(password, salt!);
 
                 App.CurrentUsername = username; 
                 App.LoadUserSettings(username); 
 
                 mainWindow.Navigate(new DashboardControl(mainWindow, username, CurrentEncryptionKey));
+
             }
             catch (Exception ex)
             {
@@ -267,43 +268,6 @@ namespace CyberVault
         
         }
 
-
-        private void LoadUserSettings(string username)
-        {
-            try
-            {
-                string appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-                string cyberVaultPath = Path.Combine(appDataPath, "CyberVault");
-                string settingsFilePath = Path.Combine(cyberVaultPath, $"{username}_settings.ini");
-
-                if (File.Exists(settingsFilePath))
-                {
-                    // Read settings from file
-                    string[] lines = File.ReadAllLines(settingsFilePath);
-
-                    foreach (string line in lines)
-                    {
-                        if (line.StartsWith("MinimizeToTray="))
-                        {
-                            string value = line.Substring("MinimizeToTray=".Length);
-                            App.MinimizeToTrayEnabled = bool.Parse(value);
-                            break;
-                        }
-                    }
-                }
-                else
-                {
-                    // Default to false if settings file doesn't exist
-                    App.MinimizeToTrayEnabled = false;
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error loading user settings: {ex.Message}");
-                // Default to false if there's an error
-                App.MinimizeToTrayEnabled = false;
-            }
-        }
 
         private byte[] HashPassword(string password, byte[] salt, int iterations = 10000, int hashSize = 32)
         {

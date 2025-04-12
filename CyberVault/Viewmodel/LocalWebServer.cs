@@ -13,7 +13,7 @@ namespace CyberVault.WebExtension
         private HttpListener _listener;
         private string _username;
         private byte[] _encryptionKey;
-        private static string _accessToken;
+        private static string ?_accessToken;
         private static bool _isRunning = false;
 
         public LocalWebServer(string username, byte[] encryptionKey)
@@ -79,14 +79,14 @@ namespace CyberVault.WebExtension
                 return;
             }
 
-            if (context.Request.HttpMethod != "GET" || context.Request.Url.LocalPath != "/passwords")
+            if (context.Request.HttpMethod != "GET" || context.Request.Url!.LocalPath != "/passwords")
             {
                 context.Response.StatusCode = 404;
                 context.Response.Close();
                 return;
             }
 
-            string authHeader = context.Request.Headers["Authorization"];
+            string authHeader = context.Request.Headers["Authorization"]!;
             if (string.IsNullOrEmpty(authHeader) || !authHeader.StartsWith("Bearer ") || authHeader.Substring(7) != _accessToken)
             {
                 context.Response.StatusCode = 401;
@@ -114,6 +114,6 @@ namespace CyberVault.WebExtension
             }
         }
 
-        public string GetAccessToken() => _accessToken;
+        public string GetAccessToken() => _accessToken!;
     }
 }
