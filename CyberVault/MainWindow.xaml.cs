@@ -1,11 +1,10 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Controls.Primitives;
-using System.Windows.Input;
-using System.Windows.Media;
 using System.ComponentModel;
 using Hardcodet.Wpf.TaskbarNotification;
-using System.IO;
+using System.Threading;
+using System;
+using System.Windows.Threading;
 
 namespace CyberVault
 {
@@ -13,7 +12,14 @@ namespace CyberVault
     {
         private const double NormalTopBarHeight = 40;
         private const double MaximizedTopBarHeight = 44;
+
         private TaskbarIcon ?trayIcon;
+
+        private DispatcherTimer ?activityTimer;
+        private DateTime lastActivityTime;
+        private bool isLocked = false;
+        private string ?currentUsername;
+        private int autoLockMinutes = 5;
 
         public MainWindow()
         {
@@ -21,8 +27,77 @@ namespace CyberVault
             Loaded += MainWindow_Loaded;
             MainContent.Content = new LoginControl(this);
             InitializeTrayIcon();
+            InitializeActivityMonitoring();
 
             Closing += MainWindow_Closing!;
+        }
+
+        private void InitializeActivityMonitoring()
+        {
+            activityTimer = new DispatcherTimer
+            {
+                Interval = TimeSpan.FromSeconds(10)
+            };
+            activityTimer.Tick += ActivityTimer_Tick!;
+
+            ResetActivityTimer();
+
+            activityTimer.Start();
+
+            this.MouseMove += MainWindow_UserActivity;
+            this.KeyDown += MainWindow_UserActivity;
+            this.PreviewMouseDown += MainWindow_UserActivity;
+        }
+
+        private void ResetActivityTimer()
+        {
+            lastActivityTime = DateTime.Now;
+        }
+
+        private void MainWindow_UserActivity(object sender, EventArgs e)
+        {
+            if (!isLocked)
+            {
+                ResetActivityTimer();
+            }
+        }
+
+        private void ActivityTimer_Tick(object sender, EventArgs e)
+        {
+            if (isLocked || string.IsNullOrEmpty(currentUsername))
+                return;
+
+            TimeSpan inactiveTime = DateTime.Now - lastActivityTime;
+
+            if (inactiveTime.TotalMinutes >= autoLockMinutes && autoLockMinutes > 0)
+            {
+                LockApplication();
+            }
+        }
+
+        public void LockApplication()
+        {
+            isLocked = true;
+
+            App.MinimizeToTrayEnabled = false;
+            App.CurrentUsername = null!;
+
+            typeof(LoginControl).GetProperty("CurrentEncryptionKey",
+                System.Reflection.BindingFlags.NonPublic |
+                System.Reflection.BindingFlags.Static)?.SetValue(null, null);
+
+            MainContent.Content = new LoginControl(this);
+
+            MessageBox.Show("Application locked due to inactivity.", "Security",
+                            MessageBoxButton.OK, MessageBoxImage.Information);
+        }
+
+        public void UserLoggedIn(string username, int lockTimeMinutes)
+        {
+            currentUsername = username;
+            autoLockMinutes = lockTimeMinutes;
+            isLocked = false;
+            ResetActivityTimer();
         }
 
         private void InitializeTrayIcon()

@@ -95,12 +95,58 @@ namespace CyberVault
                 App.LoadUserSettings(username); 
 
                 mainWindow.Navigate(new DashboardControl(mainWindow, username, CurrentEncryptionKey));
+                int lockTimeMinutes = GetAutoLockTimeFromSettings(username);
+                mainWindow.UserLoggedIn(username, lockTimeMinutes);
+
 
             }
             catch (Exception ex)
             {
                 System.Windows.MessageBox.Show($"An error occurred: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
+        }
+
+        private int GetAutoLockTimeFromSettings(string username)
+        {
+            int minutes = 5;
+
+            try
+            {
+                string appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+                string cyberVaultPath = Path.Combine(appDataPath, "CyberVault");
+                string settingsFilePath = Path.Combine(cyberVaultPath, $"{username}_settings.ini");
+
+                if (File.Exists(settingsFilePath))
+                {
+                    string[] lines = File.ReadAllLines(settingsFilePath);
+                    foreach (string line in lines)
+                    {
+                        string[] parts = line.Split('=');
+                        if (parts.Length == 2 && parts[0] == "AutoLockTime")
+                        {
+                            string value = parts[1];
+                            if (value == "Never")
+                                return 0;
+                            else if (value == "1 Minute")
+                                return 1;
+                            else if (value == "5 Minutes")
+                                return 5;
+                            else if (value == "15 Minutes")
+                                return 15;
+                            else if (value == "30 Minutes")
+                                return 30;
+                            else if (value == "1 Hour")
+                                return 60;
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error getting auto-lock time: {ex.Message}");
+            }
+
+            return minutes;
         }
 
         private void ImportTextBlock_MouseLeftButtonDown(object sender, RoutedEventArgs e)

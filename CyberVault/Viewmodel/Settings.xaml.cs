@@ -33,6 +33,8 @@ namespace CyberVault.Viewmodel
             {
                 Dictionary<string, bool> settings = new Dictionary<string, bool>();
 
+                Dictionary<string, string> stringSettings = new Dictionary<string, string>();
+
                 string appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
                 string cyberVaultPath = Path.Combine(appDataPath, "CyberVault");
                 string settingsFilePath = Path.Combine(cyberVaultPath, $"{username}_settings.ini");
@@ -51,6 +53,10 @@ namespace CyberVault.Viewmodel
                             {
                                 settings[parts[0]] = value;
                             }
+                            else
+                            {
+                                stringSettings[parts[0]] = parts[1];
+                            }
                         }
                     }
                 }
@@ -61,10 +67,37 @@ namespace CyberVault.Viewmodel
 
                 MinimizeToTrayToggle.IsChecked = settings.GetValueOrDefault("MinimizeToTray", false);
                 StartWithWindowsToggle.IsChecked = settings.GetValueOrDefault("StartWithWindows", false);
-                DarkModeToggle.IsChecked = settings.GetValueOrDefault("DarkModeEnabled", false);
                 BiometricToggle.IsChecked = settings.GetValueOrDefault("BiometricEnabled", false);
 
                 ReattachToggleEvents();
+
+                string autoLockTime = stringSettings.GetValueOrDefault("AutoLockTime", "5 Minutes");
+
+                if (AutoLockComboBox != null && AutoLockComboBox.Items.Count > 0)
+                {
+                    bool foundMatchingItem = false;
+                    foreach (ComboBoxItem item in AutoLockComboBox.Items)
+                    {
+                        if (item.Content.ToString() == autoLockTime)
+                        {
+                            AutoLockComboBox.SelectedItem = item;
+                            foundMatchingItem = true;
+                            break;
+                        }
+                    }
+
+                    if (!foundMatchingItem)
+                    {
+                        foreach (ComboBoxItem item in AutoLockComboBox.Items)
+                        {
+                            if (item.Content.ToString() == "5 Minutes")
+                            {
+                                AutoLockComboBox.SelectedItem = item;
+                                break;
+                            }
+                        }
+                    }
+                }
             }
             catch (Exception ex)
             {
@@ -80,9 +113,6 @@ namespace CyberVault.Viewmodel
             StartWithWindowsToggle.Checked -= StartWithWindowsToggle_Checked;
             StartWithWindowsToggle.Unchecked -= StartWithWindowsToggle_Unchecked;
 
-            DarkModeToggle.Checked -= DarkModeToggle_Checked;
-            DarkModeToggle.Unchecked -= DarkModeToggle_Unchecked;
-
             BiometricToggle.Checked -= BiometricToggle_Checked;
             BiometricToggle.Unchecked -= BiometricToggle_Unchecked;
         }
@@ -94,9 +124,6 @@ namespace CyberVault.Viewmodel
 
             StartWithWindowsToggle.Checked += StartWithWindowsToggle_Checked;
             StartWithWindowsToggle.Unchecked += StartWithWindowsToggle_Unchecked;
-
-            DarkModeToggle.Checked += DarkModeToggle_Checked;
-            DarkModeToggle.Unchecked += DarkModeToggle_Unchecked;
 
             BiometricToggle.Checked += BiometricToggle_Checked;
             BiometricToggle.Unchecked += BiometricToggle_Unchecked;
@@ -139,16 +166,6 @@ namespace CyberVault.Viewmodel
             }
         }
 
-        private void DarkModeToggle_Checked(object sender, RoutedEventArgs e)
-        {
-            SaveUserSetting("DarkModeEnabled", "True");
-        }
-
-        private void DarkModeToggle_Unchecked(object sender, RoutedEventArgs e)
-        {
-            SaveUserSetting("DarkModeEnabled", "False");
-        }
-
         private void MinimizeToTrayToggle_Checked(object sender, RoutedEventArgs e)
         {
             App.MinimizeToTrayEnabled = true;
@@ -187,7 +204,7 @@ namespace CyberVault.Viewmodel
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error setting up startup: {ex.Message}");
+                Console.WriteLine($"Error setting up startup: {ex.Message}`");
                 System.Windows.MessageBox.Show($"Failed to set up startup: {ex.Message}",
                     "Error", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
 
@@ -229,7 +246,26 @@ namespace CyberVault.Viewmodel
         {
             if (AutoLockComboBox.SelectedItem is ComboBoxItem selectedItem)
             {
-                SaveUserSetting("AutoLockTime", selectedItem.Content.ToString()!);
+                string selectionText = selectedItem.Content.ToString()!;
+                SaveUserSetting("AutoLockTime", selectionText);
+
+                MainWindow mainWindow = Window.GetWindow(this) as MainWindow;
+                if (mainWindow != null && !string.IsNullOrEmpty(username))
+                {
+                    int minutes = 5;
+
+                    switch (selectionText)
+                    {
+                        case "Never": minutes = 0; break;
+                        case "1 Minute": minutes = 1; break;
+                        case "5 Minutes": minutes = 5; break;
+                        case "15 Minutes": minutes = 15; break;
+                        case "30 Minutes": minutes = 30; break;
+                        case "1 Hour": minutes = 60; break;
+                    }
+
+                    mainWindow.UserLoggedIn(username, minutes);
+                }
             }
         }
 
@@ -546,20 +582,8 @@ namespace CyberVault.Viewmodel
             }
         }
 
-        private void CloudSyncToggle_Checked(object sender, RoutedEventArgs e)
-        {
-            SaveUserSetting("CloudSyncEnabled", "True");
-        }
-
-        private void CloudSyncToggle_Unchecked(object sender, RoutedEventArgs e)
-        {
-            SaveUserSetting("CloudSyncEnabled", "False");
-        }
-
         private void CheckForUpdates_Click(object sender, RoutedEventArgs e)
         {
         }
-
-
     }
 }
