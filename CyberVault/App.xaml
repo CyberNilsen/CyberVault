@@ -144,12 +144,12 @@
                             </Grid>
                             <ControlTemplate.Triggers>
                                 <Trigger Property="IsMouseOver" Value="True">
-                                    <Setter Property="Background" TargetName="Border" Value="#3B4252"/>
+                                    <Setter Property="Background" TargetName="Border" Value="Transparent"/>
                                     <Setter Property="BorderBrush" TargetName="Border" Value="#88AEEF"/>
                                 </Trigger>
                                 <Trigger Property="IsPressed" Value="True">
                                     <Setter Property="Background" TargetName="Border" Value="#5E81AC"/>
-                                    <Setter Property="BorderBrush" TargetName="Border" Value="#3B4252"/>
+                                    <Setter Property="BorderBrush" TargetName="Border" Value="Transparent"/>
                                 </Trigger>
                             </ControlTemplate.Triggers>
                         </ControlTemplate>

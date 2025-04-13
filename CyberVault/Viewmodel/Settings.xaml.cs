@@ -249,7 +249,7 @@ namespace CyberVault.Viewmodel
                 string selectionText = selectedItem.Content.ToString()!;
                 SaveUserSetting("AutoLockTime", selectionText);
 
-                MainWindow mainWindow = Window.GetWindow(this) as MainWindow;
+                MainWindow? mainWindow = Window.GetWindow(this) as MainWindow;
                 if (mainWindow != null && !string.IsNullOrEmpty(username))
                 {
                     int minutes = 5;

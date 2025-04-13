@@ -43,7 +43,7 @@
                         <StackPanel Grid.Row="0" Margin="0,20,0,15">
                             <Border Background="Transparent"  HorizontalAlignment="Center">
 
-                                <Image Source="pack://application:,,,/Images/CyberVaultcornerrounded2.png" Width="70" HorizontalAlignment="Left">
+                                <Image Source="pack://application:,,,/Images/CyberVaultcornerrounded.png" Width="70" HorizontalAlignment="Left">
                                 </Image>
                             </Border>
                             <TextBlock Text="CyberVault" FontSize="22" FontWeight="SemiBold" Foreground="White" 
