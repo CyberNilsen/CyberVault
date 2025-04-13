@@ -61,9 +61,7 @@ namespace CyberVault.Viewmodel
 
                 MinimizeToTrayToggle.IsChecked = settings.GetValueOrDefault("MinimizeToTray", false);
                 StartWithWindowsToggle.IsChecked = settings.GetValueOrDefault("StartWithWindows", false);
-                TwoFactorToggle.IsChecked = settings.GetValueOrDefault("TwoFactorEnabled", false);
                 DarkModeToggle.IsChecked = settings.GetValueOrDefault("DarkModeEnabled", false);
-                CloudSyncToggle.IsChecked = settings.GetValueOrDefault("CloudSyncEnabled", false);
                 BiometricToggle.IsChecked = settings.GetValueOrDefault("BiometricEnabled", false);
 
                 ReattachToggleEvents();
@@ -82,14 +80,8 @@ namespace CyberVault.Viewmodel
             StartWithWindowsToggle.Checked -= StartWithWindowsToggle_Checked;
             StartWithWindowsToggle.Unchecked -= StartWithWindowsToggle_Unchecked;
 
-            TwoFactorToggle.Checked -= TwoFactorToggle_Checked;
-            TwoFactorToggle.Unchecked -= TwoFactorToggle_Unchecked;
-
             DarkModeToggle.Checked -= DarkModeToggle_Checked;
             DarkModeToggle.Unchecked -= DarkModeToggle_Unchecked;
-
-            CloudSyncToggle.Checked -= CloudSyncToggle_Checked;
-            CloudSyncToggle.Unchecked -= CloudSyncToggle_Unchecked;
 
             BiometricToggle.Checked -= BiometricToggle_Checked;
             BiometricToggle.Unchecked -= BiometricToggle_Unchecked;
@@ -103,14 +95,8 @@ namespace CyberVault.Viewmodel
             StartWithWindowsToggle.Checked += StartWithWindowsToggle_Checked;
             StartWithWindowsToggle.Unchecked += StartWithWindowsToggle_Unchecked;
 
-            TwoFactorToggle.Checked += TwoFactorToggle_Checked;
-            TwoFactorToggle.Unchecked += TwoFactorToggle_Unchecked;
-
             DarkModeToggle.Checked += DarkModeToggle_Checked;
             DarkModeToggle.Unchecked += DarkModeToggle_Unchecked;
-
-            CloudSyncToggle.Checked += CloudSyncToggle_Checked;
-            CloudSyncToggle.Unchecked += CloudSyncToggle_Unchecked;
 
             BiometricToggle.Checked += BiometricToggle_Checked;
             BiometricToggle.Unchecked += BiometricToggle_Unchecked;
@@ -163,14 +149,16 @@ namespace CyberVault.Viewmodel
             SaveUserSetting("DarkModeEnabled", "False");
         }
 
-        private void TwoFactorToggle_Checked(object sender, RoutedEventArgs e)
+        private void MinimizeToTrayToggle_Checked(object sender, RoutedEventArgs e)
         {
-            SaveUserSetting("TwoFactorEnabled", "True");
+            App.MinimizeToTrayEnabled = true;
+            SaveUserSetting("MinimizeToTray", "True");
         }
 
-        private void TwoFactorToggle_Unchecked(object sender, RoutedEventArgs e)
+        private void MinimizeToTrayToggle_Unchecked(object sender, RoutedEventArgs e)
         {
-            SaveUserSetting("TwoFactorEnabled", "False");
+            App.MinimizeToTrayEnabled = false;
+            SaveUserSetting("MinimizeToTray", "False");
         }
 
         private void StartWithWindowsToggle_Checked(object sender, RoutedEventArgs e)
@@ -237,20 +225,31 @@ namespace CyberVault.Viewmodel
             }
         }
 
+        private void AutoLockComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (AutoLockComboBox.SelectedItem is ComboBoxItem selectedItem)
+            {
+                SaveUserSetting("AutoLockTime", selectedItem.Content.ToString()!);
+            }
+        }
+
+        private void BiometricToggle_Checked(object sender, RoutedEventArgs e)
+        {
+            SaveUserSetting("BiometricEnabled", "True");
+        }
+
+        private void BiometricToggle_Unchecked(object sender, RoutedEventArgs e)
+        {
+            SaveUserSetting("BiometricEnabled", "False");
+        }
+
+        private void ChangeMasterPassword_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
         private void PrivacyPolicy_Click(object sender, RoutedEventArgs e)
         {
-        }
-
-        private void MinimizeToTrayToggle_Checked(object sender, RoutedEventArgs e)
-        {
-            App.MinimizeToTrayEnabled = true;
-            SaveUserSetting("MinimizeToTray", "True");
-        }
-
-        private void MinimizeToTrayToggle_Unchecked(object sender, RoutedEventArgs e)
-        {
-            App.MinimizeToTrayEnabled = false;
-            SaveUserSetting("MinimizeToTray", "False");
         }
 
         private void ExportData_Click(object sender, RoutedEventArgs e)
@@ -561,38 +560,6 @@ namespace CyberVault.Viewmodel
         {
         }
 
-        private void ChangeMasterPassword_Click(object sender, RoutedEventArgs e)
-        {
-        }
 
-        private void BiometricToggle_Checked(object sender, RoutedEventArgs e)
-        {
-            SaveUserSetting("BiometricEnabled", "True");
-        }
-
-        private void BiometricToggle_Unchecked(object sender, RoutedEventArgs e)
-        {
-            SaveUserSetting("BiometricEnabled", "False");
-        }
-
-        private void BackupLocation_Click(object sender, RoutedEventArgs e)
-        {
-        }
-
-        private void BackupFrequencyComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            if (BackupFrequencyComboBox.SelectedItem is ComboBoxItem selectedItem)
-            {
-                SaveUserSetting("BackupFrequency", selectedItem.Content.ToString()!);
-            }
-        }
-
-        private void AutoLockComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            if (AutoLockComboBox.SelectedItem is ComboBoxItem selectedItem)
-            {
-                SaveUserSetting("AutoLockTime", selectedItem.Content.ToString()!);
-            }
-        }
     }
 }

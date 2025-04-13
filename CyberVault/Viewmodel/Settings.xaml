@@ -125,15 +125,6 @@
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
                         
-                        <TextBlock Grid.Column="0" Text="Two-Factor Authentication" Style="{StaticResource SettingLabel}"/>
-                        
-                        <TextBlock Grid.Column="1" Text="Require 2FA for login" 
-                                   Foreground="#677591" FontSize="12" VerticalAlignment="Center"/>
-                        
-                        <ToggleButton Grid.Column="2" x:Name="TwoFactorToggle" 
-                                      Style="{StaticResource SettingToggle}" 
-                                      Checked="TwoFactorToggle_Checked" 
-                                      Unchecked="TwoFactorToggle_Unchecked"/>
                     </Grid>
                     
                     <Button Content="Change Master Password" Margin="0,15,0,0" 
@@ -153,45 +144,9 @@
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
                         
-                        <TextBlock Grid.Column="0" Text="Cloud Sync" Style="{StaticResource SettingLabel}"/>
-                        
-                        <TextBlock Grid.Column="1" Text="Securely sync data across devices" 
-                                   Foreground="#677591" FontSize="12" VerticalAlignment="Center"/>
-                        <ToggleButton Grid.Column="2" x:Name="CloudSyncToggle" 
-                                      Style="{StaticResource SettingToggle}" 
-                                      Checked="CloudSyncToggle_Checked" 
-                                      Unchecked="CloudSyncToggle_Unchecked"/>
                     </Grid>
                     
-                    <Grid Margin="0,8,0,8">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto"/>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="Auto"/>
-                        </Grid.ColumnDefinitions>
-                        
-                        <TextBlock Grid.Column="0" Text="Auto Backup" Style="{StaticResource SettingLabel}"/>
-                        
-                        <StackPanel Grid.Column="1" Orientation="Vertical">
-                            
-                            <TextBlock Text="Schedule automatic backups of your vault" 
-                                       Foreground="#677591" FontSize="12" VerticalAlignment="Center"/>
-                            <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
-                                
-                                <ComboBox x:Name="BackupFrequencyComboBox" Width="150" Height="30" 
-                                          HorizontalAlignment="Left" SelectedIndex="1" 
-                                          SelectionChanged="BackupFrequencyComboBox_SelectionChanged">
-                                    <ComboBoxItem Content="Daily"/>
-                                    <ComboBoxItem Content="Weekly"/>
-                                    <ComboBoxItem Content="Monthly"/>
-                                    <ComboBoxItem Content="Never"/>
-                                </ComboBox>
-                                <Button Content="Browse..." Margin="10,0,0,0" Padding="10,5" 
-                                        Click="BackupLocation_Click"/>
-                            </StackPanel>
-                        </StackPanel>
-                    </Grid>
-                    
+
                     <StackPanel Orientation="Horizontal" Margin="0,15,0,0">
                         <Button Content="Export Data" Style="{StaticResource SaveButton}" 
                                 Background="#434C5E" Click="ExportData_Click"/>
