@@ -153,12 +153,6 @@
                         <Run Text="All your data is encrypted using AES-256 encryption and never leaves your device without your permission."/>
                     </TextBlock>
                     
-                    <StackPanel Orientation="Horizontal">
-                        <Button Content="Check for Updates" Style="{StaticResource SaveButton}" 
-                                Background="#434C5E" Click="CheckForUpdates_Click"/>
-                        <Button Content="Privacy Policy" Style="{StaticResource SaveButton}" 
-                                Background="#434C5E" Margin="10,0,0,0" Click="PrivacyPolicy_Click"/>
-                    </StackPanel>
                 </StackPanel>
             </Border>
         </StackPanel>

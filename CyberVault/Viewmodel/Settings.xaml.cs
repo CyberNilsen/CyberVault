@@ -284,10 +284,6 @@ namespace CyberVault.Viewmodel
 
         }
 
-        private void PrivacyPolicy_Click(object sender, RoutedEventArgs e)
-        {
-        }
-
         private void ExportData_Click(object sender, RoutedEventArgs e)
         {
             try
@@ -582,8 +578,5 @@ namespace CyberVault.Viewmodel
             }
         }
 
-        private void CheckForUpdates_Click(object sender, RoutedEventArgs e)
-        {
-        }
     }
 }
