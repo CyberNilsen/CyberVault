@@ -22,24 +22,6 @@
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
                         
-                        <TextBlock Grid.Column="0" Text="Dark Mode" Style="{StaticResource SettingLabel}"/>
-                        
-                        <TextBlock Grid.Column="1" Text="Switch between light and dark theme" 
-                                   Foreground="#677591" FontSize="12" VerticalAlignment="Center"/>
-                        
-                        <ToggleButton Grid.Column="2" x:Name="DarkModeToggle" 
-                                      Style="{StaticResource SettingToggle}" 
-                                      Checked="DarkModeToggle_Checked" 
-                                      Unchecked="DarkModeToggle_Unchecked"/>
-                    </Grid>
-                    
-                    <Grid Margin="0,8,0,8">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto"/>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="Auto"/>
-                        </Grid.ColumnDefinitions>
-                        
                         <TextBlock Grid.Column="0" Text="Minimize to Tray" Style="{StaticResource SettingLabel}"/>
                         
                         <TextBlock Grid.Column="1" Text="Application runs in background when closed" 
