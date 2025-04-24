@@ -218,8 +218,7 @@ namespace CyberVault.Viewmodel
         {
             try
             {
-                string startupFolderPath = Path.Combine(
-                    Environment.GetFolderPath(Environment.SpecialFolder.Startup));
+                string startupFolderPath = Environment.GetFolderPath(Environment.SpecialFolder.Startup);
 
                 string shortcutPath = Path.Combine(startupFolderPath, "CyberVault.lnk");
 
