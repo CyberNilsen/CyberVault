@@ -64,17 +64,14 @@ public class LocalWebServer
                     }
                     catch (HttpListenerException)
                     {
-                        // Server was stopped
                         break;
                     }
                     catch (ObjectDisposedException)
                     {
-                        // Listener was disposed
                         break;
                     }
                     catch (Exception ex)
                     {
-                        // Log the exception but continue running
                         Console.WriteLine($"WebServer error: {ex.Message}");
                     }
                 }
@@ -96,7 +93,6 @@ public class LocalWebServer
             _isRunning = false;
             _cancellationTokenSource.Cancel();
 
-            // Give the processing task a chance to complete cleanly
             try
             {
                 if (_processingTask != null)
