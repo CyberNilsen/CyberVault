@@ -34,7 +34,7 @@ public class LocalWebServer
             {
                 _listener.Start();
             }
-            catch (HttpListenerException ex)
+            catch (HttpListenerException )
             {
                 _listener.Close();
                 _listener = new HttpListener();
@@ -170,12 +170,8 @@ public class LocalWebServer
 
     private static string GenerateAccessToken()
     {
-        using (var rng = new RNGCryptoServiceProvider())
-        {
-            byte[] tokenData = new byte[32];
-            rng.GetBytes(tokenData);
-            return Convert.ToBase64String(tokenData);
-        }
+        byte[] tokenData = RandomNumberGenerator.GetBytes(32);
+        return Convert.ToBase64String(tokenData);
     }
 
     public string GetAccessToken() => _accessToken!;

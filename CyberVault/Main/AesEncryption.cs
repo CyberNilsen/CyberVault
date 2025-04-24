@@ -56,7 +56,7 @@ namespace CyberVault.Main
 
                 return string.Empty;
 
-            string plaintext = null;
+            string plaintext = null!;
 
             using (Aes aes = Aes.Create())
 
