@@ -5,13 +5,11 @@ using System.IO;
 using System.IO.Compression;
 using System.Net.Http;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
+
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using CyberVault.WebExtension;
-using System.Windows.Threading;
-using System.ComponentModel;
 
 namespace CyberVault.Viewmodel
 {

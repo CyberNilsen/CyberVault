@@ -1,72 +1,126 @@
-﻿using System;
+﻿using CyberVault;
 using System.Net;
-using System.Text;
-using System.Threading.Tasks;
-using System.Text.Json;
-using System.Collections.Generic;
 using System.Security.Cryptography;
+using System.Text.Json;
+using System.Text;
 
-namespace CyberVault.WebExtension
+namespace CyberVault.WebExtension;
+public class LocalWebServer
 {
-    public class LocalWebServer
+    private HttpListener _listener;
+    private string _username;
+    private byte[] _encryptionKey;
+    private static string? _accessToken;
+    private static bool _isRunning = false;
+    private Task _processingTask;
+    private CancellationTokenSource _cancellationTokenSource;
+
+    public LocalWebServer(string username, byte[] encryptionKey)
     {
-        private HttpListener _listener;
-        private string _username;
-        private byte[] _encryptionKey;
-        private static string ?_accessToken;
-        private static bool _isRunning = false;
+        _username = username;
+        _encryptionKey = encryptionKey;
+        _accessToken = GenerateAccessToken();
+        _listener = new HttpListener();
+        _listener.Prefixes.Add("http://localhost:8765/");
+        _cancellationTokenSource = new CancellationTokenSource();
+    }
 
-        public LocalWebServer(string username, byte[] encryptionKey)
+    public void Start()
+    {
+        if (_isRunning) return;
+
+        try
         {
-            _username = username;
-            _encryptionKey = encryptionKey;
-            _accessToken = GenerateAccessToken();
-            _listener = new HttpListener();
-            _listener.Prefixes.Add("http://localhost:8765/");
-        }
-
-        public void Start()
-        {
-            if (_isRunning) return;
-
+            // Check if the port is already in use
             try
             {
                 _listener.Start();
-                _isRunning = true;
-
-                Task.Run(async () =>
-                {
-                    while (_isRunning)
-                    {
-                        try
-                        {
-                            HttpListenerContext context = await _listener.GetContextAsync();
-                            ProcessRequest(context);
-                        }
-                        catch (HttpListenerException) { }
-                    }
-                });
             }
-            catch (HttpListenerException)
+            catch (HttpListenerException ex)
             {
-                _isRunning = false;
+                // Try an alternative port if 8765 is in use
+                _listener.Close();
+                _listener = new HttpListener();
+                _listener.Prefixes.Clear();
+                _listener.Prefixes.Add("http://localhost:8766/");
+                _listener.Start();
             }
+
+            _isRunning = true;
+
+            _processingTask = Task.Run(async () =>
+            {
+                var token = _cancellationTokenSource.Token;
+
+                while (_isRunning && !token.IsCancellationRequested)
+                {
+                    try
+                    {
+                        var getContextTask = _listener.GetContextAsync();
+                        HttpListenerContext context = await getContextTask.ConfigureAwait(false);
+
+                        if (token.IsCancellationRequested)
+                            break;
+
+                        ProcessRequest(context);
+                    }
+                    catch (HttpListenerException)
+                    {
+                        // Server was stopped
+                        break;
+                    }
+                    catch (ObjectDisposedException)
+                    {
+                        // Listener was disposed
+                        break;
+                    }
+                    catch (Exception ex)
+                    {
+                        // Log the exception but continue running
+                        Console.WriteLine($"WebServer error: {ex.Message}");
+                    }
+                }
+            }, _cancellationTokenSource.Token);
         }
-
-        public void Stop()
+        catch (HttpListenerException ex)
         {
-            if (!_isRunning) return;
+            Console.WriteLine($"Failed to start web server: {ex.Message}");
+            _isRunning = false;
+        }
+    }
 
+    public void Stop()
+    {
+        if (!_isRunning) return;
+
+        try
+        {
+            _isRunning = false;
+            _cancellationTokenSource.Cancel();
+
+            // Give the processing task a chance to complete cleanly
             try
             {
-                _isRunning = false;
-                _listener.Stop();
-                _listener.Close();
+                if (_processingTask != null)
+                {
+                    Task.WaitAny(new[] { _processingTask }, 1000);
+                }
             }
-            catch (ObjectDisposedException) { }
-        }
+            catch { }
 
-        private void ProcessRequest(HttpListenerContext context)
+            _listener.Stop();
+            _listener.Close();
+        }
+        catch (ObjectDisposedException) { }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error stopping web server: {ex.Message}");
+        }
+    }
+
+    private void ProcessRequest(HttpListenerContext context)
+    {
+        try
         {
             context.Response.Headers.Add("Access-Control-Allow-Origin", "*");
             context.Response.Headers.Add("Access-Control-Allow-Methods", "GET, OPTIONS");
@@ -86,7 +140,7 @@ namespace CyberVault.WebExtension
                 return;
             }
 
-            string authHeader = context.Request.Headers["Authorization"]!;
+            string authHeader = context.Request.Headers["Authorization"] ?? string.Empty;
             if (string.IsNullOrEmpty(authHeader) || !authHeader.StartsWith("Bearer ") || authHeader.Substring(7) != _accessToken)
             {
                 context.Response.StatusCode = 401;
@@ -101,19 +155,35 @@ namespace CyberVault.WebExtension
             context.Response.ContentType = "application/json";
             context.Response.ContentLength64 = buffer.Length;
             context.Response.OutputStream.Write(buffer, 0, buffer.Length);
-            context.Response.Close();
         }
-
-        private static string GenerateAccessToken()
+        catch (Exception ex)
         {
-            using (var rng = new RNGCryptoServiceProvider())
+            Console.WriteLine($"Error processing request: {ex.Message}");
+            try
             {
-                byte[] tokenData = new byte[32];
-                rng.GetBytes(tokenData);
-                return Convert.ToBase64String(tokenData);
+                context.Response.StatusCode = 500;
             }
+            catch { }
         }
-
-        public string GetAccessToken() => _accessToken!;
+        finally
+        {
+            try
+            {
+                context.Response.Close();
+            }
+            catch { }
+        }
     }
+
+    private static string GenerateAccessToken()
+    {
+        using (var rng = new RNGCryptoServiceProvider())
+        {
+            byte[] tokenData = new byte[32];
+            rng.GetBytes(tokenData);
+            return Convert.ToBase64String(tokenData);
+        }
+    }
+
+    public string GetAccessToken() => _accessToken!;
 }

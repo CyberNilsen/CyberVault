@@ -1,8 +1,8 @@
-﻿using CyberVault.WebExtension;
-using System.Configuration;
+﻿using System.Configuration;
 using System.Data;
 using System.IO;
 using System.Windows;
+using CyberVault.WebExtension;
 namespace CyberVault;
 /// <summary>
 /// Interaction logic for App.xaml
@@ -12,8 +12,8 @@ public partial class App : Application
     public static bool MinimizeToTrayEnabled { get; set; } = false;
     public static string CurrentUsername { get; set; } = string.Empty;
 
-    public static string ?CurrentAccessToken { get; set; }
-    public static LocalWebServer ?WebServer { get; set; }
+    public static string? CurrentAccessToken { get; set; }
+    public static LocalWebServer? WebServer { get; set; }
 
     public static void LoadUserSettings(string username)
     {
@@ -41,4 +41,6 @@ public partial class App : Application
             Console.WriteLine($"Error loading user settings: {ex.Message}");
         }
     }
+
+    
 }

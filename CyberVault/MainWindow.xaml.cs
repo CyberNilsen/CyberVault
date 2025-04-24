@@ -195,6 +195,10 @@ namespace CyberVault
                 if (window != null)
                 {
                     window.Close();
+                    App.CurrentUsername = null!;
+                    App.CurrentAccessToken = null;
+                    App.WebServer?.Stop();
+                    App.WebServer = null;
                 }
             }
         }
