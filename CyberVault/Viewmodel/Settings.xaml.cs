@@ -196,7 +196,7 @@ namespace CyberVault.Viewmodel
 
                     shortcut.TargetPath = exePath;
                     shortcut.WorkingDirectory = Path.GetDirectoryName(exePath);
-                    shortcut.Description = "CyberVault Password Manager";
+                    shortcut.Description = "CyberVault";
                     shortcut.Save();
                 }
 
