@@ -280,7 +280,16 @@ namespace CyberVault.Viewmodel
 
         private void ChangeMasterPassword_Click(object sender, RoutedEventArgs e)
         {
-
+            var result = System.Windows.MessageBox.Show("Are you sure you want to change master password?.",
+                "Master Password", MessageBoxButton.YesNo, MessageBoxImage.Information);
+            if (result == MessageBoxResult.Yes)
+            {
+                System.Windows.MessageBox.Show(" TEST", "Not Implemented", MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
+            else
+            {
+                System.Windows.MessageBox.Show("Master password change cancelled.", "Cancelled", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
         }
 
         private void ExportData_Click(object sender, RoutedEventArgs e)
