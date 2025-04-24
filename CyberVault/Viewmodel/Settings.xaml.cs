@@ -1,4 +1,5 @@
-﻿using IWshRuntimeLibrary;
+﻿using CyberVault.Main;
+using IWshRuntimeLibrary;
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
@@ -280,15 +281,103 @@ namespace CyberVault.Viewmodel
 
         private void ChangeMasterPassword_Click(object sender, RoutedEventArgs e)
         {
-            var result = System.Windows.MessageBox.Show("Are you sure you want to change master password?.",
-                "Master Password", MessageBoxButton.YesNo, MessageBoxImage.Information);
+            var result = System.Windows.MessageBox.Show("Are you sure you want to change your master password?\nThis will re-encrypt all your stored data.",
+                "Change Master Password", MessageBoxButton.YesNo, MessageBoxImage.Question);
+
             if (result == MessageBoxResult.Yes)
             {
-                System.Windows.MessageBox.Show(" TEST", "Not Implemented", MessageBoxButton.OK, MessageBoxImage.Warning);
+                var passwordWindow = new MasterPassword(username!, encryptionKey!);
+                passwordWindow.Owner = Window.GetWindow(this);
+                bool? dialogResult = passwordWindow.ShowDialog();
+
+                if (dialogResult == true && !string.IsNullOrEmpty(passwordWindow.OldPassword) && !string.IsNullOrEmpty(passwordWindow.NewPassword))
+                {
+                    try
+                    {
+                        string appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+                        string cyberVaultPath = Path.Combine(appDataPath, "CyberVault");
+                        string passwordsFilePath = Path.Combine(cyberVaultPath, $"passwords_{username}.dat");
+
+                        List<PasswordItem> existingPasswords = PasswordStorage.LoadPasswords(username!, encryptionKey!);
+
+                        string credentialsFilePath = Path.Combine(cyberVaultPath, "credentials.txt");
+                        string[] lines = System.IO.File.ReadAllLines(credentialsFilePath);
+                        byte[] newSalt = null!;
+
+                        foreach (string line in lines)
+                        {
+                            if (line.StartsWith(username + ","))
+                            {
+                                string[] parts = line.Split(',');
+                                newSalt = Convert.FromBase64String(parts[1]);
+                                break;
+                            }
+                        }
+
+                        if (newSalt == null)
+                        {
+                            throw new Exception("Could not find salt for user credentials");
+                        }
+
+                        byte[] newEncryptionKey = KeyDerivation.DeriveKey(passwordWindow.NewPassword, newSalt);
+
+                        PasswordStorage.SavePasswords(existingPasswords, username!, newEncryptionKey);
+
+                        ReencryptAuthenticatorsFile(username!, encryptionKey!, newEncryptionKey);
+
+                        encryptionKey = newEncryptionKey;
+
+                        System.Windows.MessageBox.Show("Master password changed successfully.",
+                            "Success", MessageBoxButton.OK, MessageBoxImage.Information);
+                    }
+                    catch (Exception ex)
+                    {
+                        System.Windows.MessageBox.Show($"Error changing master password: {ex.Message}",
+                            "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    }
+                }
             }
-            else
+        }
+
+        private void ReencryptAuthenticatorsFile(string username, byte[] oldKey, byte[] newKey)
+        {
+            try
             {
-                System.Windows.MessageBox.Show("Master password change cancelled.", "Cancelled", MessageBoxButton.OK, MessageBoxImage.Information);
+                string appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+                string cyberVaultPath = Path.Combine(appDataPath, "CyberVault");
+                string authFilePath = Path.Combine(cyberVaultPath, $"{username}.authenticators.enc");
+
+                if (!System.IO.File.Exists(authFilePath))
+                {
+                    return;
+                }
+
+                byte[] encryptedData = System.IO.File.ReadAllBytes(authFilePath);
+
+                
+                byte[] iv = new byte[16];
+                byte[] actualEncryptedData = new byte[encryptedData.Length - 16];
+
+                Array.Copy(encryptedData, 0, iv, 0, 16);
+                Array.Copy(encryptedData, 16, actualEncryptedData, 0, actualEncryptedData.Length);
+
+                string decryptedString = AesEncryption.Decrypt(actualEncryptedData, oldKey, iv);
+
+                byte[] decryptedData = System.Text.Encoding.UTF8.GetBytes(decryptedString);
+
+                byte[] newIv = AesEncryption.GenerateIV();
+
+                byte[] newEncryptedData = AesEncryption.Encrypt(System.Text.Encoding.UTF8.GetString(decryptedData), newKey, newIv);
+
+                byte[] finalData = new byte[16 + newEncryptedData.Length];
+                Array.Copy(newIv, 0, finalData, 0, 16);
+                Array.Copy(newEncryptedData, 0, finalData, 16, newEncryptedData.Length);
+
+                System.IO.File.WriteAllBytes(authFilePath, finalData);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error re-encrypting authenticators: {ex.Message}");
             }
         }
 
