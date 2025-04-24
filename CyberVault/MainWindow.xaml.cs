@@ -2,8 +2,6 @@
 using System.Windows.Controls;
 using System.ComponentModel;
 using Hardcodet.Wpf.TaskbarNotification;
-using System.Threading;
-using System;
 using System.Windows.Threading;
 
 namespace CyberVault
