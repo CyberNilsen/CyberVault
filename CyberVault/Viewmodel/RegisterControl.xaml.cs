@@ -70,7 +70,7 @@ namespace CyberVault
                     {
                         if (line.StartsWith(username + ","))
                         {
-                            MessageBox.Show("Username already exists!", "Registration Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                            MessageBox.Show("Account already exists!", "Registration Error", MessageBoxButton.OK, MessageBoxImage.Error);
                             return;
                         }
                     }

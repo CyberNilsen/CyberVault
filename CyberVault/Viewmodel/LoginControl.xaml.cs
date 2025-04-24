@@ -56,7 +56,7 @@ namespace CyberVault
 
                 if (!File.Exists(credentialsFilePath))
                 {
-                    System.Windows.MessageBox.Show("No user accounts found. Please register first.", "Login Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    System.Windows.MessageBox.Show("No accounts found. Please register first.", "Login Error", MessageBoxButton.OK, MessageBoxImage.Error);
                     return;
                 }
 
@@ -85,7 +85,7 @@ namespace CyberVault
                 byte[] inputHash = HashPassword(password, salt!);
                 if (!CompareByteArrays(inputHash, storedHash!))
                 {
-                    System.Windows.MessageBox.Show("Incorrect password!", "Login Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    System.Windows.MessageBox.Show("Incorrect password or username!", "Login Error", MessageBoxButton.OK, MessageBoxImage.Error);
                     return;
                 }
 
