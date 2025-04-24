@@ -189,7 +189,7 @@ namespace CyberVault.Viewmodel
 
                 if (!System.IO.File.Exists(shortcutPath))
                 {
-                    string exePath = System.Reflection.Assembly.GetExecutingAssembly().Location;
+                    string exePath = System.Diagnostics.Process.GetCurrentProcess().MainModule!.FileName;
 
                     WshShell shell = new WshShell();
                     IWshShortcut shortcut = (IWshShortcut)shell.CreateShortcut(shortcutPath);
