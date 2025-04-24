@@ -1,12 +1,8 @@
-﻿using System.Configuration;
-using System.Data;
+﻿using CyberVault.WebExtension;
 using System.IO;
 using System.Windows;
-using CyberVault.WebExtension;
 namespace CyberVault;
-/// <summary>
-/// Interaction logic for App.xaml
-/// </summary>
+
 public partial class App : Application
 {
     public static bool MinimizeToTrayEnabled { get; set; } = false;
