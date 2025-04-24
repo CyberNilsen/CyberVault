@@ -1,183 +1,220 @@
-﻿    using System;
-    using System.Collections.Generic;
-    using System.Diagnostics;
-    using System.IO;
-    using System.IO.Compression;
-    using System.Net.Http;
-    using System.Text.RegularExpressions;
-    using System.Threading.Tasks;
-    using System.Windows;
-    using System.Windows.Controls;
-    using System.Windows.Media;
-    using CyberVault.WebExtension;
-    using System.Windows.Threading;
-    using System.ComponentModel;
+﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
+using System.IO.Compression;
+using System.Net.Http;
+using System.Text.RegularExpressions;
+using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Media;
+using CyberVault.WebExtension;
+using System.Windows.Threading;
+using System.ComponentModel;
 
-    namespace CyberVault.Viewmodel
+namespace CyberVault.Viewmodel
+{
+    public partial class HomeDashboardControl : UserControl
     {
-        public partial class HomeDashboardControl : UserControl
+        private string? _accessToken;
+        private LocalWebServer? _webServer;
+        private string _currentVersion = "v3.0";
+        private readonly string _githubRepoUrl = "https://github.com/CyberNilsen/CyberVault";
+        private readonly string _githubApiReleaseUrl = "https://api.github.com/repos/CyberNilsen/CyberVault/releases/latest";
+        private bool _updateAvailable = false;
+        private string _latestVersion = "";
+        private string _downloadUrl = "";
+        private bool _isDownloading = false;
+        private readonly string _tempDownloadPath;
+        private readonly string _applicationPath;
+        private UpdateProgressWindow? _updateProgressWindow;
+
+        public HomeDashboardControl(string username, byte[] encryptionKey)
         {
-            private string ?_accessToken;
-            private LocalWebServer ?_webServer;
-            private string _currentVersion = "v3.0";
-            private readonly string _githubRepoUrl = "https://github.com/CyberNilsen/CyberVault";
-            private readonly string _githubApiReleaseUrl = "https://api.github.com/repos/CyberNilsen/CyberVault/releases/latest";
-            private bool _updateAvailable = false;
-            private string _latestVersion = "";
-            private string _downloadUrl = "";
-            private bool _isDownloading = false;
-            private readonly string _tempDownloadPath;
-            private readonly string _applicationPath;
-            private UpdateProgressWindow ?_updateProgressWindow;
+            InitializeComponent();
 
-            public HomeDashboardControl(string username, byte[] encryptionKey)
+            LoadCurrentVersion();
+
+            _applicationPath = AppDomain.CurrentDomain.BaseDirectory;
+            _tempDownloadPath = Path.Combine(Path.GetTempPath(), "CyberVaultUpdate");
+
+            if (App.WebServer != null)
             {
-                InitializeComponent();
-
-                LoadCurrentVersion();
-
-                _applicationPath = AppDomain.CurrentDomain.BaseDirectory;
-                _tempDownloadPath = Path.Combine(Path.GetTempPath(), "CyberVaultUpdate");
-
+                _webServer = App.WebServer;
+                _accessToken = App.CurrentAccessToken;
+            }
+            else
+            {
                 InitializeWebServer(username, encryptionKey);
-                LoadExtensionKey();
-                SetRandomQuote();
-                CurrentVersionText.Text = _currentVersion;
             }
 
-            private void LoadCurrentVersion()
+            this.Loaded += UserControl_Loaded;
+
+            SetRandomQuote();
+            CurrentVersionText.Text = _currentVersion;
+        }
+
+        private void LoadCurrentVersion()
+        {
+            try
             {
-                try
+                string versionFilePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "version.txt");
+                if (File.Exists(versionFilePath))
                 {
-                    string versionFilePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "version.txt");
-                    if (File.Exists(versionFilePath))
+                    string versionFromFile = File.ReadAllText(versionFilePath).Trim();
+                    if (!string.IsNullOrEmpty(versionFromFile) && versionFromFile.StartsWith("v"))
                     {
-                        string versionFromFile = File.ReadAllText(versionFilePath).Trim();
-                        if (!string.IsNullOrEmpty(versionFromFile) && versionFromFile.StartsWith("v"))
-                        {
-                            _currentVersion = versionFromFile;
-                        }
+                        _currentVersion = versionFromFile;
                     }
                 }
-                catch (Exception)
-                {
-                    return;
-                }
             }
-
-            private void UserControl_Loaded(object sender, RoutedEventArgs e)
+            catch (Exception)
             {
-                CheckForUpdatesAsync();
+                return;
             }
+        }
 
-            private async void CheckForUpdatesAsync()
-            {
-                try
-                {
-                    await CheckForUpdates(false);
-                }
-                catch (Exception)
-                {
-                    UpdateStatusText.Text = "Update status: Unknown";
-                }
-            }
+        private void UserControl_Loaded(object sender, RoutedEventArgs e)
+        {
+            CheckForUpdatesAsync();
+            ExtensionKeyDisplay();
+        }
 
-            private void InitializeWebServer(string username, byte[] encryptionKey)
+        private void ExtensionKeyDisplay()
+        {
+            if (string.IsNullOrEmpty(_accessToken))
             {
-                try
-                {
-                    _webServer = new LocalWebServer(username, encryptionKey);
-                    _webServer.Start();
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show($"Failed to start web server: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                }
-            }
+                _accessToken = App.CurrentAccessToken;
 
-            private void LoadExtensionKey()
-            {
-                try
+                if (string.IsNullOrEmpty(_accessToken) && _webServer != null)
                 {
-                    if (_webServer != null)
-                    {
+                    
                         _accessToken = _webServer.GetAccessToken();
-                        ExtensionKeyText.Text = _accessToken;
-
-                        string maskedText = new string('•', _accessToken.Length);
-                        MaskedKeyText.Text = maskedText;
-
-                        ExtensionKeyText.Visibility = Visibility.Collapsed;
-                        MaskedKeyText.Visibility = Visibility.Visible;
-                    }
-                    else
-                    {
-                        ExtensionKeyText.Text = "Server not started";
-                        MaskedKeyText.Text = "Server not started";
-                    }
-                }
-                catch (Exception ex)
-                {
-                    ExtensionKeyText.Text = "Error loading key";
-                    MaskedKeyText.Text = "Error loading key";
-                    MessageBox.Show($"Failed to load extension key: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                        App.CurrentAccessToken = _accessToken;
+                    
+                    
                 }
             }
 
-            private void CopyKeyButton_Click(object sender, RoutedEventArgs e)
+            if (!string.IsNullOrEmpty(_accessToken))
             {
-                try
-                {
-                    if (!string.IsNullOrEmpty(_accessToken))
-                    {
-                        Clipboard.SetText(_accessToken);
-                        ShowCopySuccess();
-                    }
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show($"Failed to copy key: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                }
+                ExtensionKeyText.Text = _accessToken;
+                string maskedText = new string('•', _accessToken.Length);
+                MaskedKeyText.Text = maskedText;
+            }
+            else
+            {
+                ExtensionKeyText.Text = "Server not started";
+                MaskedKeyText.Text = "Server not started";
             }
 
-            private void ToggleKeyVisibilityButton_Click(object sender, RoutedEventArgs e)
+            ExtensionKeyText.Visibility = Visibility.Collapsed;
+            MaskedKeyText.Visibility = Visibility.Visible;
+        }
+
+        private async void CheckForUpdatesAsync()
+        {
+            try
             {
-                if (ExtensionKeyText.Visibility == Visibility.Collapsed)
-                {
-                    ExtensionKeyText.Visibility = Visibility.Visible;
-                    MaskedKeyText.Visibility = Visibility.Collapsed;
+                await CheckForUpdates(false);
+            }
+            catch (Exception)
+            {
+                UpdateStatusText.Text = "Update status: Unknown";
+            }
+        }
 
-                    ((TextBlock)ToggleKeyVisibilityButton.Content).Text = "\uE7B3";
+        private void InitializeWebServer(string username, byte[] encryptionKey)
+        {
+            try
+            {
+                _webServer = new LocalWebServer(username, encryptionKey);
+                _webServer.Start();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Failed to start web server: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        private void LoadExtensionKey()
+        {
+            try
+            {
+                if (_webServer != null && string.IsNullOrEmpty(_accessToken))
+                {
+                    _accessToken = _webServer.GetAccessToken();
+                    App.CurrentAccessToken = _accessToken;
                 }
-                else
-                {
-                    ExtensionKeyText.Visibility = Visibility.Collapsed;
-                    MaskedKeyText.Visibility = Visibility.Visible;
 
-                    ((TextBlock)ToggleKeyVisibilityButton.Content).Text = "\uE7B3";
+                ExtensionKeyDisplay();
+            }
+            catch (Exception ex)
+            {
+                ExtensionKeyText.Text = "Error loading key";
+                MaskedKeyText.Text = "Error loading key";
+                MessageBox.Show($"Failed to load extension key: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        private void CopyKeyButton_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                if (!string.IsNullOrEmpty(_accessToken))
+                {
+                    Clipboard.SetText(_accessToken);
+                    ShowCopySuccess();
                 }
             }
-
-            private void ShowCopySuccess()
+            catch (Exception ex)
             {
-                string? originalContent = CopyKeyButton.Content.ToString();
-                CopyKeyButton.Content = "Copied!";
-                CopyKeyButton.Background = System.Windows.Media.Brushes.Green;
-
-                var timer = new System.Windows.Threading.DispatcherTimer();
-                timer.Tick += (s, args) =>
-                {
-                    CopyKeyButton.Content = originalContent;
-                    CopyKeyButton.Background = new System.Windows.Media.SolidColorBrush((System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString("#5E81AC"));
-                    timer.Stop();
-                };
-                timer.Interval = TimeSpan.FromSeconds(2);
-                timer.Start();
+                MessageBox.Show($"Failed to copy key: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
+        }
 
-            private void SetRandomQuote()
+        private void ToggleKeyVisibilityButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (ExtensionKeyText.Visibility == Visibility.Collapsed)
             {
-                List<string> quotes = new List<string>
+                if (!string.IsNullOrEmpty(_accessToken))
+                {
+                    ExtensionKeyText.Text = _accessToken;
+                }
+
+                ExtensionKeyText.Visibility = Visibility.Visible;
+                MaskedKeyText.Visibility = Visibility.Collapsed;
+                ((TextBlock)ToggleKeyVisibilityButton.Content).Text = "\uE7B3";
+            }
+            else
+            {
+                ExtensionKeyText.Visibility = Visibility.Collapsed;
+                MaskedKeyText.Visibility = Visibility.Visible;
+                ((TextBlock)ToggleKeyVisibilityButton.Content).Text = "\uE7B3";
+            }
+        }
+
+        private void ShowCopySuccess()
+        {
+            string? originalContent = CopyKeyButton.Content.ToString();
+            CopyKeyButton.Content = "Copied!";
+            CopyKeyButton.Background = System.Windows.Media.Brushes.Green;
+
+            var timer = new System.Windows.Threading.DispatcherTimer();
+            timer.Tick += (s, args) =>
+            {
+                CopyKeyButton.Content = originalContent;
+                CopyKeyButton.Background = new System.Windows.Media.SolidColorBrush((System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString("#5E81AC"));
+                timer.Stop();
+            };
+            timer.Interval = TimeSpan.FromSeconds(2);
+            timer.Start();
+        }
+
+        private void SetRandomQuote()
+        {
+            List<string> quotes = new List<string>
                 {
                     "☕ Strong passwords and strong coffee: two things you should never compromise.",
                     "🔥 Your firewall is only as strong as your coffee is black.",
@@ -211,169 +248,169 @@
                     "🔒 May your coffee be strong and your passwords stronger."
                 };
 
-                Random rand = new Random();
-                int index = rand.Next(quotes.Count);
-                QuoteText.Text = quotes[index];
-            }
+            Random rand = new Random();
+            int index = rand.Next(quotes.Count);
+            QuoteText.Text = quotes[index];
+        }
 
-            private async void CheckUpdateButton_Click(object sender, RoutedEventArgs e)
-            {
-                await CheckForUpdates(true);
-            }
+        private async void CheckUpdateButton_Click(object sender, RoutedEventArgs e)
+        {
+            await CheckForUpdates(true);
+        }
 
-            private async Task CheckForUpdates(bool showErrors)
+        private async Task CheckForUpdates(bool showErrors)
+        {
+            try
             {
-                try
+                UpdateStatusText.Text = "Checking for updates...";
+                CheckUpdateButton.IsEnabled = false;
+
+                using (HttpClient client = new HttpClient())
                 {
-                    UpdateStatusText.Text = "Checking for updates...";
-                    CheckUpdateButton.IsEnabled = false;
+                    client.DefaultRequestHeaders.Add("User-Agent", "CyberVault-Program");
+                    client.Timeout = TimeSpan.FromSeconds(5);
 
-                    using (HttpClient client = new HttpClient())
+                    string responseBody = await client.GetStringAsync(_githubApiReleaseUrl);
+
+                    Regex versionRegex = new Regex("\"tag_name\":\\s*\"(v[0-9]+\\.[0-9]+)\"");
+                    Match versionMatch = versionRegex.Match(responseBody);
+
+                    if (versionMatch.Success)
                     {
-                        client.DefaultRequestHeaders.Add("User-Agent", "CyberVault-Program");
-                        client.Timeout = TimeSpan.FromSeconds(5);
+                        _latestVersion = versionMatch.Groups[1].Value;
 
-                        string responseBody = await client.GetStringAsync(_githubApiReleaseUrl);
+                        Regex downloadUrlRegex = new Regex("\"browser_download_url\":\\s*\"([^\"]+\\.zip)\"");
+                        Match downloadUrlMatch = downloadUrlRegex.Match(responseBody);
 
-                        Regex versionRegex = new Regex("\"tag_name\":\\s*\"(v[0-9]+\\.[0-9]+)\"");
-                        Match versionMatch = versionRegex.Match(responseBody);
-
-                        if (versionMatch.Success)
-                        {
-                            _latestVersion = versionMatch.Groups[1].Value;
-
-                            Regex downloadUrlRegex = new Regex("\"browser_download_url\":\\s*\"([^\"]+\\.zip)\"");
-                            Match downloadUrlMatch = downloadUrlRegex.Match(responseBody);
-
-                            if (downloadUrlMatch.Success)
-                                _downloadUrl = downloadUrlMatch.Groups[1].Value;
-                            else
-                                _downloadUrl = $"{_githubRepoUrl}/releases/tag/{_latestVersion}";
-
-                            CompareVersions(_currentVersion, _latestVersion);
-                        }
+                        if (downloadUrlMatch.Success)
+                            _downloadUrl = downloadUrlMatch.Groups[1].Value;
                         else
-                        {
-                            if (showErrors)
-                                UpdateStatusText.Text = "Could not retrieve version information.";
-                        }
-                    }
-                }
-                catch (Exception ex)
-                {
-                    if (showErrors)
-                        UpdateStatusText.Text = $"Error checking for updates: {ex.Message}";
-                }
-                finally
-                {
-                    CheckUpdateButton.IsEnabled = true;
-                }
-            }
+                            _downloadUrl = $"{_githubRepoUrl}/releases/tag/{_latestVersion}";
 
-            private void CompareVersions(string currentVersion, string latestVersion)
-            {
-                try
-                {
-                    currentVersion = currentVersion.TrimStart('v');
-                    latestVersion = latestVersion.TrimStart('v');
-
-                    Version current = new Version(currentVersion);
-                    Version latest = new Version(latestVersion);
-
-                    if (latest > current)
-                    {
-                        _updateAvailable = true;
-                        UpdateStatusText.Text = $"Update available: {_latestVersion}";
-                        UpdateNowButton.Visibility = Visibility.Visible;
+                        CompareVersions(_currentVersion, _latestVersion);
                     }
                     else
                     {
-                        _updateAvailable = false;
-                        UpdateStatusText.Text = "You have the latest version.";
-                        UpdateNowButton.Visibility = Visibility.Collapsed;
+                        if (showErrors)
+                            UpdateStatusText.Text = "Could not retrieve version information.";
                     }
                 }
-                catch (Exception ex)
+            }
+            catch (Exception ex)
+            {
+                if (showErrors)
+                    UpdateStatusText.Text = $"Error checking for updates: {ex.Message}";
+            }
+            finally
+            {
+                CheckUpdateButton.IsEnabled = true;
+            }
+        }
+
+        private void CompareVersions(string currentVersion, string latestVersion)
+        {
+            try
+            {
+                currentVersion = currentVersion.TrimStart('v');
+                latestVersion = latestVersion.TrimStart('v');
+
+                Version current = new Version(currentVersion);
+                Version latest = new Version(latestVersion);
+
+                if (latest > current)
                 {
-                    UpdateStatusText.Text = $"Error comparing versions: {ex.Message}";
+                    _updateAvailable = true;
+                    UpdateStatusText.Text = $"Update available: {_latestVersion}";
+                    UpdateNowButton.Visibility = Visibility.Visible;
+                }
+                else
+                {
+                    _updateAvailable = false;
+                    UpdateStatusText.Text = "You have the latest version.";
+                    UpdateNowButton.Visibility = Visibility.Collapsed;
                 }
             }
-
-            private void UpdateNowButton_Click(object sender, RoutedEventArgs e)
+            catch (Exception ex)
             {
-                if (_updateAvailable && !string.IsNullOrEmpty(_downloadUrl) && !_isDownloading)
-                {
-                    ShowUpdateConfirmationDialog();
-                }
+                UpdateStatusText.Text = $"Error comparing versions: {ex.Message}";
             }
+        }
 
-            private void ShowUpdateConfirmationDialog()
+        private void UpdateNowButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (_updateAvailable && !string.IsNullOrEmpty(_downloadUrl) && !_isDownloading)
             {
-                Window confirmationDialog = new Window
-                {
-                    Title = "Update Confirmation",
-                    Width = 400,
-                    Height = 230,
-                    WindowStartupLocation = WindowStartupLocation.CenterScreen,
-                    ResizeMode = ResizeMode.NoResize,
-                    WindowStyle = WindowStyle.ToolWindow
-                };
-
-                Grid dialogGrid = new Grid();
-                dialogGrid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(2, GridUnitType.Star) });
-                dialogGrid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Star) });
-
-                TextBlock messageText = new TextBlock
-                {
-                    Text = $"A new version of CyberVault ({_latestVersion}) is available.\n\nDo you want to update now?\n\nThe application will close, update, and restart automatically.",
-                    TextWrapping = TextWrapping.Wrap,
-                    VerticalAlignment = VerticalAlignment.Center,
-                    HorizontalAlignment = HorizontalAlignment.Center,
-                    TextAlignment = TextAlignment.Center,
-                    Margin = new Thickness(20)
-                };
-                Grid.SetRow(messageText, 0);
-                dialogGrid.Children.Add(messageText);
-
-                StackPanel buttonPanel = new StackPanel
-                {
-                    Orientation = Orientation.Horizontal,
-                    HorizontalAlignment = HorizontalAlignment.Center,
-                    VerticalAlignment = VerticalAlignment.Center
-                };
-                Grid.SetRow(buttonPanel, 1);
-
-                Button yesButton = new Button
-                {
-                    Content = "Update Now",
-                    Width = 120,
-                    Height = 30,
-                    Margin = new Thickness(10),
-                    Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#5E81AC")),
-                    Foreground = Brushes.White
-                };
-                yesButton.Click += async (s, args) =>
-                {
-                    confirmationDialog.Close();
-                    await PerformUpdate();
-                };
-
-                Button noButton = new Button
-                {
-                    Content = "Later",
-                    Width = 120,
-                    Height = 30,
-                    Margin = new Thickness(10)
-                };
-                noButton.Click += (s, args) => confirmationDialog.Close();
-
-                buttonPanel.Children.Add(yesButton);
-                buttonPanel.Children.Add(noButton);
-                dialogGrid.Children.Add(buttonPanel);
-
-                confirmationDialog.Content = dialogGrid;
-                confirmationDialog.ShowDialog();
+                ShowUpdateConfirmationDialog();
             }
+        }
+
+        private void ShowUpdateConfirmationDialog()
+        {
+            Window confirmationDialog = new Window
+            {
+                Title = "Update Confirmation",
+                Width = 400,
+                Height = 230,
+                WindowStartupLocation = WindowStartupLocation.CenterScreen,
+                ResizeMode = ResizeMode.NoResize,
+                WindowStyle = WindowStyle.ToolWindow
+            };
+
+            Grid dialogGrid = new Grid();
+            dialogGrid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(2, GridUnitType.Star) });
+            dialogGrid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Star) });
+
+            TextBlock messageText = new TextBlock
+            {
+                Text = $"A new version of CyberVault ({_latestVersion}) is available.\n\nDo you want to update now?\n\nThe application will close, update, and restart automatically.",
+                TextWrapping = TextWrapping.Wrap,
+                VerticalAlignment = VerticalAlignment.Center,
+                HorizontalAlignment = HorizontalAlignment.Center,
+                TextAlignment = TextAlignment.Center,
+                Margin = new Thickness(20)
+            };
+            Grid.SetRow(messageText, 0);
+            dialogGrid.Children.Add(messageText);
+
+            StackPanel buttonPanel = new StackPanel
+            {
+                Orientation = Orientation.Horizontal,
+                HorizontalAlignment = HorizontalAlignment.Center,
+                VerticalAlignment = VerticalAlignment.Center
+            };
+            Grid.SetRow(buttonPanel, 1);
+
+            Button yesButton = new Button
+            {
+                Content = "Update Now",
+                Width = 120,
+                Height = 30,
+                Margin = new Thickness(10),
+                Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#5E81AC")),
+                Foreground = Brushes.White
+            };
+            yesButton.Click += async (s, args) =>
+            {
+                confirmationDialog.Close();
+                await PerformUpdate();
+            };
+
+            Button noButton = new Button
+            {
+                Content = "Later",
+                Width = 120,
+                Height = 30,
+                Margin = new Thickness(10)
+            };
+            noButton.Click += (s, args) => confirmationDialog.Close();
+
+            buttonPanel.Children.Add(yesButton);
+            buttonPanel.Children.Add(noButton);
+            dialogGrid.Children.Add(buttonPanel);
+
+            confirmationDialog.Content = dialogGrid;
+            confirmationDialog.ShowDialog();
+        }
 
         private async Task PerformUpdate()
         {
@@ -411,9 +448,9 @@
                 {
                     File.WriteAllText(Path.Combine(_tempDownloadPath, "version.txt"), _latestVersion);
                 }
-                catch { 
-                
-                      }
+                catch
+                {
+                }
 
                 CreateUpdaterScript(zipPath);
 
@@ -452,16 +489,16 @@
 
                                     try {
                                         Write-Log ""Update script started""
-    
+
                                         Start-Sleep -Seconds 2
                                         Write-Log ""Waiting for application to close completely""
-    
+
                                         $versionFile = ""$TEMPPATH$\version.txt""
                                         if (Test-Path -Path $versionFile) {
                                             Write-Log ""Found version file, will restore after update""
                                             $versionContent = Get-Content -Path $versionFile -Raw
                                         }
-    
+
                                         # Create a backup of critical files that should be preserved
                                         Write-Log ""Creating backup of critical files""
                                         $backupDir = ""$TEMPPATH$\backup""
@@ -469,11 +506,11 @@
                                             Remove-Item -Path $backupDir -Recurse -Force
                                         }
                                         New-Item -ItemType Directory -Path $backupDir -Force | Out-Null
-    
+
                                         $filesToPreserve = @(
 
                                         )
-    
+
                                         foreach ($file in $filesToPreserve) {
                                             $sourcePath = Join-Path ""$APPPATH$"" $file
                                             if (Test-Path -Path $sourcePath) {
@@ -482,7 +519,7 @@
                                                 Write-Log ""Backed up: $file""
                                             }
                                         }
-    
+
                                         Write-Log ""Cleaning application directory""
                                         Get-ChildItem -Path ""$APPPATH$"" -Exclude ""CyberVaultUpdate"" | ForEach-Object {
                                             if ($_.FullName -ne $backupDir) {
@@ -490,16 +527,16 @@
                                                 Write-Log ""Removed: $($_.Name)""
                                             }
                                         }
-    
+
                                         Write-Log ""Extracting update directly to application directory""
                                         $extractDir = ""$TEMPPATH$\extracted""
                                         if (Test-Path -Path $extractDir) {
                                             Remove-Item -Path $extractDir -Recurse -Force
                                         }
                                         New-Item -ItemType Directory -Path $extractDir -Force | Out-Null
-    
+
                                         Expand-Archive -Path ""$ZIPPATH$"" -DestinationPath $extractDir -Force
-    
+
                                         $extractedItems = Get-ChildItem -Path $extractDir
                                         if ($extractedItems.Count -eq 1 -and (Get-Item -Path $extractedItems[0].FullName).PSIsContainer) {
                                             # If the zip contains a root folder, copy content from inside that folder
@@ -508,7 +545,7 @@
                                             Get-ChildItem -Path $rootFolder -Recurse | ForEach-Object {
                                                 $relativePath = $_.FullName.Substring($rootFolder.Length + 1)
                                                 $targetPath = Join-Path ""$APPPATH$"" $relativePath
-            
+
                                                 if ($_.PSIsContainer) {
                                                     if (-not (Test-Path -Path $targetPath)) {
                                                         New-Item -ItemType Directory -Path $targetPath -Force | Out-Null
@@ -528,7 +565,7 @@
                                             Get-ChildItem -Path $extractDir -Recurse | ForEach-Object {
                                                 $relativePath = $_.FullName.Substring($extractDir.Length + 1)
                                                 $targetPath = Join-Path ""$APPPATH$"" $relativePath
-            
+
                                                 if ($_.PSIsContainer) {
                                                     if (-not (Test-Path -Path $targetPath)) {
                                                         New-Item -ItemType Directory -Path $targetPath -Force | Out-Null
@@ -544,12 +581,12 @@
                                                 }
                                             }
                                         }
-    
+
                                         if ($versionContent) {
                                             Write-Log ""Restoring version file""
                                             Set-Content -Path ""$APPPATH$\version.txt"" -Value $versionContent
                                         }
-    
+
                                         Write-Log ""Restoring preserved files""
                                         foreach ($file in $filesToPreserve) {
                                             $sourcePath = Join-Path $backupDir $file
@@ -559,7 +596,7 @@
                                                 Write-Log ""Restored: $file""
                                             }
                                         }
-    
+
                                         Write-Log ""Cleaning up temporary directories""
                                         if (Test-Path -Path $backupDir) {
                                             Remove-Item -Path $backupDir -Recurse -Force
@@ -567,20 +604,20 @@
                                         if (Test-Path -Path $extractDir) {
                                             Remove-Item -Path $extractDir -Recurse -Force
                                         }
-    
+
                                         $appExePath = ""$APPPATH$\CyberVault.exe""
                                         if (Test-Path -Path $appExePath) {
                                             Write-Log ""Application executable found at: $appExePath""
-        
+
                                             Start-Sleep -Seconds 2
-        
+
                                             Write-Log ""Starting application""
                                             try {
                                                 $startInfo = New-Object System.Diagnostics.ProcessStartInfo
                                                 $startInfo.FileName = $appExePath
                                                 $startInfo.WorkingDirectory = ""$APPPATH$""
                                                 $startInfo.UseShellExecute = $true
-            
+
                                                 [System.Diagnostics.Process]::Start($startInfo)
                                                 Write-Log ""Application started successfully""
                                             }
@@ -598,7 +635,7 @@
                                         else {
                                             Write-Log ""ERROR: Application executable not found at: $appExePath""
                                         }
-    
+
                                         # Exit script
                                         Write-Log ""Update completed successfully""
                                         exit 0
@@ -626,68 +663,69 @@
         }
 
         private void RunUpdaterInBackground()
+        {
+            try
             {
-                try
-                {
-                    string launcherPath = Path.Combine(_tempDownloadPath, "update_launcher.bat");
+                string launcherPath = Path.Combine(_tempDownloadPath, "update_launcher.bat");
 
-                    ProcessStartInfo startInfo = new ProcessStartInfo
-                    {
-                        FileName = launcherPath,
-                        UseShellExecute = false,
-                        CreateNoWindow = true,
-                        WindowStyle = ProcessWindowStyle.Hidden
-                    };
-
-                    Process.Start(startInfo);
-                }
-                catch (Exception ex)
+                ProcessStartInfo startInfo = new ProcessStartInfo
                 {
-                    MessageBox.Show($"Failed to start updater: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                }
+                    FileName = launcherPath,
+                    UseShellExecute = false,
+                    CreateNoWindow = true,
+                    WindowStyle = ProcessWindowStyle.Hidden
+                };
+
+                Process.Start(startInfo);
             }
-
-            private async Task DownloadFileAsync(string url, string filePath)
+            catch (Exception ex)
             {
-                using (HttpClient client = new HttpClient())
+                MessageBox.Show($"Failed to start updater: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        private async Task DownloadFileAsync(string url, string filePath)
+        {
+            using (HttpClient client = new HttpClient())
+            {
+                client.DefaultRequestHeaders.Add("User-Agent", "CyberVault");
+
+                var progress = new Progress<double>(percent =>
                 {
-                    client.DefaultRequestHeaders.Add("User-Agent", "CyberVault");
-
-                    var progress = new Progress<double>(percent => {
-                        if (_updateProgressWindow != null && _updateProgressWindow.IsVisible)
-                        {
-                            Application.Current.Dispatcher.Invoke(() => {
-                                _updateProgressWindow.UpdateProgressBar.Value = percent * 100;
-                                _updateProgressWindow.StatusText.Text = $"Downloading update: {percent:P0}";
-                            });
-                        }
-                    });
-
-                    using (var response = await client.GetAsync(url, HttpCompletionOption.ResponseHeadersRead))
+                    if (_updateProgressWindow != null && _updateProgressWindow.IsVisible)
                     {
-                        response.EnsureSuccessStatusCode();
-                        var totalBytes = response.Content.Headers.ContentLength ?? -1L;
-
-                        using (var fileStream = new FileStream(filePath, FileMode.Create, FileAccess.Write, FileShare.None))
+                        Application.Current.Dispatcher.Invoke(() =>
                         {
-                            using (var contentStream = await response.Content.ReadAsStreamAsync())
-                            {
-                                if (totalBytes == -1)
-                                {
-                                    await contentStream.CopyToAsync(fileStream);
-                                }
-                                else
-                                {
-                                    var buffer = new byte[8192];
-                                    var totalBytesRead = 0L;
-                                    var bytesRead = 0;
+                            _updateProgressWindow.UpdateProgressBar.Value = percent * 100;
+                            _updateProgressWindow.StatusText.Text = $"Downloading update: {percent:P0}";
+                        });
+                    }
+                });
 
-                                    while ((bytesRead = await contentStream.ReadAsync(buffer, 0, buffer.Length)) != 0)
-                                    {
-                                        await fileStream.WriteAsync(buffer, 0, bytesRead);
-                                        totalBytesRead += bytesRead;
-                                        ((IProgress<double>)progress).Report((double)totalBytesRead / totalBytes);
-                                    }
+                using (var response = await client.GetAsync(url, HttpCompletionOption.ResponseHeadersRead))
+                {
+                    response.EnsureSuccessStatusCode();
+                    var totalBytes = response.Content.Headers.ContentLength ?? -1L;
+
+                    using (var fileStream = new FileStream(filePath, FileMode.Create, FileAccess.Write, FileShare.None))
+                    {
+                        using (var contentStream = await response.Content.ReadAsStreamAsync())
+                        {
+                            if (totalBytes == -1)
+                            {
+                                await contentStream.CopyToAsync(fileStream);
+                            }
+                            else
+                            {
+                                var buffer = new byte[8192];
+                                var totalBytesRead = 0L;
+                                var bytesRead = 0;
+
+                                while ((bytesRead = await contentStream.ReadAsync(buffer, 0, buffer.Length)) != 0)
+                                {
+                                    await fileStream.WriteAsync(buffer, 0, bytesRead);
+                                    totalBytesRead += bytesRead;
+                                    ((IProgress<double>)progress).Report((double)totalBytesRead / totalBytes);
                                 }
                             }
                         }
@@ -696,3 +734,4 @@
             }
         }
     }
+}

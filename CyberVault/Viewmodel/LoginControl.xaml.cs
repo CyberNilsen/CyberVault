@@ -7,6 +7,7 @@ using System.Windows.Forms;
 using System.Windows.Input;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement.StartPanel;
 using CyberVault;
+using CyberVault.WebExtension;
 
 namespace CyberVault
 {
@@ -97,7 +98,12 @@ namespace CyberVault
                 mainWindow.Navigate(new DashboardControl(mainWindow, username, CurrentEncryptionKey));
                 int lockTimeMinutes = GetAutoLockTimeFromSettings(username);
                 mainWindow.UserLoggedIn(username, lockTimeMinutes);
-
+                if (App.WebServer == null)
+                {
+                    App.WebServer = new LocalWebServer(username, CurrentEncryptionKey);
+                    App.WebServer.Start();
+                    App.CurrentAccessToken = App.WebServer.GetAccessToken();
+                }
 
             }
             catch (Exception ex)
