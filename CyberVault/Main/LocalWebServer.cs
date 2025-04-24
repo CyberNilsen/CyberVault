@@ -31,14 +31,12 @@ public class LocalWebServer
 
         try
         {
-            // Check if the port is already in use
             try
             {
                 _listener.Start();
             }
             catch (HttpListenerException ex)
             {
-                // Try an alternative port if 8765 is in use
                 _listener.Close();
                 _listener = new HttpListener();
                 _listener.Prefixes.Clear();
