@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -81,6 +82,11 @@ namespace CyberVault
             {
                 App.MinimizeToTrayEnabled = false;
                 App.CurrentUsername = null!;
+                App.CurrentAccessToken = null;
+                App.WebServer?.Stop();
+                App.WebServer = null;
+                
+
 
                 typeof(LoginControl).GetProperty("CurrentEncryptionKey",
                     System.Reflection.BindingFlags.NonPublic |
