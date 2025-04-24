@@ -1,7 +1,7 @@
 ﻿using System.IO;
 using System.Security.Cryptography;
 
-namespace CyberVault
+namespace CyberVault.Main
 
 {
     public static class AesEncryption
