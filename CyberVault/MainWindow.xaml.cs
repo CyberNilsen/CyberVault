@@ -11,12 +11,12 @@ namespace CyberVault
         private const double NormalTopBarHeight = 40;
         private const double MaximizedTopBarHeight = 44;
 
-        private TaskbarIcon ?trayIcon;
+        private TaskbarIcon? trayIcon;
 
-        private DispatcherTimer ?activityTimer;
+        private DispatcherTimer? activityTimer;
         private DateTime lastActivityTime;
         private bool isLocked = false;
-        private string ?currentUsername;
+        private string? currentUsername;
         private int autoLockMinutes = 5;
 
         public MainWindow()

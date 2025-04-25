@@ -4,6 +4,8 @@ using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Forms;
+using Windows.Security.Credentials.UI;
+using Windows.Security.Credentials;
 
 
 namespace CyberVault.Viewmodel
@@ -247,14 +249,104 @@ namespace CyberVault.Viewmodel
             }
         }
 
-        private void BiometricToggle_Checked(object sender, RoutedEventArgs e)
+        private async void BiometricToggle_Checked(object sender, RoutedEventArgs e)
         {
-            SaveUserSetting("BiometricEnabled", "True");
+            try
+            {
+                var availabilityResult = await Windows.Security.Credentials.UI.UserConsentVerifier.CheckAvailabilityAsync();
+
+                if (availabilityResult != Windows.Security.Credentials.UI.UserConsentVerifierAvailability.Available)
+                {
+                    System.Windows.MessageBox.Show("Windows Hello is not available on this device or is not properly configured. Please set up Windows Hello in your Windows settings.",
+                        "Windows Hello Not Available", MessageBoxButton.OK, MessageBoxImage.Warning);
+
+                    BiometricToggle.Checked -= BiometricToggle_Checked;
+                    BiometricToggle.IsChecked = false;
+                    BiometricToggle.Checked += BiometricToggle_Checked;
+
+                    return;
+                }
+
+                var consentResult = await Windows.Security.Credentials.UI.UserConsentVerifier.RequestVerificationAsync(
+                    "Please verify your identity to enable biometric login");
+
+                if (consentResult == Windows.Security.Credentials.UI.UserConsentVerificationResult.Verified)
+                {
+                    string appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+                    string cyberVaultPath = Path.Combine(appDataPath, "CyberVault");
+
+                    var passwordWindow = new PasswordConfirmationDialog();
+                    passwordWindow.Owner = Window.GetWindow(this);
+                    bool? result = passwordWindow.ShowDialog();
+
+                    if (result == true && !string.IsNullOrEmpty(passwordWindow.Password))
+                    {
+                        byte[] encodedPassword = System.Text.Encoding.UTF8.GetBytes(passwordWindow.Password);
+                        byte[] encryptedPassword = System.Security.Cryptography.ProtectedData.Protect(
+                            encodedPassword,
+                            null,
+                            System.Security.Cryptography.DataProtectionScope.CurrentUser);
+
+                        string bioConfigPath = Path.Combine(cyberVaultPath, "biometric_config.txt");
+                        System.IO.File.WriteAllText(bioConfigPath, $"{username},{Convert.ToBase64String(encryptedPassword)}");
+
+                        SaveUserSetting("BiometricEnabled", "True");
+                        System.Windows.MessageBox.Show("Biometric login has been enabled successfully.",
+                            "Biometric Setup Complete", MessageBoxButton.OK, MessageBoxImage.Information);
+                    }
+                    else
+                    {
+                        BiometricToggle.Checked -= BiometricToggle_Checked;
+                        BiometricToggle.IsChecked = false;
+                        BiometricToggle.Checked += BiometricToggle_Checked;
+
+                        SaveUserSetting("BiometricEnabled", "False");
+                    }
+                }
+                else
+                {
+                    System.Windows.MessageBox.Show("Windows Hello verification failed. Biometric login was not enabled.",
+                        "Verification Failed", MessageBoxButton.OK, MessageBoxImage.Warning);
+
+                    BiometricToggle.Checked -= BiometricToggle_Checked;
+                    BiometricToggle.IsChecked = false;
+                    BiometricToggle.Checked += BiometricToggle_Checked;
+
+                    SaveUserSetting("BiometricEnabled", "False");
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Windows.MessageBox.Show($"Error setting up biometric authentication: {ex.Message}",
+                    "Setup Error", MessageBoxButton.OK, MessageBoxImage.Error);
+
+                BiometricToggle.Checked -= BiometricToggle_Checked;
+                BiometricToggle.IsChecked = false;
+                BiometricToggle.Checked += BiometricToggle_Checked;
+
+                SaveUserSetting("BiometricEnabled", "False");
+            }
         }
 
         private void BiometricToggle_Unchecked(object sender, RoutedEventArgs e)
         {
-            SaveUserSetting("BiometricEnabled", "False");
+            try
+            {
+                string appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+                string cyberVaultPath = Path.Combine(appDataPath, "CyberVault");
+                string bioConfigPath = Path.Combine(cyberVaultPath, "biometric_config.txt");
+
+                if (System.IO.File.Exists(bioConfigPath))
+                {
+                    System.IO.File.Delete(bioConfigPath);
+                }
+
+                SaveUserSetting("BiometricEnabled", "False");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error removing biometric config: {ex.Message}");
+            }
         }
 
         private void ChangeMasterPassword_Click(object sender, RoutedEventArgs e)

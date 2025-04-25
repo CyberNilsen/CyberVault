@@ -4,6 +4,7 @@ using System.Windows;
 using System.Windows.Forms;
 using System.Windows.Input;
 using CyberVault.WebExtension;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.StartPanel;
 
 
 namespace CyberVault
@@ -106,6 +107,30 @@ namespace CyberVault
             catch (Exception ex)
             {
                 System.Windows.MessageBox.Show($"An error occurred: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        private void BiometricLogin_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                string appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+                string cyberVaultPath = Path.Combine(appDataPath, "CyberVault");
+                string bioConfigFilePath = Path.Combine(cyberVaultPath, "biometric_config.txt");
+
+                if (!File.Exists(bioConfigFilePath))
+                {
+                    System.Windows.MessageBox.Show("Biometric authentication is not set up. Please log in with your password and enable biometric authentication in settings.",
+                        "Biometric Not Configured", MessageBoxButton.OK, MessageBoxImage.Information);
+                    return;
+                }
+
+                mainWindow.Navigate(new BiometricLoginControl(mainWindow));
+            }
+            catch (Exception ex)
+            {
+                System.Windows.MessageBox.Show($"Error launching biometric authentication: {ex.Message}",
+                    "Biometric Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -360,5 +385,6 @@ namespace CyberVault
                 PasswordInput.Visibility = Visibility.Visible;
             }
         }
+
     }
 }

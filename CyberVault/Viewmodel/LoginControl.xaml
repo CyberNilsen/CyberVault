@@ -63,15 +63,27 @@
                         </Border>
 
                         <Button Grid.Row="4" Content="Login" Style="{StaticResource LoginButton}"
-                              Background="#5E81AC" Height="50" Click="LoginButton_Click" Foreground="White" />
+                              Background="#5E81AC" Height="50" Click="LoginButton_Click" 
+                              Foreground="White" Margin="0,0,0,15" />
 
-                        <TextBlock Grid.Row="5" HorizontalAlignment="Center" Margin="0,25,0,0" FontSize="14" Foreground="#88FFFFFF">
+                        <Button x:Name="BiometricLoginButton" Grid.Row="4"
+                              Style="{StaticResource Biometric}"
+                              Background="#4C566A" Height="40" 
+                              Click="BiometricLogin_Click" 
+                              Margin="0,65,0,84" Grid.RowSpan="2">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="🔐" FontSize="16" Margin="0,0,8,0"/>
+                                <TextBlock Text="Use Biometric Login" FontSize="14"/>
+                            </StackPanel>
+                        </Button>
+
+                        <TextBlock Grid.Row="5" HorizontalAlignment="Center" Margin="0,75,0,0" FontSize="14" Foreground="#88FFFFFF">
                             <Run Text="Don't have an account? " />
                             <TextBlock Text="Register" Foreground="#88AEEF" FontWeight="SemiBold" Cursor="Hand"
                                      MouseLeftButtonDown="RegisterTextBlock_MouseLeftButtonDown" />
                         </TextBlock>
 
-                        <TextBlock Grid.Row="5" HorizontalAlignment="Center" Margin="0,55,0,0" FontSize="14" Foreground="#88FFFFFF">
+                        <TextBlock Grid.Row="5" HorizontalAlignment="Center" Margin="0,105,0,0" FontSize="14" Foreground="#88FFFFFF">
                             <Run Text="Already have an account? " />
                             <TextBlock Text="Import" Foreground="#88AEEF" FontWeight="SemiBold" Cursor="Hand"
                                     MouseLeftButtonDown="ImportTextBlock_MouseLeftButtonDown" />
