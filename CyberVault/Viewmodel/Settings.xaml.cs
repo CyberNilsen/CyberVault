@@ -281,6 +281,49 @@ namespace CyberVault.Viewmodel
 
                     if (result == true && !string.IsNullOrEmpty(passwordWindow.Password))
                     {
+                        string credentialsFilePath = Path.Combine(cyberVaultPath, "credentials.txt");
+                        bool passwordVerified = false;
+
+                        if (System.IO.File.Exists(credentialsFilePath))
+                        {
+                            string[] lines = System.IO.File.ReadAllLines(credentialsFilePath);
+
+                            foreach (string line in lines)
+                            {
+                                if (line.StartsWith(username + ","))
+                                {
+                                    string[] parts = line.Split(',');
+                                    if (parts.Length >= 3)
+                                    {
+                                        byte[] salt = Convert.FromBase64String(parts[1]);
+                                        string storedHash = parts[2];
+
+                                        byte[] enteredKey = KeyDerivation.DeriveKey(passwordWindow.Password, salt);
+                                        string enteredHash = Convert.ToBase64String(enteredKey);
+
+                                        if (enteredHash == storedHash)
+                                        {
+                                            passwordVerified = true;
+                                            break;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        if (!passwordVerified)
+                        {
+                            System.Windows.MessageBox.Show("Incorrect master password. Biometric login not enabled.",
+                                "Authentication Failed", MessageBoxButton.OK, MessageBoxImage.Error);
+
+                            BiometricToggle.Checked -= BiometricToggle_Checked;
+                            BiometricToggle.IsChecked = false;
+                            BiometricToggle.Checked += BiometricToggle_Checked;
+
+                            SaveUserSetting("BiometricEnabled", "False");
+                            return;
+                        }
+
                         byte[] encodedPassword = System.Text.Encoding.UTF8.GetBytes(passwordWindow.Password);
                         byte[] encryptedPassword = System.Security.Cryptography.ProtectedData.Protect(
                             encodedPassword,
@@ -306,7 +349,7 @@ namespace CyberVault.Viewmodel
                 else
                 {
                     System.Windows.MessageBox.Show("Windows Hello verification failed. Biometric login was not enabled.",
-                        "Verification Failed", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    "Verification Failed", MessageBoxButton.OK, MessageBoxImage.Warning);
 
                     BiometricToggle.Checked -= BiometricToggle_Checked;
                     BiometricToggle.IsChecked = false;
@@ -318,7 +361,7 @@ namespace CyberVault.Viewmodel
             catch (Exception ex)
             {
                 System.Windows.MessageBox.Show($"Error setting up biometric authentication: {ex.Message}",
-                    "Setup Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                "Setup Error", MessageBoxButton.OK, MessageBoxImage.Error);
 
                 BiometricToggle.Checked -= BiometricToggle_Checked;
                 BiometricToggle.IsChecked = false;

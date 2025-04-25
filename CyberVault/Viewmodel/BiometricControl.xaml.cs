@@ -97,8 +97,44 @@ namespace CyberVault
         {
             try
             {
-                
-                byte[] derivedKey = new byte[32];
+                byte[] decryptedPasswordBytes = System.Security.Cryptography.ProtectedData.Unprotect(
+                    encryptedPassword,
+                    null,
+                    System.Security.Cryptography.DataProtectionScope.CurrentUser);
+
+                string decryptedPassword = Encoding.UTF8.GetString(decryptedPasswordBytes);
+
+                string appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+                string cyberVaultPath = Path.Combine(appDataPath, "CyberVault");
+                string credentialsPath = Path.Combine(cyberVaultPath, "credentials.txt");
+
+                byte[]? salt = null;
+
+                if (File.Exists(credentialsPath))
+                {
+                    string[] lines = File.ReadAllLines(credentialsPath);
+                    foreach (string line in lines)
+                    {
+                        if (line.StartsWith(username + ","))
+                        {
+                            string[] parts = line.Split(',');
+                            if (parts.Length >= 2)
+                            {
+                                salt = Convert.FromBase64String(parts[1]);
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                if (salt == null)
+                {
+                    MessageBox.Show("Could not find user credentials.",
+                        "Login Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
+                }
+
+                byte[] derivedKey = KeyDerivation.DeriveKey(decryptedPassword, salt);
 
                 App.CurrentUsername = username;
                 App.LoadUserSettings(username);
