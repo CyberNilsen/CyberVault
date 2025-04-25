@@ -38,12 +38,10 @@ namespace CyberVault
         {
             try
             {
-                // First, show user consent dialog from Windows Hello
                 var availabilityResult = await UserConsentVerifier.CheckAvailabilityAsync();
 
                 if (availabilityResult == UserConsentVerifierAvailability.Available)
                 {
-                    // Prompt the user for biometric verification
                     var consentResult = await UserConsentVerifier.RequestVerificationAsync("CyberVault Authentication");
 
                     if (consentResult == UserConsentVerificationResult.Verified)
