@@ -4,6 +4,10 @@ using System.ComponentModel;
 using Hardcodet.Wpf.TaskbarNotification;
 using System.Windows.Threading;
 using CyberVault.Viewmodel;
+using System.Windows.Media;
+using System.Windows.Media.Animation;
+using System.Windows.Media.Effects;
+
 
 namespace CyberVault
 {
@@ -105,27 +109,160 @@ namespace CyberVault
             {
                 Icon = new System.Drawing.Icon(System.Windows.Application.GetResourceStream(
                     new System.Uri("pack://application:,,,/Images/CyberVault.ico")).Stream),
-                ToolTipText = "CyberVault",
+                ToolTipText = "CyberVault Password Manager",
                 Visibility = Visibility.Hidden
             };
 
             var contextMenu = new ContextMenu();
 
-            var openMenuItem = new MenuItem { Header = "➕Open" };
+            ControlTemplate contextMenuTemplate = new ControlTemplate(typeof(ContextMenu));
+            var contextBorderFactory = new FrameworkElementFactory(typeof(Border), "Border");
+            contextBorderFactory.SetValue(Border.BackgroundProperty, new SolidColorBrush((Color)ColorConverter.ConvertFromString("#3B4252")));
+            contextBorderFactory.SetValue(Border.BorderBrushProperty, new SolidColorBrush((Color)ColorConverter.ConvertFromString("#4C566A")));
+            contextBorderFactory.SetValue(Border.BorderThicknessProperty, new Thickness(1));
+            contextBorderFactory.SetValue(Border.CornerRadiusProperty, new CornerRadius(8));
+            contextBorderFactory.SetValue(Border.PaddingProperty, new Thickness(3));
+
+            var itemsPresenterFactory = new FrameworkElementFactory(typeof(ItemsPresenter), "ItemsPresenter");
+            itemsPresenterFactory.SetValue(FrameworkElement.MarginProperty, new Thickness(0));
+            contextBorderFactory.AppendChild(itemsPresenterFactory);
+
+            contextMenuTemplate.VisualTree = contextBorderFactory;
+            contextMenu.Template = contextMenuTemplate;
+
+            contextMenu.Effect = new DropShadowEffect
+            {
+                Color = Colors.Black,
+                Direction = 270,
+                ShadowDepth = 4,
+                Opacity = 0.6,
+                BlurRadius = 8
+            };
+
+            contextMenu.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#3B4252"));
+            contextMenu.BorderBrush = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#4C566A"));
+            contextMenu.BorderThickness = new Thickness(1);
+            contextMenu.Padding = new Thickness(3);
+
+            Style menuItemStyle = new Style(typeof(MenuItem));
+            menuItemStyle.Setters.Add(new Setter(MenuItem.ForegroundProperty, new SolidColorBrush(Colors.White)));
+            menuItemStyle.Setters.Add(new Setter(MenuItem.BackgroundProperty, new SolidColorBrush((Color)ColorConverter.ConvertFromString("#3B4252"))));
+            menuItemStyle.Setters.Add(new Setter(MenuItem.PaddingProperty, new Thickness(12, 8, 12, 8)));
+            menuItemStyle.Setters.Add(new Setter(MenuItem.BorderThicknessProperty, new Thickness(0)));
+            menuItemStyle.Setters.Add(new Setter(MenuItem.FontSizeProperty, 14.0));
+            menuItemStyle.Setters.Add(new Setter(MenuItem.MinWidthProperty, 180.0));
+            menuItemStyle.Setters.Add(new Setter(MenuItem.MarginProperty, new Thickness(2)));
+
+            var borderFactory = new FrameworkElementFactory(typeof(Border), "Border");
+            borderFactory.SetValue(Border.BackgroundProperty, new TemplateBindingExtension(MenuItem.BackgroundProperty));
+            borderFactory.SetValue(Border.BorderBrushProperty, new TemplateBindingExtension(MenuItem.BorderBrushProperty));
+            borderFactory.SetValue(Border.BorderThicknessProperty, new TemplateBindingExtension(MenuItem.BorderThicknessProperty));
+            borderFactory.SetValue(Border.CornerRadiusProperty, new CornerRadius(6));
+
+            var contentPresenterFactory = new FrameworkElementFactory(typeof(ContentPresenter));
+            contentPresenterFactory.SetValue(ContentPresenter.ContentProperty, new TemplateBindingExtension(MenuItem.HeaderProperty));
+            contentPresenterFactory.SetValue(ContentPresenter.MarginProperty, new Thickness(32, 0, 0, 0));
+            contentPresenterFactory.SetValue(FrameworkElement.VerticalAlignmentProperty, VerticalAlignment.Center);
+
+            borderFactory.AppendChild(contentPresenterFactory);
+
+            var menuItemTemplate = new ControlTemplate(typeof(MenuItem));
+            menuItemTemplate.VisualTree = borderFactory;
+            menuItemStyle.Setters.Add(new Setter(MenuItem.TemplateProperty, menuItemTemplate));
+
+            Trigger hoverTrigger = new Trigger { Property = MenuItem.IsMouseOverProperty, Value = true };
+            hoverTrigger.Setters.Add(new Setter(MenuItem.BackgroundProperty, new SolidColorBrush((Color)ColorConverter.ConvertFromString("#5E81AC"))));
+            hoverTrigger.Setters.Add(new Setter(MenuItem.ForegroundProperty, new SolidColorBrush(Colors.White)));
+            menuItemStyle.Triggers.Add(hoverTrigger);
+
+            var enterAnimation = new Storyboard();
+            var colorAnimation = new ColorAnimation
+            {
+                Duration = new Duration(TimeSpan.FromSeconds(0.2)),
+                To = (Color)ColorConverter.ConvertFromString("#5E81AC")
+            };
+            Storyboard.SetTargetProperty(colorAnimation, new PropertyPath("Background.Color"));
+            enterAnimation.Children.Add(colorAnimation);
+
+            var scaleXAnimation = new DoubleAnimation
+            {
+                Duration = new Duration(TimeSpan.FromSeconds(0.2)),
+                To = 1.02
+            };
+            Storyboard.SetTargetProperty(scaleXAnimation, new PropertyPath("RenderTransform.ScaleX"));
+            enterAnimation.Children.Add(scaleXAnimation);
+
+            var scaleYAnimation = new DoubleAnimation
+            {
+                Duration = new Duration(TimeSpan.FromSeconds(0.2)),
+                To = 1.02
+            };
+            Storyboard.SetTargetProperty(scaleYAnimation, new PropertyPath("RenderTransform.ScaleY"));
+            enterAnimation.Children.Add(scaleYAnimation);
+
+            EventTrigger mouseEnterTrigger = new EventTrigger { RoutedEvent = MenuItem.MouseEnterEvent };
+            mouseEnterTrigger.Actions.Add(new BeginStoryboard { Storyboard = enterAnimation });
+            menuItemStyle.Triggers.Add(mouseEnterTrigger);
+
+            var openMenuItem = new MenuItem
+            {
+                Header = "Open CyberVault",
+                Style = menuItemStyle,
+                RenderTransformOrigin = new Point(0.5, 0.5),
+                RenderTransform = new ScaleTransform(1, 1)
+            };
+
+            openMenuItem.Icon = new Grid
+            {
+                Width = 24,
+                Height = 24,
+                Children = { new TextBlock { Text = "🔓", FontSize = 14, Foreground = new SolidColorBrush(Colors.White) } }
+            };
             openMenuItem.Click += (s, e) => ShowMainWindow();
 
-            var SettingsMenuItem = new MenuItem { Header = "⚙️Settings" };
-            SettingsMenuItem.Click += (s, e) => SettingsControl();
+            var settingsMenuItem = new MenuItem
+            {
+                Header = "Settings",
+                Style = menuItemStyle,
+                RenderTransformOrigin = new Point(0.5, 0.5),
+                RenderTransform = new ScaleTransform(1, 1)
+            };
+            settingsMenuItem.Icon = new Grid
+            {
+                Width = 24,
+                Height = 24,
+                Children = { new TextBlock { Text = "⚙️", FontSize = 14, Foreground = new SolidColorBrush(Colors.White) } }
+            };
+            settingsMenuItem.Click += (s, e) => SettingsControl();
 
-            var exitMenuItem = new MenuItem { Header = "❌Exit" };
+            var separator = new Separator
+            {
+                Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#4C566A")),
+                Margin = new Thickness(8, 4, 8, 4),
+                Height = 1
+            };
+
+            var exitMenuItem = new MenuItem
+            {
+                Header = "Exit",
+                Style = menuItemStyle,
+                RenderTransformOrigin = new Point(0.5, 0.5),
+                RenderTransform = new ScaleTransform(1, 1)
+            };
+            exitMenuItem.Icon = new Grid
+            {
+                Width = 24,
+                Height = 24,
+                Children = { new TextBlock { Text = "✖️", FontSize = 14, Foreground = new SolidColorBrush(Colors.White) } }
+            };
             exitMenuItem.Click += (s, e) => ExitApplication();
 
             contextMenu.Items.Add(openMenuItem);
-            contextMenu.Items.Add(SettingsMenuItem);
+            contextMenu.Items.Add(settingsMenuItem);
+            contextMenu.Items.Add(separator);
             contextMenu.Items.Add(exitMenuItem);
 
             trayIcon.ContextMenu = contextMenu;
-
             trayIcon.TrayMouseDoubleClick += (s, e) => ShowMainWindow();
         }
 
