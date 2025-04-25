@@ -111,13 +111,13 @@ namespace CyberVault
 
             var contextMenu = new ContextMenu();
 
-            var openMenuItem = new MenuItem { Header = "Open" };
+            var openMenuItem = new MenuItem { Header = "➕Open" };
             openMenuItem.Click += (s, e) => ShowMainWindow();
 
-            var SettingsMenuItem = new MenuItem { Header = "Settings" };
+            var SettingsMenuItem = new MenuItem { Header = "⚙️Settings" };
             SettingsMenuItem.Click += (s, e) => SettingsControl();
 
-            var exitMenuItem = new MenuItem { Header = "Exit" };
+            var exitMenuItem = new MenuItem { Header = "❌Exit" };
             exitMenuItem.Click += (s, e) => ExitApplication();
 
             contextMenu.Items.Add(openMenuItem);
