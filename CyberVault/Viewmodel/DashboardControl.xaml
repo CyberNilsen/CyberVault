@@ -19,9 +19,13 @@
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
                     <StackPanel Grid.Column="0" Orientation="Horizontal">
-                        <Image Source="pack://application:,,,/Images/CyberVault2.jpg" Width="24" Height="24" Margin="15,10,8,10" Opacity="0.9"/>
+                        <Image Source="pack://application:,,,/Images/CyberVaultNew.png"
+                               SnapsToDevicePixels="True"
+                               UseLayoutRounding="True"
+                               RenderOptions.BitmapScalingMode="HighQuality"
+                               Width="24" Height="24" Margin="15,8,8,10" Opacity="0.9"/>
                         <TextBlock Text="CyberVault Dashboard" VerticalAlignment="Center" 
-                               FontSize="16" FontWeight="SemiBold" Foreground="White"/>
+                               FontSize="16" FontWeight="SemiBold" Margin="0,8,0,10" Foreground="White"/>
                     </StackPanel>
                 </Grid>
             </Border>
@@ -43,7 +47,10 @@
                         <StackPanel Grid.Row="0" Margin="0,20,0,15">
                             <Border Background="Transparent"  HorizontalAlignment="Center">
 
-                                <Image Source="pack://application:,,,/Images/CyberVaultcornerrounded.png" Width="70" HorizontalAlignment="Left">
+                                <Image Source="pack://application:,,,/Images/CyberVaultNew.png" Width="70" HorizontalAlignment="Left"
+                                       SnapsToDevicePixels="True"
+                                       UseLayoutRounding="True"
+                                       RenderOptions.BitmapScalingMode="HighQuality">
                                 </Image>
                             </Border>
                             <TextBlock Text="CyberVault" FontSize="22" FontWeight="SemiBold" Foreground="White" 

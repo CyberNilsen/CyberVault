@@ -34,7 +34,7 @@
                         <Button Grid.Row="1" x:Name="BiometricAuthButton" Content="Authenticate" 
                                 Style="{StaticResource LoginButton}"
                                 Background="#5E81AC" Height="50" Click="BiometricAuthButton_Click" 
-                                Foreground="White" Margin="0,0,0,25">
+                                Foreground="White" Margin="0,0,0,15">
                             <Button.ContentTemplate>
                                 <DataTemplate>
                                     <StackPanel Orientation="Horizontal">
@@ -61,8 +61,11 @@
         <Border Grid.Column="1" Background="White" CornerRadius="0,10,10,0">
             <Grid>
                 <StackPanel VerticalAlignment="Center">
-                    <Viewbox MaxHeight="250" MaxWidth="250" Margin="0,0,0,30">
-                        <Image Source="pack://application:,,,/Images/CyberVaultUPSCALED.png"/>
+                    <Viewbox MaxHeight="300" MaxWidth="300" Margin="0,0,0,30">
+                        <Image Source="pack://application:,,,/Images/CyberVaultNew.png" 
+                               SnapsToDevicePixels="True"
+                               UseLayoutRounding="True"
+                               RenderOptions.BitmapScalingMode="HighQuality"/>
                     </Viewbox>
                     <TextBlock Text="Windows Hello" FontSize="36" Foreground="#4C566A"
                              HorizontalAlignment="Center" Margin="0,0,0,10" />

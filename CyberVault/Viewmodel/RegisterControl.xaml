@@ -94,8 +94,11 @@
         <Border Grid.Column="1" Background="White" CornerRadius="0,10,10,0">
             <Grid>
                 <StackPanel VerticalAlignment="Center">
-                    <Viewbox MaxHeight="250" MaxWidth="250" Margin="0,0,0,30">
-                        <Image Source="pack://application:,,,/Images/CyberVaultUPSCALED.png"/>
+                    <Viewbox MaxHeight="300" MaxWidth="300" Margin="0,0,0,30">
+                        <Image Source="pack://application:,,,/Images/CyberVaultNew.png"
+                               SnapsToDevicePixels="True"
+                               UseLayoutRounding="True"
+                               RenderOptions.BitmapScalingMode="HighQuality"/>
                     </Viewbox>
                     <TextBlock Text="Welcome to a Secure Vault" FontSize="36" Foreground="#4C566A" 
                              HorizontalAlignment="Center" Margin="0,0,0,10"/>

@@ -22,6 +22,8 @@
 		<None Remove="Images\CyberVaultBigger.jpg" />
 		<None Remove="Images\CyberVaultEvenBigger.jpg" />
 		<None Remove="Images\CyberVaultLogo.ico" />
+		<None Remove="Images\CyberVaultNew.png" />
+		<None Remove="Images\CyberVaultNewSmall.png" />
 		<None Remove="Images\CyberVaultUPSCALED.png" />
 		<None Remove="Images\eye2.png" />
 		<None Remove="Images\eye3.svg" />
@@ -64,6 +66,7 @@
 		<Resource Include="Images\CyberVault.jpg" />
 		<Resource Include="Images\CyberVault2.jpg" />
 		<Resource Include="Images\CyberVaultcornerrounded.png" />
+		<Resource Include="Images\CyberVaultNew.png" />
 		<Resource Include="Images\CyberVaultUPSCALED.png" />
 		<Resource Include="Images\wrench.png">
 			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
