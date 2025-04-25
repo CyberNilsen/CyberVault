@@ -5,12 +5,12 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:CyberVault.Viewmodel"
              mc:Ignorable="d" d:DesignWidth="800"
-             Loaded="Settings_Loaded" Height="426">
+             Loaded="Settings_Loaded" >
 
     <ScrollViewer VerticalScrollBarVisibility="Auto">
         <StackPanel Margin="0,0,0,20">
 
-            <Border Style="{StaticResource SettingsCard}">
+            <Border Style="{StaticResource SettingsCard}" >
                 <StackPanel>
                     <TextBlock Text="General" Style="{StaticResource SectionTitle}"/>
 
