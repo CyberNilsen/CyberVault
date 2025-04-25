@@ -3,6 +3,7 @@ using System.Windows.Controls;
 using System.ComponentModel;
 using Hardcodet.Wpf.TaskbarNotification;
 using System.Windows.Threading;
+using CyberVault.Viewmodel;
 
 namespace CyberVault
 {
@@ -113,10 +114,14 @@ namespace CyberVault
             var openMenuItem = new MenuItem { Header = "Open" };
             openMenuItem.Click += (s, e) => ShowMainWindow();
 
+            var SettingsMenuItem = new MenuItem { Header = "Settings" };
+            SettingsMenuItem.Click += (s, e) => SettingsControl();
+
             var exitMenuItem = new MenuItem { Header = "Exit" };
             exitMenuItem.Click += (s, e) => ExitApplication();
 
             contextMenu.Items.Add(openMenuItem);
+            contextMenu.Items.Add(SettingsMenuItem);
             contextMenu.Items.Add(exitMenuItem);
 
             trayIcon.ContextMenu = contextMenu;
@@ -129,6 +134,37 @@ namespace CyberVault
             this.Show();
             this.WindowState = WindowState.Normal;
             this.Activate();
+        }
+
+        private void SettingsControl()
+        {
+
+            if (string.IsNullOrEmpty(currentUsername) || isLocked)
+            {
+                MessageBox.Show("Please login to access settings.", "Authentication Required",
+                                 MessageBoxButton.OK, MessageBoxImage.Information);
+
+                MainContent.Content = new LoginControl(this);
+            }
+            else
+            {
+                byte[]? encryptionKey = (byte[]?)typeof(LoginControl).GetProperty("CurrentEncryptionKey",
+                    System.Reflection.BindingFlags.NonPublic |
+                    System.Reflection.BindingFlags.Static)?.GetValue(null);
+
+                if (MainContent.Content is DashboardControl dashboard)
+                {
+                    dashboard.Settings_Click(this, new RoutedEventArgs());
+                    ShowMainWindow();
+                }
+                else
+                {
+                    var dashboardControl = new DashboardControl(this, currentUsername, encryptionKey!);
+                    MainContent.Content = dashboardControl;
+                    dashboardControl.Settings_Click(this, new RoutedEventArgs());
+                    ShowMainWindow();
+                }
+            }
         }
 
         private void ExitApplication()
