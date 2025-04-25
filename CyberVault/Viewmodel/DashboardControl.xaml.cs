@@ -68,7 +68,7 @@ namespace CyberVault
             DashboardContent.Content = authenticatorControl;
         }
 
-        private void Settings_Click(object sender, RoutedEventArgs e)
+        public void Settings_Click(object sender, RoutedEventArgs e)
         {
             WelcomeText.Text = "Settings";
 
