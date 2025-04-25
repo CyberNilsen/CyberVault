@@ -122,6 +122,7 @@ namespace CyberVault
             contextBorderFactory.SetValue(Border.BorderThicknessProperty, new Thickness(1));
             contextBorderFactory.SetValue(Border.CornerRadiusProperty, new CornerRadius(8));
             contextBorderFactory.SetValue(Border.PaddingProperty, new Thickness(3));
+            contextBorderFactory.SetValue(Border.MinHeightProperty, 60.0);
 
             var itemsPresenterFactory = new FrameworkElementFactory(typeof(ItemsPresenter), "ItemsPresenter");
             itemsPresenterFactory.SetValue(FrameworkElement.MarginProperty, new Thickness(0));
@@ -147,9 +148,10 @@ namespace CyberVault
             Style menuItemStyle = new Style(typeof(MenuItem));
             menuItemStyle.Setters.Add(new Setter(MenuItem.ForegroundProperty, new SolidColorBrush(Colors.White)));
             menuItemStyle.Setters.Add(new Setter(MenuItem.BackgroundProperty, new SolidColorBrush((Color)ColorConverter.ConvertFromString("#3B4252"))));
-            menuItemStyle.Setters.Add(new Setter(MenuItem.PaddingProperty, new Thickness(12, 8, 12, 8)));
+            menuItemStyle.Setters.Add(new Setter(MenuItem.PaddingProperty, new Thickness(12, 12, 12, 12)));
             menuItemStyle.Setters.Add(new Setter(MenuItem.BorderThicknessProperty, new Thickness(0)));
             menuItemStyle.Setters.Add(new Setter(MenuItem.FontSizeProperty, 14.0));
+            menuItemStyle.Setters.Add(new Setter(MenuItem.MinHeightProperty, 30.0));
             menuItemStyle.Setters.Add(new Setter(MenuItem.MinWidthProperty, 180.0));
             menuItemStyle.Setters.Add(new Setter(MenuItem.MarginProperty, new Thickness(2)));
 
