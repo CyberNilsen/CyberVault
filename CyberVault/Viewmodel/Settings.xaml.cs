@@ -192,7 +192,7 @@ namespace CyberVault.Viewmodel
                 }
                 SaveUserSetting("StartWithWindows", "True");
             }
-            catch (Exception ex)
+            catch (Exception )
             {
                 StartWithWindowsToggle.Checked -= StartWithWindowsToggle_Checked;
                 StartWithWindowsToggle.IsChecked = false;
@@ -212,7 +212,7 @@ namespace CyberVault.Viewmodel
                 }
                 SaveUserSetting("StartWithWindows", "False");
             }
-            catch (Exception ex)
+            catch (Exception )
             {
                 StartWithWindowsToggle.Checked -= StartWithWindowsToggle_Checked;
                 StartWithWindowsToggle.IsChecked = false;
