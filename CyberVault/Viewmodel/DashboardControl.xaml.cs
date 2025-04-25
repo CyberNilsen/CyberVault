@@ -4,6 +4,7 @@ using System.Windows.Input;
 using CyberVault.View;
 using CyberVault.Viewmodel;
 
+
 namespace CyberVault
 {
     public partial class DashboardControl : UserControl
@@ -70,9 +71,18 @@ namespace CyberVault
         private void Settings_Click(object sender, RoutedEventArgs e)
         {
             WelcomeText.Text = "Settings";
-            var settings = new  Settings(username, encryptionKey);
+
+            var settings = new Settings(username, encryptionKey);
+
+            settings.KontaktOssRequested += (s, args) =>
+            {
+                WelcomeText.Text = "Kontakt oss";
+                DashboardContent.Content = new KontaktOss(Application.Current.MainWindow);
+            };
+
             DashboardContent.Content = settings;
         }
+
 
         private void LogoutButton_Click(object sender, RoutedEventArgs e)
         {

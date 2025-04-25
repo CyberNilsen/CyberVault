@@ -4,47 +4,46 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:CyberVault.Viewmodel"
-             mc:Ignorable="d" 
-             d:DesignHeight="450" d:DesignWidth="800"
-             Loaded="Settings_Loaded">
+             mc:Ignorable="d" d:DesignWidth="800"
+             Loaded="Settings_Loaded" Height="426">
 
     <ScrollViewer VerticalScrollBarVisibility="Auto">
         <StackPanel Margin="0,0,0,20">
-            
+
             <Border Style="{StaticResource SettingsCard}">
                 <StackPanel>
                     <TextBlock Text="General" Style="{StaticResource SectionTitle}"/>
-                    
+
                     <Grid Margin="0,8,0,8">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto"/>
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
-                        
+
                         <TextBlock Grid.Column="0" Text="Minimize to Tray" Style="{StaticResource SettingLabel}"/>
-                        
+
                         <TextBlock Grid.Column="1" Text="Application runs in background when closed" 
                                    Foreground="#677591" FontSize="12" VerticalAlignment="Center"/>
-                        
+
                         <ToggleButton Grid.Column="2" x:Name="MinimizeToTrayToggle" 
                                       Style="{StaticResource SettingToggle}" 
                                       Checked="MinimizeToTrayToggle_Checked" 
                                       Unchecked="MinimizeToTrayToggle_Unchecked"/>
                     </Grid>
-                    
+
                     <Grid Margin="0,8,0,8">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto"/>
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
-                        
+
                         <TextBlock Grid.Column="0" Text="Start with Windows" Style="{StaticResource SettingLabel}"/>
-                        
+
                         <TextBlock Grid.Column="1" Text="Launch application on system startup" 
                                    Foreground="#677591" FontSize="12" VerticalAlignment="Center"/>
-                        
+
                         <ToggleButton Grid.Column="2" x:Name="StartWithWindowsToggle" 
                                       Style="{StaticResource SettingToggle}" 
                                       Checked="StartWithWindowsToggle_Checked" 
@@ -52,25 +51,25 @@
                     </Grid>
                 </StackPanel>
             </Border>
-            
+
             <Border Style="{StaticResource SettingsCard}">
                 <StackPanel>
                     <TextBlock Text="Security" Style="{StaticResource SectionTitle}"/>
-                    
+
                     <Grid Margin="0,8,0,8">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto"/>
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
-                        
+
                         <TextBlock Grid.Column="0" Text="Auto Lock" Style="{StaticResource SettingLabel}"/>
-                        
+
                         <StackPanel Grid.Column="1" Orientation="Vertical">
-                            
+
                             <TextBlock Text="Automatically lock vault after inactivity" 
                                        Foreground="#677591" FontSize="12" VerticalAlignment="Center"/>
-                            
+
                             <ComboBox x:Name="AutoLockComboBox" Width="150" Height="30" Margin="0,8,0,0" 
                                       HorizontalAlignment="Left" SelectedIndex="2" SelectionChanged="AutoLockComboBox_SelectionChanged">
                                 <ComboBoxItem Content="Never"/>
@@ -82,16 +81,16 @@
                             </ComboBox>
                         </StackPanel>
                     </Grid>
-                    
+
                     <Grid Margin="0,15,0,8">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto"/>
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
-                        
+
                         <TextBlock Grid.Column="0" Text="Biometric Authentication" Style="{StaticResource SettingLabel}"/>
-                        
+
                         <TextBlock Grid.Column="1" Text="Use fingerprint or face ID to unlock the vault" 
                                    Foreground="#677591" FontSize="12" VerticalAlignment="Center"/>
                         <ToggleButton Grid.Column="2" x:Name="BiometricToggle" 
@@ -99,35 +98,35 @@
                                       Checked="BiometricToggle_Checked" 
                                       Unchecked="BiometricToggle_Unchecked"/>
                     </Grid>
-                    
+
                     <Grid Margin="0,8,0,8">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto"/>
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
-                        
+
                     </Grid>
-                    
+
                     <Button Content="Change Master Password" Margin="0,15,0,0" 
                             HorizontalAlignment="Left" Style="{StaticResource SaveButton}" 
                             Background="#434C5E" Click="ChangeMasterPassword_Click"/>
                 </StackPanel>
             </Border>
-            
+
             <Border Style="{StaticResource SettingsCard}">
                 <StackPanel>
                     <TextBlock Text="Data" Style="{StaticResource SectionTitle}"/>
-                    
+
                     <Grid Margin="0,8,0,8">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto"/>
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
-                        
+
                     </Grid>
-                    
+
 
                     <StackPanel Orientation="Horizontal" Margin="0,15,0,0">
                         <Button Content="Export Data" Style="{StaticResource SaveButton}" 
@@ -137,22 +136,29 @@
                     </StackPanel>
                 </StackPanel>
             </Border>
-            
+
             <Border Style="{StaticResource SettingsCard}">
                 <StackPanel>
                     <TextBlock Text="About" Style="{StaticResource SectionTitle}"/>
-                    
+
                     <StackPanel Margin="0,8,0,10">
                         <TextBlock Text="CyberVault" FontWeight="SemiBold" FontSize="16" Foreground="#2E3440"/>
-                        
+
                         <TextBlock Text="Version 3.0.0" Foreground="#677591" FontSize="12" Margin="0,4,0,0"/>
                     </StackPanel>
-                    
+
                     <TextBlock TextWrapping="Wrap" Margin="0,0,0,15">
-                        <Run Text="CyberVault is a secure password manager and authenticator designed to keep your digital life safe. "/>
-                        <Run Text="All your data is encrypted using AES-256 encryption and never leaves your device without your permission."/>
+            <Run Text="CyberVault is a secure password manager and authenticator designed to keep your digital life safe. "/>
+            <Run Text="All your data is encrypted using AES-256 encryption and never leaves your device without your permission."/>
                     </TextBlock>
-                    
+
+                    <!-- Ny Kontakt oss knapp -->
+                    <Button Content="Kontakt oss" 
+                Style="{StaticResource SaveButton}" 
+                Background="#434C5E" 
+                HorizontalAlignment="Left"
+                Margin="0,0,0,10"
+                Click="KontaktOss_Click"/>
                 </StackPanel>
             </Border>
         </StackPanel>

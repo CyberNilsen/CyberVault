@@ -6,6 +6,8 @@ using System.Windows.Controls;
 using System.Windows.Forms;
 using Windows.Security.Credentials.UI;
 using Windows.Security.Credentials;
+using System.Windows.Navigation;
+using CyberVault.Viewmodel;
 
 
 namespace CyberVault.Viewmodel
@@ -787,6 +789,16 @@ namespace CyberVault.Viewmodel
                     "Import Error", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
             }
         }
+
+        public event EventHandler KontaktOssRequested;
+
+        // Når du skal trigge eventet:
+        private void KontaktOss_Click(object sender, RoutedEventArgs e)
+        {
+            KontaktOssRequested?.Invoke(this, EventArgs.Empty);
+        }
+
+
 
     }
 }

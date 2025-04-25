@@ -1,0 +1,100 @@
+<UserControl x:Class="CyberVault.Viewmodel.KontaktOss"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:CyberVault.Viewmodel"
+             mc:Ignorable="d" d:DesignWidth="800"
+             Height="426">
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <StackPanel Margin="0,0,0,20">
+
+            <Border Style="{StaticResource SettingsCard}">
+                <StackPanel>
+                    <TextBlock Text="Contact Information" Style="{StaticResource SectionTitle}"/>
+
+                    <Grid Margin="0,15,0,8">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <TextBlock Grid.Column="0" Text="Name" Style="{StaticResource SettingLabel}"/>
+                        <TextBox Grid.Column="1" x:Name="NameTextBox" Margin="10,0,0,0" 
+                                 Height="30" VerticalContentAlignment="Center"/>
+                    </Grid>
+
+                    <Grid Margin="0,15,0,8">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <TextBlock Grid.Column="0" Text="Email" Style="{StaticResource SettingLabel}"/>
+                        <TextBox Grid.Column="1" x:Name="EmailTextBox" Margin="10,0,0,0" 
+                                 Height="30" VerticalContentAlignment="Center"/>
+                    </Grid>
+
+                    <Grid Margin="0,15,0,8">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <TextBlock Grid.Column="0" Text="Subject" Style="{StaticResource SettingLabel}"/>
+                        <ComboBox Grid.Column="1" x:Name="SubjectComboBox" Margin="10,0,0,0" 
+                                  Height="30" HorizontalAlignment="Stretch">
+                            <ComboBoxItem Content="General Inquiry"/>
+                            <ComboBoxItem Content="Technical Support"/>
+                            <ComboBoxItem Content="Bug Report"/>
+                            <ComboBoxItem Content="Feature Request"/>
+                            <ComboBoxItem Content="Other"/>
+                        </ComboBox>
+                    </Grid>
+                </StackPanel>
+            </Border>
+
+            <Border Style="{StaticResource SettingsCard}">
+                <StackPanel>
+                    <TextBlock Text="Your Message" Style="{StaticResource SectionTitle}"/>
+
+                    <Grid Margin="0,8,0,8">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+
+                        <TextBlock Grid.Row="0" Text="Describe how we can help you" 
+                                   Foreground="#677591" FontSize="12" Margin="0,0,0,8"/>
+
+                        <TextBox Grid.Row="1" x:Name="MessageTextBox" Height="150" 
+                                 TextWrapping="Wrap" AcceptsReturn="True" 
+                                 VerticalScrollBarVisibility="Auto"/>
+                    </Grid>
+
+                    <Button Content="Send Message" x:Name="SendButton"
+                            HorizontalAlignment="Left" Style="{StaticResource SaveButton}" 
+                            Background="#434C5E" Margin="0,15,0,0" Click="SendButton_Click"/>
+
+                    <TextBlock x:Name="StatusMessage" Visibility="Collapsed" 
+                               Margin="0,10,0,0" Foreground="#677591" FontSize="14"/>
+                </StackPanel>
+            </Border>
+
+            <Border Style="{StaticResource SettingsCard}">
+                <StackPanel>
+                    <TextBlock Text="Privacy and Data Processing" Style="{StaticResource SectionTitle}"/>
+
+                    <TextBlock TextWrapping="Wrap" Margin="0,8,0,15" Foreground="#677591">
+                        <Run Text="By submitting this form, you consent to our processing of your personal data in accordance with our"/>
+                        <Hyperlink NavigateUri="https://www.cybervault.no/privacy" RequestNavigate="Hyperlink_RequestNavigate">
+                            privacy policy
+                        </Hyperlink>
+                        <Run Text=". We will only use this information to respond to your inquiry."/>
+                    </TextBlock>
+                </StackPanel>
+            </Border>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>
