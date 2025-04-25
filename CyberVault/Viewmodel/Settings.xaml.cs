@@ -183,24 +183,18 @@ namespace CyberVault.Viewmodel
         {
             try
             {
-                string startupFolderPath = Path.Combine(
-                    Environment.GetFolderPath(Environment.SpecialFolder.Startup));
-
+                string startupFolderPath = Environment.GetFolderPath(Environment.SpecialFolder.Startup);
                 string shortcutPath = Path.Combine(startupFolderPath, "CyberVault.lnk");
-
                 if (!System.IO.File.Exists(shortcutPath))
                 {
                     string exePath = System.Diagnostics.Process.GetCurrentProcess().MainModule!.FileName;
-
                     WshShell shell = new WshShell();
                     IWshShortcut shortcut = (IWshShortcut)shell.CreateShortcut(shortcutPath);
-
                     shortcut.TargetPath = exePath;
-                    shortcut.WorkingDirectory = Path.GetDirectoryName(exePath);
+                    shortcut.WorkingDirectory = Path.GetDirectoryName(exePath) ?? "";
                     shortcut.Description = "CyberVault";
                     shortcut.Save();
                 }
-
                 SaveUserSetting("StartWithWindows", "True");
             }
             catch (Exception ex)
