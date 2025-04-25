@@ -212,6 +212,7 @@ namespace CyberVault
                 Style = menuItemStyle,
                 RenderTransformOrigin = new Point(0.5, 0.5),
                 RenderTransform = new ScaleTransform(1, 1)
+                
             };
 
             openMenuItem.Icon = new Grid
