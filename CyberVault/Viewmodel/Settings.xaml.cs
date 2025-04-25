@@ -183,26 +183,17 @@ namespace CyberVault.Viewmodel
         {
             try
             {
-                string startupFolderPath = Environment.GetFolderPath(Environment.SpecialFolder.Startup);
-                string shortcutPath = Path.Combine(startupFolderPath, "CyberVault.lnk");
-                if (!System.IO.File.Exists(shortcutPath))
+                string appName = "CyberVault";
+                string exePath = System.Diagnostics.Process.GetCurrentProcess().MainModule!.FileName;
+
+                using (Microsoft.Win32.RegistryKey? key = Microsoft.Win32.Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true))
                 {
-                    string exePath = System.Diagnostics.Process.GetCurrentProcess().MainModule!.FileName;
-                    WshShell shell = new WshShell();
-                    IWshShortcut shortcut = (IWshShortcut)shell.CreateShortcut(shortcutPath);
-                    shortcut.TargetPath = exePath;
-                    shortcut.WorkingDirectory = Path.GetDirectoryName(exePath) ?? "";
-                    shortcut.Description = "CyberVault";
-                    shortcut.Save();
+                    key?.SetValue(appName, exePath);
                 }
                 SaveUserSetting("StartWithWindows", "True");
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error setting up startup: {ex.Message}`");
-                System.Windows.MessageBox.Show($"Failed to set up startup: {ex.Message}",
-                    "Error", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
-
                 StartWithWindowsToggle.Checked -= StartWithWindowsToggle_Checked;
                 StartWithWindowsToggle.IsChecked = false;
                 StartWithWindowsToggle.Checked += StartWithWindowsToggle_Checked;
@@ -213,26 +204,19 @@ namespace CyberVault.Viewmodel
         {
             try
             {
-                string startupFolderPath = Environment.GetFolderPath(Environment.SpecialFolder.Startup);
+                string appName = "CyberVault";
 
-                string shortcutPath = Path.Combine(startupFolderPath, "CyberVault.lnk");
-
-                if (System.IO.File.Exists(shortcutPath))
+                using (Microsoft.Win32.RegistryKey? key = Microsoft.Win32.Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true))
                 {
-                    System.IO.File.Delete(shortcutPath);
+                    key?.DeleteValue(appName, false);
                 }
-
                 SaveUserSetting("StartWithWindows", "False");
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error removing startup: {ex.Message}");
-                System.Windows.MessageBox.Show($"Failed to remove startup: {ex.Message}",
-                    "Error", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
-
-                StartWithWindowsToggle.Unchecked -= StartWithWindowsToggle_Unchecked;
-                StartWithWindowsToggle.IsChecked = true;
-                StartWithWindowsToggle.Unchecked += StartWithWindowsToggle_Unchecked;
+                StartWithWindowsToggle.Checked -= StartWithWindowsToggle_Checked;
+                StartWithWindowsToggle.IsChecked = false;
+                StartWithWindowsToggle.Checked += StartWithWindowsToggle_Checked;
             }
         }
 
