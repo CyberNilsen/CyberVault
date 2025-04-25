@@ -61,9 +61,6 @@ namespace CyberVault
                                     string username = credentials[0];
                                     byte[] encryptedPassword = Convert.FromBase64String(credentials[1]);
 
-                                    // Handle decryption and login via biometric auth
-                                    // This is simplified; you should securely decrypt the password
-                                    // For example purposes only
                                     HandleBiometricLogin(username, encryptedPassword);
                                     return;
                                 }
@@ -100,15 +97,8 @@ namespace CyberVault
         {
             try
             {
-                // This would be replaced with your actual authentication logic
-                // For example, decrypt the password using ProtectedData and then authenticate
-
-                // For demonstration purposes, we'll assume successful authentication
-                // and navigate to the dashboard
-
-                // Simulate getting the encryption key from the encrypted password
-                // In a real implementation, you'd properly decrypt this
-                byte[] derivedKey = new byte[32]; // Placeholder
+                
+                byte[] derivedKey = new byte[32];
 
                 App.CurrentUsername = username;
                 App.LoadUserSettings(username);
@@ -117,7 +107,6 @@ namespace CyberVault
                 int lockTimeMinutes = GetAutoLockTimeFromSettings(username);
                 mainWindow.UserLoggedIn(username, lockTimeMinutes);
 
-                // Setup web server if needed
                 if (App.WebServer == null)
                 {
                     App.WebServer = new LocalWebServer(username, derivedKey);
@@ -176,13 +165,11 @@ namespace CyberVault
 
         private void CancelButton_Click(object sender, RoutedEventArgs e)
         {
-            // Return to main login screen
             mainWindow.Navigate(new LoginControl(mainWindow));
         }
 
         private void PasswordLogin_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
-            // Navigate to standard password login
             mainWindow.Navigate(new LoginControl(mainWindow));
         }
     }

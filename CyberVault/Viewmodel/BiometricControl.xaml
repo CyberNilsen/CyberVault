@@ -45,7 +45,7 @@
                             </Button.ContentTemplate>
                         </Button>
 
-                        <Button Grid.Row="2" Content="Cancel" Style="{StaticResource LoginButton}"
+                        <Button Grid.Row="2" Content="Cancel" Style="{StaticResource Biometric}"
                                 Background="#4C566A" Height="40" Click="CancelButton_Click" 
                                 Foreground="White" Margin="0,0,0,40" />
 
