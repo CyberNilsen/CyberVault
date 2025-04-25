@@ -155,18 +155,49 @@ namespace CyberVault
             menuItemStyle.Setters.Add(new Setter(MenuItem.MinWidthProperty, 180.0));
             menuItemStyle.Setters.Add(new Setter(MenuItem.MarginProperty, new Thickness(2)));
 
+            Style iconTextBlockStyle = new Style(typeof(TextBlock));
+            iconTextBlockStyle.Setters.Add(new Setter(TextBlock.FontSizeProperty, 12.0));
+            iconTextBlockStyle.Setters.Add(new Setter(TextBlock.ForegroundProperty, new SolidColorBrush(Colors.White)));
+            iconTextBlockStyle.Setters.Add(new Setter(TextBlock.VerticalAlignmentProperty, VerticalAlignment.Center));
+            iconTextBlockStyle.Setters.Add(new Setter(TextBlock.HorizontalAlignmentProperty, HorizontalAlignment.Center));
+            iconTextBlockStyle.Setters.Add(new Setter(TextBlock.MarginProperty, new Thickness(0)));
+
             var borderFactory = new FrameworkElementFactory(typeof(Border), "Border");
             borderFactory.SetValue(Border.BackgroundProperty, new TemplateBindingExtension(MenuItem.BackgroundProperty));
             borderFactory.SetValue(Border.BorderBrushProperty, new TemplateBindingExtension(MenuItem.BorderBrushProperty));
             borderFactory.SetValue(Border.BorderThicknessProperty, new TemplateBindingExtension(MenuItem.BorderThicknessProperty));
             borderFactory.SetValue(Border.CornerRadiusProperty, new CornerRadius(6));
 
-            var contentPresenterFactory = new FrameworkElementFactory(typeof(ContentPresenter));
-            contentPresenterFactory.SetValue(ContentPresenter.ContentProperty, new TemplateBindingExtension(MenuItem.HeaderProperty));
-            contentPresenterFactory.SetValue(ContentPresenter.MarginProperty, new Thickness(32, 0, 0, 0));
-            contentPresenterFactory.SetValue(FrameworkElement.VerticalAlignmentProperty, VerticalAlignment.Center);
+            var gridFactory = new FrameworkElementFactory(typeof(Grid));
 
-            borderFactory.AppendChild(contentPresenterFactory);
+            var iconColumn = new FrameworkElementFactory(typeof(ColumnDefinition));
+            iconColumn.SetValue(ColumnDefinition.WidthProperty, new GridLength(22));
+
+            var textColumn = new FrameworkElementFactory(typeof(ColumnDefinition));
+            textColumn.SetValue(ColumnDefinition.WidthProperty, new GridLength(1, GridUnitType.Star));
+
+            gridFactory.AppendChild(iconColumn);
+            gridFactory.AppendChild(textColumn);
+
+            var iconPresenter = new FrameworkElementFactory(typeof(ContentPresenter), "IconContent");
+            iconPresenter.SetValue(ContentPresenter.ContentProperty, new TemplateBindingExtension(MenuItem.IconProperty));
+            iconPresenter.SetValue(Grid.ColumnProperty, 0);
+            iconPresenter.SetValue(ContentPresenter.WidthProperty, 18.0);
+            iconPresenter.SetValue(ContentPresenter.HeightProperty, 18.0);
+            iconPresenter.SetValue(ContentPresenter.VerticalAlignmentProperty, VerticalAlignment.Center);
+            iconPresenter.SetValue(ContentPresenter.HorizontalAlignmentProperty, HorizontalAlignment.Center);
+
+            var contentPresenter = new FrameworkElementFactory(typeof(ContentPresenter), "HeaderContent");
+            contentPresenter.SetValue(ContentPresenter.ContentProperty, new TemplateBindingExtension(MenuItem.HeaderProperty));
+            contentPresenter.SetValue(Grid.ColumnProperty, 1);
+            contentPresenter.SetValue(FrameworkElement.VerticalAlignmentProperty, VerticalAlignment.Center);
+            contentPresenter.SetValue(FrameworkElement.HorizontalAlignmentProperty, HorizontalAlignment.Center);
+            contentPresenter.SetValue(ContentPresenter.MarginProperty, new Thickness(-16, 0, 0, 0));
+
+            gridFactory.AppendChild(iconPresenter);
+            gridFactory.AppendChild(contentPresenter);
+
+            borderFactory.AppendChild(gridFactory);
 
             var menuItemTemplate = new ControlTemplate(typeof(MenuItem));
             menuItemTemplate.VisualTree = borderFactory;
@@ -212,15 +243,14 @@ namespace CyberVault
                 Style = menuItemStyle,
                 RenderTransformOrigin = new Point(0.5, 0.5),
                 RenderTransform = new ScaleTransform(1, 1)
-                
             };
 
-            openMenuItem.Icon = new Grid
+            var openIconTextBlock = new TextBlock
             {
-                Width = 24,
-                Height = 24,
-                Children = { new TextBlock { Text = "🔓", FontSize = 14, Foreground = new SolidColorBrush(Colors.White) } }
+                Text = "🔓",
+                Style = iconTextBlockStyle
             };
+            openMenuItem.Icon = openIconTextBlock;
             openMenuItem.Click += (s, e) => ShowMainWindow();
 
             var settingsMenuItem = new MenuItem
@@ -230,12 +260,13 @@ namespace CyberVault
                 RenderTransformOrigin = new Point(0.5, 0.5),
                 RenderTransform = new ScaleTransform(1, 1)
             };
-            settingsMenuItem.Icon = new Grid
+
+            var settingsIconTextBlock = new TextBlock
             {
-                Width = 24,
-                Height = 24,
-                Children = { new TextBlock { Text = "⚙️", FontSize = 14, Foreground = new SolidColorBrush(Colors.White) } }
+                Text = "⚙️",
+                Style = iconTextBlockStyle
             };
+            settingsMenuItem.Icon = settingsIconTextBlock;
             settingsMenuItem.Click += (s, e) => SettingsControl();
 
             var separator = new Separator
@@ -252,12 +283,13 @@ namespace CyberVault
                 RenderTransformOrigin = new Point(0.5, 0.5),
                 RenderTransform = new ScaleTransform(1, 1)
             };
-            exitMenuItem.Icon = new Grid
+
+            var exitIconTextBlock = new TextBlock
             {
-                Width = 24,
-                Height = 24,
-                Children = { new TextBlock { Text = "✖️", FontSize = 14, Foreground = new SolidColorBrush(Colors.White) } }
+                Text = "✖️",
+                Style = iconTextBlockStyle
             };
+            exitMenuItem.Icon = exitIconTextBlock;
             exitMenuItem.Click += (s, e) => ExitApplication();
 
             contextMenu.Items.Add(openMenuItem);
