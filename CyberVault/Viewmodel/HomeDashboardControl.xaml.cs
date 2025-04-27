@@ -5,10 +5,11 @@ using System.IO;
 using System.IO.Compression;
 using System.Net.Http;
 using System.Text.RegularExpressions;
-
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using CyberVault.Main;
 using CyberVault.WebExtension;
 
 namespace CyberVault.Viewmodel
@@ -27,10 +28,18 @@ namespace CyberVault.Viewmodel
         private readonly string _tempDownloadPath;
         private readonly string _applicationPath;
         private UpdateProgressWindow? _updateProgressWindow;
+        private string _username;
+        private byte[] _encryptionKey;
+        private List<PasswordItem> _passwords;
+        private int _authenticatorCount;
 
         public HomeDashboardControl(string username, byte[] encryptionKey)
         {
             InitializeComponent();
+            _username = username;
+            _encryptionKey = encryptionKey;
+            _passwords = new List<PasswordItem>();
+            _authenticatorCount = 0;
 
             LoadCurrentVersion();
 
@@ -77,6 +86,7 @@ namespace CyberVault.Viewmodel
         {
             CheckForUpdatesAsync();
             ExtensionKeyDisplay();
+            UpdateSecuritySummary();
         }
 
         private void ExtensionKeyDisplay()
@@ -730,6 +740,160 @@ namespace CyberVault.Viewmodel
                     }
                 }
             }
+        }
+
+        private void UpdateSecuritySummary()
+        {
+            try
+            {
+                // Load passwords and authenticators
+                LoadPasswordsInfo();
+                LoadAuthenticatorsInfo();
+
+                // Update the UI with counts
+                PasswordCountText.Text = _passwords.Count.ToString();
+                AuthenticatorCountText.Text = _authenticatorCount.ToString();
+
+                // Calculate and update security score
+                int securityScore = CalculateSecurityScore();
+                SecurityScoreText.Text = $"{securityScore}%";
+
+                // Update the icon color based on security score
+                UpdateSecurityScoreColor(securityScore);
+            }
+            catch (Exception ex)
+            {
+                // Fail silently, but show a reasonable default
+                PasswordCountText.Text = "0";
+                AuthenticatorCountText.Text = "0";
+                SecurityScoreText.Text = "0%";
+            }
+        }
+
+        private void UpdateSecurityScoreColor(int securityScore)
+        {
+            SolidColorBrush scoreBrush;
+            
+            if (securityScore >= 80)
+                scoreBrush = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#A3BE8C")); // Green
+            else if (securityScore >= 50)
+                scoreBrush = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#EBCB8B")); // Yellow
+            else
+                scoreBrush = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#BF616A")); // Red
+
+            // Find the TextBlock with the security icon and update its color
+            var securityIcon = this.FindName("SecurityScoreIcon") as TextBlock;
+            if (securityIcon != null)
+            {
+                securityIcon.Foreground = scoreBrush;
+            }
+        }
+
+        private void LoadPasswordsInfo()
+        {
+            _passwords = PasswordStorage.LoadPasswords(_username, _encryptionKey);
+        }
+
+        private void LoadAuthenticatorsInfo()
+        {
+            try
+            {
+                string appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+                string cyberVaultPath = Path.Combine(appDataPath, "CyberVault");
+                string authFilePath = Path.Combine(cyberVaultPath, $"{_username}_authenticators.enc");
+
+                if (!File.Exists(authFilePath))
+                {
+                    _authenticatorCount = 0;
+                    return;
+                }
+
+                byte[] encryptedData = File.ReadAllBytes(authFilePath);
+
+                byte[] iv = new byte[16];
+                Array.Copy(encryptedData, 0, iv, 0, 16);
+
+                byte[] actualEncryptedData = new byte[encryptedData.Length - 16];
+                Array.Copy(encryptedData, 16, actualEncryptedData, 0, actualEncryptedData.Length);
+
+                string decryptedData = AesEncryption.Decrypt(actualEncryptedData, _encryptionKey, iv);
+
+                string[] entries = decryptedData.Split(new[] { "||ENTRY||" }, StringSplitOptions.RemoveEmptyEntries);
+                _authenticatorCount = entries.Length;
+            }
+            catch (Exception)
+            {
+                _authenticatorCount = 0;
+            }
+        }
+
+        private int CalculateSecurityScore()
+        {
+            int score = 0;
+            int passwordPoints = 0;
+            int maxPasswordPoints = _passwords.Count * 100;
+
+            // If there are no passwords, base score only on 2FA
+            if (_passwords.Count == 0)
+            {
+                if (_authenticatorCount > 0)
+                    return 70; // Decent score if they have at least some 2FA but no passwords
+                return 30; // Low score if no passwords or 2FA stored
+            }
+
+            // Calculate password strength for each password
+            foreach (var password in _passwords)
+            {
+                if (password.Password != null)
+                {
+                    passwordPoints += EvaluatePasswordStrength(password.Password);
+                }
+            }
+
+            // Normalize password score to 70% of total
+            double passwordScore = (double)passwordPoints / maxPasswordPoints * 70;
+
+            // Calculate 2FA score - up to 30% of total
+            double twoFactorScore = 0;
+            if (_authenticatorCount > 0)
+            {
+                double twoFactorRatio = Math.Min(1.0, (double)_authenticatorCount / _passwords.Count);
+                twoFactorScore = twoFactorRatio * 30;
+            }
+
+            // Combine scores
+            score = (int)Math.Round(passwordScore + twoFactorScore);
+
+            // Cap score between 0-100
+            return Math.Max(0, Math.Min(100, score));
+        }
+
+        private int EvaluatePasswordStrength(string password)
+        {
+            int score = 0;
+
+            // Length - up to 40 points
+            if (password.Length >= 16)
+                score += 40;
+            else if (password.Length >= 12)
+                score += 30;
+            else if (password.Length >= 8)
+                score += 20;
+            else if (password.Length >= 6)
+                score += 10;
+
+            // Complexity - up to 60 points
+            bool hasUpperCase = Regex.IsMatch(password, "[A-Z]");
+            bool hasLowerCase = Regex.IsMatch(password, "[a-z]");
+            bool hasDigit = Regex.IsMatch(password, "[0-9]");
+            bool hasSpecialChar = Regex.IsMatch(password, "[^a-zA-Z0-9]");
+
+            if (hasUpperCase) score += 15;
+            if (hasLowerCase) score += 15;
+            if (hasDigit) score += 15;
+            if (hasSpecialChar) score += 15;
+
+            return score;
         }
     }
 }
