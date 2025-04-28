@@ -37,7 +37,7 @@ All passwords are encrypted and stored locally for maximum security.
 Contributing:
 We welcome contributions from the community! If you have suggestions or bug reports, feel free to open an issue or submit a pull request.
 
-License
+[License](https://github.com/CyberNilsen/CyberVault/blob/master/LICENSE)
 This project is licensed under the MIT License - see the LICENSE file for details.
 
 Contact
