@@ -232,7 +232,13 @@
                     <Setter.Value>
                         <ControlTemplate TargetType="{x:Type Button}">
                             <Grid>
-                                <Border x:Name="border" Background="{TemplateBinding Background}" CornerRadius="8">
+                                <Border x:Name="border" Background="{TemplateBinding Background}" CornerRadius="8"
+                                        RenderTransformOrigin="0.5,0.5">
+                                    <Border.RenderTransform>
+                                        <TransformGroup>
+                                            <ScaleTransform />
+                                        </TransformGroup>
+                                    </Border.RenderTransform>
                                     <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                 </Border>
                             </Grid>
@@ -241,22 +247,65 @@
                                     <Setter TargetName="border" Property="Background">
                                         <Setter.Value>
                                             <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-                                                <GradientStop Color="#81A1C1" Offset="0"/>
-                                                <GradientStop Color="#88C0D0" Offset="1"/>
+                                                <GradientStop Color="#4C6A99" Offset="0"/>
+                                                <GradientStop Color="#5E81AC" Offset="1"/>
                                             </LinearGradientBrush>
                                         </Setter.Value>
                                     </Setter>
-                                    <Setter TargetName="border" Property="RenderTransform">
+                                    <Setter TargetName="border" Property="Effect">
                                         <Setter.Value>
-                                            <ScaleTransform ScaleX="1.05" ScaleY="1.05"/>
+                                            <DropShadowEffect BlurRadius="12" ShadowDepth="2" Opacity="0.4" Color="#5E81AC"/>
                                         </Setter.Value>
                                     </Setter>
-                                    <Setter TargetName="border" Property="RenderTransformOrigin" Value="0.5,0.5"/>
+                                    <Trigger.EnterActions>
+                                        <BeginStoryboard>
+                                            <Storyboard>
+                                                <DoubleAnimation 
+                                                    Storyboard.TargetName="border" 
+                                                    Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleX)" 
+                                                    To="1.05" Duration="0:0:0.1"/>
+                                                <DoubleAnimation 
+                                                    Storyboard.TargetName="border" 
+                                                    Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleY)" 
+                                                    To="1.05" Duration="0:0:0.1"/>
+                                            </Storyboard>
+                                        </BeginStoryboard>
+                                    </Trigger.EnterActions>
+                                    <Trigger.ExitActions>
+                                        <BeginStoryboard>
+                                            <Storyboard>
+                                                <DoubleAnimation 
+                                                    Storyboard.TargetName="border" 
+                                                    Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleX)" 
+                                                    To="1" Duration="0:0:0.1"/>
+                                                <DoubleAnimation 
+                                                    Storyboard.TargetName="border" 
+                                                    Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleY)" 
+                                                    To="1" Duration="0:0:0.1"/>
+                                            </Storyboard>
+                                        </BeginStoryboard>
+                                    </Trigger.ExitActions>
+                                </Trigger>
+                                <Trigger Property="IsPressed" Value="True">
+                                    <Setter TargetName="border" Property="Background">
+                                        <Setter.Value>
+                                            <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                                <GradientStop Color="#3B4252" Offset="0"/>
+                                                <GradientStop Color="#4C6A99" Offset="1"/>
+                                            </LinearGradientBrush>
+                                        </Setter.Value>
+                                    </Setter>
+                                    <Setter TargetName="border" Property="Effect">
+                                        <Setter.Value>
+                                            <DropShadowEffect BlurRadius="6" ShadowDepth="1" Opacity="0.3" Color="#5E81AC"/>
+                                        </Setter.Value>
+                                    </Setter>
                                 </Trigger>
                             </ControlTemplate.Triggers>
                         </ControlTemplate>
                     </Setter.Value>
                 </Setter>
+                <Setter Property="Cursor" Value="Hand"/>
             </Style>
 
             <Style x:Key="Biometric" TargetType="{x:Type Button}">
@@ -314,14 +363,20 @@
                         <ControlTemplate TargetType="{x:Type Button}">
                             <Grid>
                                 <Border x:Name="mainBorder" Background="{TemplateBinding Background}" 
-                            CornerRadius="8" Padding="{TemplateBinding Padding}">
+                                        CornerRadius="8" Padding="{TemplateBinding Padding}"
+                                        RenderTransformOrigin="0.5,0.5">
+                                    <Border.RenderTransform>
+                                        <TransformGroup>
+                                            <ScaleTransform />
+                                        </TransformGroup>
+                                    </Border.RenderTransform>
                                     <Grid>
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="*" />
                                         </Grid.ColumnDefinitions>
 
                                         <Border x:Name="flashEffect" Width="30" Background="#AAFFFFFF" 
-                                    CornerRadius="8" Opacity="0" HorizontalAlignment="Left">
+                                                CornerRadius="8" Opacity="0" HorizontalAlignment="Left">
                                             <Border.Effect>
                                                 <BlurEffect Radius="20" />
                                             </Border.Effect>
@@ -330,8 +385,8 @@
                                         <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
 
                                         <Path x:Name="highlight" Stretch="Fill" Fill="#336D98CC" Opacity="0"
-                                Data="M 0,50 C 25,20 75,20 100,50" 
-                                Height="0" VerticalAlignment="Top"/>
+                                              Data="M 0,50 C 25,20 75,20 100,50" 
+                                              Height="0" VerticalAlignment="Top"/>
                                     </Grid>
                                 </Border>
                             </Grid>
@@ -342,24 +397,33 @@
                                         <BeginStoryboard>
                                             <Storyboard>
                                                 <ColorAnimation Storyboard.TargetName="mainBorder" 
-                                       Storyboard.TargetProperty="(Border.Background).(SolidColorBrush.Color)"
-                                       To="#7297C7" Duration="0:0:0.2"/>
+                                                           Storyboard.TargetProperty="(Border.Background).(SolidColorBrush.Color)"
+                                                           To="#7297C7" Duration="0:0:0.2"/>
 
                                                 <DoubleAnimation Storyboard.TargetName="highlight" 
-                                         Storyboard.TargetProperty="Height"
-                                         From="0" To="50" Duration="0:0:0.2"/>
+                                                             Storyboard.TargetProperty="Height"
+                                                             From="0" To="50" Duration="0:0:0.2"/>
                                                 <DoubleAnimation Storyboard.TargetName="highlight" 
-                                         Storyboard.TargetProperty="Opacity"
-                                         From="0" To="1" Duration="0:0:0.2"/>
+                                                             Storyboard.TargetProperty="Opacity"
+                                                             From="0" To="1" Duration="0:0:0.2"/>
 
                                                 <DoubleAnimation Storyboard.TargetName="flashEffect" 
-                                        Storyboard.TargetProperty="Opacity"
-                                        From="0" To="0.7" Duration="0:0:0.3"
-                                        AutoReverse="True" />
+                                                            Storyboard.TargetProperty="Opacity"
+                                                            From="0" To="0.7" Duration="0:0:0.3"
+                                                            AutoReverse="True" />
                                                 <ThicknessAnimation Storyboard.TargetName="flashEffect" 
-                                           Storyboard.TargetProperty="Margin"
-                                           From="-30,0,0,0" To="300,0,-1000,0" 
-                                           Duration="0:0:0.6" />
+                                                               Storyboard.TargetProperty="Margin"
+                                                               From="-30,0,0,0" To="300,0,-1000,0" 
+                                                               Duration="0:0:0.6" />
+
+                                                <DoubleAnimation 
+                                                    Storyboard.TargetName="mainBorder" 
+                                                    Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleX)" 
+                                                    To="1.03" Duration="0:0:0.1"/>
+                                                <DoubleAnimation 
+                                                    Storyboard.TargetName="mainBorder" 
+                                                    Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleY)" 
+                                                    To="1.03" Duration="0:0:0.1"/>
 
                                             </Storyboard>
                                         </BeginStoryboard>
@@ -369,21 +433,41 @@
                                         <BeginStoryboard>
                                             <Storyboard>
                                                 <ColorAnimation Storyboard.TargetName="mainBorder" 
-                                       Storyboard.TargetProperty="(Border.Background).(SolidColorBrush.Color)"
-                                       To="#5E81AC" Duration="0:0:0.3"/>
+                                                           Storyboard.TargetProperty="(Border.Background).(SolidColorBrush.Color)"
+                                                           To="#5E81AC" Duration="0:0:0.3"/>
                                                 <DoubleAnimation Storyboard.TargetName="highlight" 
-                                         Storyboard.TargetProperty="Height"
-                                         To="0" Duration="0:0:0.2"/>
+                                                             Storyboard.TargetProperty="Height"
+                                                             To="0" Duration="0:0:0.2"/>
                                                 <DoubleAnimation Storyboard.TargetName="highlight" 
-                                         Storyboard.TargetProperty="Opacity"
-                                         To="0" Duration="0:0:0.2"/>
+                                                             Storyboard.TargetProperty="Opacity"
+                                                             To="0" Duration="0:0:0.2"/>
+
+                                                <DoubleAnimation 
+                                                    Storyboard.TargetName="mainBorder" 
+                                                    Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleX)" 
+                                                    To="1" Duration="0:0:0.1"/>
+                                                <DoubleAnimation 
+                                                    Storyboard.TargetName="mainBorder" 
+                                                    Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleY)" 
+                                                    To="1" Duration="0:0:0.1"/>
                                             </Storyboard>
                                         </BeginStoryboard>
                                     </Trigger.ExitActions>
+
+                                    <Setter TargetName="mainBorder" Property="Effect">
+                                        <Setter.Value>
+                                            <DropShadowEffect BlurRadius="10" ShadowDepth="2" Opacity="0.4" Color="#5E81AC"/>
+                                        </Setter.Value>
+                                    </Setter>
                                 </Trigger>
 
                                 <Trigger Property="IsPressed" Value="True">
                                     <Setter TargetName="mainBorder" Property="Background" Value="#4C6A92"/>
+                                    <Setter TargetName="mainBorder" Property="Effect">
+                                        <Setter.Value>
+                                            <DropShadowEffect BlurRadius="5" ShadowDepth="1" Opacity="0.3" Color="#3B4252"/>
+                                        </Setter.Value>
+                                    </Setter>
                                 </Trigger>
                             </ControlTemplate.Triggers>
                         </ControlTemplate>
@@ -393,6 +477,7 @@
                 <Setter Property="Foreground" Value="White"/>
                 <Setter Property="FontWeight" Value="SemiBold"/>
                 <Setter Property="FontSize" Value="16"/>
+                <Setter Property="Background" Value="#5E81AC"/>
             </Style>
 
 
