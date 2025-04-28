@@ -31,7 +31,7 @@
                         <TextBlock Grid.Row="0" Text="USERNAME" FontSize="14" FontWeight="SemiBold"
                                  Foreground="#88FFFFFF" Margin="0,0,0,8" />
                         <Border Grid.Row="1" Background="#3B4252" CornerRadius="8" Margin="0,0,0,25">
-                            <TextBox x:Name="UsernameInput" Style="{StaticResource ModernTextBox}"
+                            <TextBox x:Name="UsernameInput" KeyDown="Input_KeyDown" Style="{StaticResource ModernTextBox}"
                                    Height="48" Foreground="White" />
                         </Border>
 
@@ -44,11 +44,11 @@
                                     <ColumnDefinition Width="Auto" />
                                 </Grid.ColumnDefinitions>
 
-                                <PasswordBox x:Name="PasswordInput" Grid.Column="0" 
+                                <PasswordBox x:Name="PasswordInput" KeyDown="Input_KeyDown" Grid.Column="0" 
                                              Style="{StaticResource ModernPasswordBox}"
                                              Height="48" Foreground="White" />
 
-                                <TextBox x:Name="PlainTextPassword" Grid.Column="0"
+                                <TextBox x:Name="PlainTextPassword" KeyDown="Input_KeyDown" Grid.Column="0"
                                          Style="{StaticResource ModernTextBox}"
                                          Height="48" Foreground="White" 
                                          Visibility="Collapsed" />
