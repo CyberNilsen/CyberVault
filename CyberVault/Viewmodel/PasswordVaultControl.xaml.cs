@@ -112,6 +112,36 @@ namespace CyberVault.View
             }
         }
 
+        private void ClearSearchButton_Click(object sender, RoutedEventArgs e)
+        {
+            SearchBox.Text = string.Empty;
+            ClearSearchButton.Visibility = Visibility.Collapsed;
+            PasswordListBox.ItemsSource = SavedPasswords;
+        }
+
+        private void SearchBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            string searchTerm = SearchBox.Text.ToLower();
+
+            ClearSearchButton.Visibility = string.IsNullOrWhiteSpace(searchTerm)
+                ? Visibility.Collapsed
+                : Visibility.Visible;
+
+            if (string.IsNullOrWhiteSpace(searchTerm))
+            {
+                PasswordListBox.ItemsSource = SavedPasswords;
+                return;
+            }
+
+            var filteredPasswords = SavedPasswords.Where(p =>
+                p.Name!.ToLower().Contains(searchTerm) ||
+                p.Website!.ToLower().Contains(searchTerm) ||
+                p.Username!.ToLower().Contains(searchTerm) ||
+                p.Email!.ToLower().Contains(searchTerm)).ToList();
+
+            PasswordListBox.ItemsSource = filteredPasswords;
+        }
+
         private void SaveAllPasswords()
         {
             try
