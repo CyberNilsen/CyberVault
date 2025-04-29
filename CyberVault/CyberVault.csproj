@@ -33,9 +33,6 @@
 		<None Remove="Images\wrench.png" />
 	</ItemGroup>
 	<ItemGroup>
-	  <Compile Include="Main\LockFolder.cpp" />
-	</ItemGroup>
-	<ItemGroup>
 		<COMReference Include="IWshRuntimeLibrary">
 			<WrapperTool>tlbimp</WrapperTool>
 			<VersionMinor>0</VersionMinor>
