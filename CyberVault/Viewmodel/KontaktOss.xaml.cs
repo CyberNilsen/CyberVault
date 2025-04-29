@@ -1,16 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Net.Http;
-using System.Text;
 using System.Windows;
 using System.Windows.Controls;
-using System.Security.Cryptography;
+using System.Windows.Navigation;
 
 namespace CyberVault.Viewmodel
 {
     public partial class KontaktOss : UserControl
     {
+        private const string FormspreeEndpoint = "https://formspree.io/f/xjkyjvka";
         private Window mainWindow;
+
         public KontaktOss(Window mainWindow)
         {
             this.mainWindow = mainWindow;
@@ -35,9 +36,6 @@ namespace CyberVault.Viewmodel
                 StatusMessage.Text = "Sending message...";
                 StatusMessage.Visibility = Visibility.Visible;
 
-                // Get the obfuscated endpoint
-                string formspreeEndpoint = DecodeEndpoint();
-
                 using (HttpClient client = new HttpClient())
                 {
                     var formData = new Dictionary<string, string>
@@ -49,7 +47,7 @@ namespace CyberVault.Viewmodel
                     };
 
                     var content = new FormUrlEncodedContent(formData);
-                    HttpResponseMessage response = await client.PostAsync(formspreeEndpoint, content);
+                    HttpResponseMessage response = await client.PostAsync(FormspreeEndpoint, content);
 
                     if (response.IsSuccessStatusCode)
                     {
@@ -73,31 +71,7 @@ namespace CyberVault.Viewmodel
             }
         }
 
-        private string DecodeEndpoint()
-        {
-            byte[] encodedParts = new byte[]
-            {
-                104, 116, 116, 112, 115, 58, 47, 47, 102, 111, 114, 109, 115, 112, 114, 101, 101,
-                46, 105, 111, 47, 102, 47, 120, 106, 107, 121, 106, 118, 107, 97
-            };
-
-            string machineKey = Environment.MachineName.Substring(0, Math.Min(2, Environment.MachineName.Length));
-            byte[] keyBytes = Encoding.UTF8.GetBytes(machineKey + "CyberVault");
-
-            for (int i = 0; i < encodedParts.Length; i++)
-            {
-                encodedParts[i] = (byte)(encodedParts[i] ^ keyBytes[i % keyBytes.Length]);
-            }
-
-            for (int i = 0; i < encodedParts.Length; i++)
-            {
-                encodedParts[i] = (byte)(encodedParts[i] ^ keyBytes[i % keyBytes.Length]);
-            }
-
-            return Encoding.UTF8.GetString(encodedParts);
-        }
-
-        private void Hyperlink_RequestNavigate(object sender, System.Windows.Navigation.RequestNavigateEventArgs e)
+        private void Hyperlink_RequestNavigate(object sender, RequestNavigateEventArgs e)
         {
             try
             {

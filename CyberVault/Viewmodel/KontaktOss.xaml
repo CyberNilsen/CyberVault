@@ -9,9 +9,7 @@
 
     <ScrollViewer VerticalScrollBarVisibility="Auto">
         <StackPanel Margin="0,0,0,30">
-            <!-- Header Section -->
 
-            <!-- Contact Information Card -->
             <Border Style="{StaticResource SettingsCard}" CornerRadius="8" Margin="15,0,15,20">
                 <StackPanel Margin="20">
                     <StackPanel Orientation="Horizontal" Margin="0,0,0,15">
@@ -19,21 +17,18 @@
                         <TextBlock Text="Contact Information" Style="{StaticResource SectionTitle}" Margin="10,0,0,0"/>
                     </StackPanel>
 
-                    <!-- Name Field -->
                     <TextBlock Text="Name" Style="{StaticResource SettingLabel}" Margin="0,0,0,6"/>
                     <Border BorderBrush="#D8DEE9" BorderThickness="1" CornerRadius="5">
                         <TextBox x:Name="NameTextBox" Height="36" VerticalContentAlignment="Center" 
                                 BorderThickness="0" Padding="10,0,0,0" Background="Transparent"/>
                     </Border>
 
-                    <!-- Email Field -->
                     <TextBlock Text="Email" Style="{StaticResource SettingLabel}" Margin="0,20,0,6"/>
                     <Border BorderBrush="#D8DEE9" BorderThickness="1" CornerRadius="5">
                         <TextBox x:Name="EmailTextBox" Height="36" VerticalContentAlignment="Center" 
                                 BorderThickness="0" Padding="10,0,0,0" Background="Transparent"/>
                     </Border>
 
-                    <!-- Subject Field -->
                     <TextBlock Text="Subject" Style="{StaticResource SettingLabel}" Margin="0,20,0,6"/>
                     <Border BorderBrush="#D8DEE9" BorderThickness="1" CornerRadius="5">
                         <ComboBox x:Name="SubjectComboBox" Height="36" VerticalContentAlignment="Center" 
@@ -48,7 +43,6 @@
                 </StackPanel>
             </Border>
 
-            <!-- Message Card -->
             <Border Style="{StaticResource SettingsCard}" CornerRadius="8" Margin="15,0,15,20">
                 <StackPanel Margin="20">
                     <StackPanel Orientation="Horizontal" Margin="0,0,0,15">
@@ -79,7 +73,6 @@
                 </StackPanel>
             </Border>
 
-            <!-- Privacy Card -->
             <Border Style="{StaticResource SettingsCard}" CornerRadius="8" Margin="15,0,15,20">
                 <StackPanel Margin="20">
                     <StackPanel Orientation="Horizontal" Margin="0,0,0,15">
@@ -94,13 +87,17 @@
                                        Foreground="#5E81AC">
                                 privacy policy
                             </Hyperlink>
-                            <Run Text=". We will only use this information to respond to your inquiry."/>
+                            <Run Text=". We will only use this information to respond to your inquiry. If forms is down you can reach us at cyberbrothershq@gmail.com or at" />
+
+                             <Hyperlink NavigateUri="https://github.com/CyberNilsen/CyberVault" RequestNavigate="Hyperlink_RequestNavigate"
+                                Foreground="#5E81AC">
+                                Github
+                             </Hyperlink>
                         </TextBlock>
                     </Border>
                 </StackPanel>
             </Border>
 
-            <!-- Footer spacing -->
             <Rectangle Height="10" Opacity="0"/>
         </StackPanel>
     </ScrollViewer>
