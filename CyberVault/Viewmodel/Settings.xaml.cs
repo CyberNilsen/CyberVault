@@ -790,6 +790,16 @@ namespace CyberVault.Viewmodel
             }
         }
 
+        private void ExportPasswords_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void ImportPasswords_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
         public event EventHandler KontaktOssRequested;
 
         // Når du skal trigge eventet:
@@ -797,8 +807,6 @@ namespace CyberVault.Viewmodel
         {
             KontaktOssRequested?.Invoke(this, EventArgs.Empty);
         }
-
-
 
     }
 }

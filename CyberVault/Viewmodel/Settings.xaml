@@ -139,6 +139,29 @@
 
             <Border Style="{StaticResource SettingsCard}">
                 <StackPanel>
+                    <TextBlock Text="Passwords" Style="{StaticResource SectionTitle}"/>
+
+                    <Grid Margin="0,8,0,8">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+
+                    </Grid>
+
+
+                    <StackPanel Orientation="Horizontal" Margin="0,15,0,0">
+                        <Button Content="Export Passwords" Style="{StaticResource SaveButton}" 
+                                Background="#434C5E" Click="ExportPasswords_Click"/>
+                        <Button Content="Import Passwords" Style="{StaticResource SaveButton}" 
+                    Background="#434C5E" Margin="10,0,0,0" Click="ImportPasswords_Click"/>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+
+            <Border Style="{StaticResource SettingsCard}">
+                <StackPanel>
                     <TextBlock Text="About" Style="{StaticResource SectionTitle}"/>
 
                     <StackPanel Margin="0,8,0,10">
