@@ -792,15 +792,350 @@ namespace CyberVault.Viewmodel
 
         private void ExportPasswords_Click(object sender, RoutedEventArgs e)
         {
+            try
+            {
+                List<PasswordItem> passwords = PasswordStorage.LoadPasswords(username!, encryptionKey!);
 
+                if (passwords == null || passwords.Count == 0)
+                {
+                    System.Windows.MessageBox.Show("There are no passwords to export.",
+                        "Export Information", MessageBoxButton.OK, MessageBoxImage.Information);
+                    return;
+                }
+
+                var saveFileDialog = new Microsoft.Win32.SaveFileDialog
+                {
+                    Title = "Save Passwords as JSON",
+                    Filter = "JSON Files (*.json)|*.json",
+                    DefaultExt = ".json",
+                    FileName = $"CyberVault_Passwords_{username}_{DateTime.Now:yyyyMMdd}",
+                    AddExtension = true
+                };
+
+                if (saveFileDialog.ShowDialog() != true)
+                {
+                    return;
+                }
+
+                string jsonFilePath = saveFileDialog.FileName;
+
+                var options = new System.Text.Json.JsonSerializerOptions
+                {
+                    WriteIndented = true, 
+                };
+
+                string jsonContent = System.Text.Json.JsonSerializer.Serialize(passwords, options);
+
+                System.IO.File.WriteAllText(jsonFilePath, jsonContent);
+
+                System.Windows.MessageBox.Show($"Successfully exported {passwords.Count} passwords to:\n{jsonFilePath}",
+                    "Export Complete", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+            catch (Exception ex)
+            {
+                System.Windows.MessageBox.Show($"Error exporting passwords: {ex.Message}",
+                    "Export Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
 
         private void ImportPasswords_Click(object sender, RoutedEventArgs e)
         {
+            try
+            {
+                var openFileDialog = new Microsoft.Win32.OpenFileDialog
+                {
+                    Title = "Select JSON file with passwords",
+                    Filter = "JSON Files (*.json)|*.json|All Files (*.*)|*.*",
+                    Multiselect = false
+                };
 
+                if (openFileDialog.ShowDialog() != true)
+                {
+                    return;
+                }
+
+                string jsonFilePath = openFileDialog.FileName;
+
+                if (!System.IO.File.Exists(jsonFilePath))
+                {
+                    System.Windows.MessageBox.Show("Selected file does not exist.",
+                        "Import Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
+                }
+
+                string jsonContent = System.IO.File.ReadAllText(jsonFilePath);
+
+                List<PasswordItem> importedPasswords = new List<PasswordItem>();
+                int parsedCount = 0;
+
+                try
+                {
+                    using (var jsonDoc = System.Text.Json.JsonDocument.Parse(jsonContent))
+                    {
+                        var root = jsonDoc.RootElement;
+
+                        if (root.ValueKind == System.Text.Json.JsonValueKind.Array)
+                        {
+                            foreach (var element in root.EnumerateArray())
+                            {
+                                var passwordItem = ParsePasswordItemFromJsonElement(element);
+                                if (passwordItem != null)
+                                {
+                                    importedPasswords.Add(passwordItem);
+                                    parsedCount++;
+                                }
+                            }
+                        }
+                        else if (root.ValueKind == System.Text.Json.JsonValueKind.Object)
+                        {
+                            foreach (var property in root.EnumerateObject())
+                            {
+                                if (property.Value.ValueKind == System.Text.Json.JsonValueKind.Array)
+                                {
+                                    foreach (var element in property.Value.EnumerateArray())
+                                    {
+                                        var passwordItem = ParsePasswordItemFromJsonElement(element);
+                                        if (passwordItem != null)
+                                        {
+                                            importedPasswords.Add(passwordItem);
+                                            parsedCount++;
+                                        }
+                                    }
+                                }
+                                else if (property.Value.ValueKind == System.Text.Json.JsonValueKind.Object)
+                                {
+                                    var passwordItem = ParsePasswordItemFromJsonElement(property.Value);
+                                    if (passwordItem != null)
+                                    {
+                                        importedPasswords.Add(passwordItem);
+                                        parsedCount++;
+                                    }
+                                }
+                            }
+
+                            if (parsedCount == 0)
+                            {
+                                var passwordItem = ParsePasswordItemFromJsonElement(root);
+                                if (passwordItem != null)
+                                {
+                                    importedPasswords.Add(passwordItem);
+                                    parsedCount++;
+                                }
+                            }
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    System.Windows.MessageBox.Show($"Error parsing JSON: {ex.Message}",
+                        "Import Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
+                }
+
+                if (importedPasswords.Count == 0)
+                {
+                    System.Windows.MessageBox.Show("No valid password entries found in the file.",
+                        "Import Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
+
+                List<PasswordItem> existingPasswords = PasswordStorage.LoadPasswords(username!, encryptionKey!);
+
+                int added = 0;
+                int skipped = 0;
+                int updated = 0;
+
+                Dictionary<string, PasswordItem> existingPasswordDict = new Dictionary<string, PasswordItem>(
+                    StringComparer.OrdinalIgnoreCase);
+
+                foreach (var existing in existingPasswords)
+                {
+                    if (!string.IsNullOrWhiteSpace(existing.Name))
+                    {
+                        existingPasswordDict[existing.Name] = existing;
+                    }
+                }
+
+                foreach (var importedPassword in importedPasswords)
+                {
+                    if (string.IsNullOrWhiteSpace(importedPassword.Name))
+                    {
+                        skipped++;
+                        continue;
+                    }
+
+                    if (existingPasswordDict.TryGetValue(importedPassword.Name, out var existingPassword))
+                    {
+                        bool anyChange = false;
+
+                        if (!string.IsNullOrEmpty(importedPassword.Website))
+                        {
+                            existingPassword.Website = importedPassword.Website;
+                            anyChange = true;
+                        }
+
+                        if (!string.IsNullOrEmpty(importedPassword.Username))
+                        {
+                            existingPassword.Username = importedPassword.Username;
+                            anyChange = true;
+                        }
+
+                        if (!string.IsNullOrEmpty(importedPassword.Email))
+                        {
+                            existingPassword.Email = importedPassword.Email;
+                            anyChange = true;
+                        }
+
+                        if (!string.IsNullOrEmpty(importedPassword.Password))
+                        {
+                            existingPassword.Password = importedPassword.Password;
+                            anyChange = true;
+                        }
+
+                        if (anyChange)
+                        {
+                            updated++;
+                        }
+                    }
+                    else
+                    {
+                        existingPasswords.Add(importedPassword);
+                        existingPasswordDict[importedPassword.Name] = importedPassword;
+                        added++;
+                    }
+                }
+
+                if (added > 0 || updated > 0)
+                {
+                    PasswordStorage.SavePasswords(existingPasswords, username!, encryptionKey!);
+
+                    string message = $"Import completed successfully!\n\n" +
+                                    $"Added: {added} new passwords\n" +
+                                    $"Updated: {updated} existing passwords\n" +
+                                    $"Skipped: {skipped} invalid entries\n" +
+                                    $"Total parsed: {parsedCount}";
+
+                    System.Windows.MessageBox.Show(message, "Import Complete",
+                        MessageBoxButton.OK, MessageBoxImage.Information);
+                }
+                else
+                {
+                    System.Windows.MessageBox.Show($"No passwords were imported. Skipped {skipped} invalid entries.",
+                        "Import Information", MessageBoxButton.OK, MessageBoxImage.Information);
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Windows.MessageBox.Show($"Error importing passwords: {ex.Message}",
+                    "Import Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
 
-        public event EventHandler KontaktOssRequested;
+        private PasswordItem ParsePasswordItemFromJsonElement(System.Text.Json.JsonElement element)
+        {
+            if (element.ValueKind != System.Text.Json.JsonValueKind.Object)
+            {
+                return null!;
+            }
+
+            string[] nameVariations = { "name", "title", "site_name", "application", "app", "account", "service" };
+            string[] websiteVariations = { "website", "url", "uri", "web", "site", "link" };
+            string[] usernameVariations = { "username", "user", "user_name", "login", "login_name", "account_name" };
+            string[] emailVariations = { "email", "e-mail", "email_address", "mail" };
+            string[] passwordVariations = { "password", "pass", "pwd", "secret", "passphrase" };
+
+            var passwordItem = new PasswordItem();
+            bool foundAnyProperty = false;
+
+            void TrySetProperty(string[] variations, Action<string> setter)
+            {
+                foreach (var variation in variations)
+                {
+                    if (element.TryGetProperty(variation, out var jsonValue) &&
+                        jsonValue.ValueKind == System.Text.Json.JsonValueKind.String)
+                    {
+                        string? value = jsonValue.GetString();
+                        if (!string.IsNullOrWhiteSpace(value))
+                        {
+                            setter(value);
+                            foundAnyProperty = true;
+                            break;
+                        }
+                    }
+                }
+            }
+
+            TrySetProperty(nameVariations, value => passwordItem.Name = value);
+            TrySetProperty(websiteVariations, value => passwordItem.Website = value);
+            TrySetProperty(usernameVariations, value => passwordItem.Username = value);
+            TrySetProperty(emailVariations, value => passwordItem.Email = value);
+            TrySetProperty(passwordVariations, value => passwordItem.Password = value);
+
+            if (string.IsNullOrWhiteSpace(passwordItem.Name) && !string.IsNullOrWhiteSpace(passwordItem.Website))
+            {
+                try
+                {
+                    var uri = new Uri(passwordItem.Website);
+                    passwordItem.Name = uri.Host.Replace("www.", "");
+                    foundAnyProperty = true;
+                }
+                catch
+                {
+                    passwordItem.Name = passwordItem.Website;
+                }
+            }
+
+            if (element.TryGetProperty("origin_url", out var originUrl) &&
+                element.TryGetProperty("username_value", out var usernameValue) &&
+                element.TryGetProperty("password_value", out var passwordValue))
+            {
+                passwordItem.Website = originUrl.GetString();
+                passwordItem.Username = usernameValue.GetString();
+                passwordItem.Password = passwordValue.GetString();
+
+                if (string.IsNullOrWhiteSpace(passwordItem.Name) && !string.IsNullOrWhiteSpace(passwordItem.Website))
+                {
+                    try
+                    {
+                        var uri = new Uri(passwordItem.Website);
+                        passwordItem.Name = uri.Host.Replace("www.", "");
+                    }
+                    catch
+                    {
+                        passwordItem.Name = "Imported from Chrome";
+                    }
+                }
+
+                foundAnyProperty = true;
+            }
+
+            if (element.TryGetProperty("login", out var loginObj) && loginObj.ValueKind == System.Text.Json.JsonValueKind.Object)
+            {
+                if (loginObj.TryGetProperty("username", out var username))
+                    passwordItem.Username = username.GetString();
+
+                if (loginObj.TryGetProperty("password", out var password))
+                    passwordItem.Password = password.GetString();
+
+                if (loginObj.TryGetProperty("uris", out var uris) && uris.ValueKind == System.Text.Json.JsonValueKind.Array)
+                {
+                    foreach (var uri in uris.EnumerateArray())
+                    {
+                        if (uri.TryGetProperty("uri", out var uriValue))
+                        {
+                            passwordItem.Website = uriValue.GetString();
+                            break;
+                        }
+                    }
+                }
+
+                foundAnyProperty = true;
+            }
+
+            return foundAnyProperty ? passwordItem : null!;
+        }
+
+        public event EventHandler ?KontaktOssRequested;
 
         // Når du skal trigge eventet:
         private void KontaktOss_Click(object sender, RoutedEventArgs e)

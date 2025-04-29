@@ -761,7 +761,7 @@ namespace CyberVault.Viewmodel
                 // Update the icon color based on security score
                 UpdateSecurityScoreColor(securityScore);
             }
-            catch (Exception ex)
+            catch (Exception )
             {
                 // Fail silently, but show a reasonable default
                 PasswordCountText.Text = "0";
