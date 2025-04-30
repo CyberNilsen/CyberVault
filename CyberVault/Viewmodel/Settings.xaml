@@ -137,7 +137,7 @@
                 </StackPanel>
             </Border>
 
-            <Border Style="{StaticResource SettingsCard}">
+            <Border Style="{StaticResource SettingsCard}" Height="163">
                 <StackPanel>
                     <TextBlock Text="Passwords" Style="{StaticResource SectionTitle}"/>
 
@@ -151,12 +151,20 @@
                     </Grid>
 
 
-                    <StackPanel Orientation="Horizontal" Margin="0,15,0,0">
+                    <StackPanel Orientation="Horizontal" Margin="0,5,0,12">
                         <Button Content="Export Passwords" Style="{StaticResource SaveButton}" 
                                 Background="#434C5E" Click="ExportPasswords_Click"/>
                         <Button Content="Import Passwords" Style="{StaticResource SaveButton}" 
                     Background="#434C5E" Margin="10,0,0,0" Click="ImportPasswords_Click"/>
+                        
                     </StackPanel>
+                    <TextBlock TextWrapping="Wrap" Foreground="#677591" Margin="0,0,0,0">
+                    <Run Text="If you need help you can consult this for help:"/>
+                    <Hyperlink NavigateUri="https://cybernilsen.github.io/CyberVault-website/export_user_tutorial.html" RequestNavigate="Hyperlink_RequestNavigate"
+                               Foreground="#5E81AC">
+                                Tutorial
+                    </Hyperlink>
+                    </TextBlock>
                 </StackPanel>
             </Border>
 
