@@ -159,7 +159,7 @@
                         
                     </StackPanel>
                     <TextBlock TextWrapping="Wrap" Foreground="#677591" Margin="0,0,0,0">
-                    <Run Text="If you need help you can consult this for help:"/>
+                    <Run Text="If you need help importing passwords or exporting passwords you can consult this for help:"/>
                     <Hyperlink NavigateUri="https://cybernilsen.github.io/CyberVault-website/export_user_tutorial.html" RequestNavigate="Hyperlink_RequestNavigate"
                                Foreground="#5E81AC">
                                 Tutorial

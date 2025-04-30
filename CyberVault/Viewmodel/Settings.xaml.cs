@@ -844,7 +844,7 @@ namespace CyberVault.Viewmodel
             {
                 var openFileDialog = new Microsoft.Win32.OpenFileDialog
                 {
-                    Title = "Select JSON file with passwords",
+                    Title = "Select JSON file with passwords/JSON is the only supported file currently for importing passwords.",
                     Filter = "JSON Files (*.json)|*.json|All Files (*.*)|*.*",
                     Multiselect = false
                 };
@@ -1133,6 +1133,24 @@ namespace CyberVault.Viewmodel
             }
 
             return foundAnyProperty ? passwordItem : null!;
+        }
+
+        private void Hyperlink_RequestNavigate(object sender, RequestNavigateEventArgs e)
+        {
+            try
+            {
+                System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+                {
+                    FileName = e.Uri.AbsoluteUri,
+                    UseShellExecute = true
+                });
+                e.Handled = true;
+            }
+            catch (Exception ex)
+            {
+                System.Windows.MessageBox.Show($"Could not open link: {ex.Message}", "Error",
+                                MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
 
         public event EventHandler ?KontaktOssRequested;
