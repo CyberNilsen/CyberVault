@@ -83,7 +83,7 @@
                     <Border Background="#ECEFF4" Padding="15" CornerRadius="5" Margin="0,5,0,10">
                         <TextBlock TextWrapping="Wrap" Foreground="#677591">
                             <Run Text="By submitting this form, you consent to our processing of your personal data in accordance with our"/>
-                            <Hyperlink NavigateUri="https://www.cybervault.no/privacy" RequestNavigate="Hyperlink_RequestNavigate"
+                            <Hyperlink NavigateUri="https://cybernilsen.github.io/CyberVault-website/privacy_policy" RequestNavigate="Hyperlink_RequestNavigate"
                                        Foreground="#5E81AC">
                                 privacy policy
                             </Hyperlink>
