@@ -175,7 +175,19 @@ namespace CyberVault.View
         private void SavePassword_Click(object sender, RoutedEventArgs e)
         {
             string password = NewPasswordBox.Visibility == Visibility.Visible ? NewPasswordBox.Password : PlainTextPassword.Text;
+
+            if (string.IsNullOrWhiteSpace(PasswordNameTextBox.Text) ||
+                string.IsNullOrWhiteSpace(WebsiteTextBox.Text) ||
+                string.IsNullOrWhiteSpace(EmailTextBox.Text) ||
+                string.IsNullOrWhiteSpace(UsernameTextBox.Text) ||
+                string.IsNullOrWhiteSpace(password))
+            {
+                MessageBox.Show("Please fill in all required fields before proceeding.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
             var selectedItem = PasswordListBox.SelectedItem as PasswordItem;
+
             if (selectedItem != null)
             {
                 selectedItem.Name = PasswordNameTextBox.Text;
@@ -183,9 +195,8 @@ namespace CyberVault.View
                 selectedItem.Email = EmailTextBox.Text;
                 selectedItem.Username = UsernameTextBox.Text;
                 selectedItem.Password = password;
-                SaveAllPasswords();
+
                 MessageBox.Show("Password updated!", "Info", MessageBoxButton.OK, MessageBoxImage.Information);
-                LoadPasswords();
             }
             else
             {
@@ -198,11 +209,15 @@ namespace CyberVault.View
                     Password = password
                 };
                 SavedPasswords.Add(newItem);
-                SaveAllPasswords();
                 MessageBox.Show("Password saved!", "Info", MessageBoxButton.OK, MessageBoxImage.Information);
             }
+
+            SaveAllPasswords();
+            LoadPasswords();
+
             CloseCreatePasswordGrid();
         }
+
 
         private void DeletePassword_Click(object sender, RoutedEventArgs e)
         {
