@@ -101,7 +101,7 @@ namespace CyberVault.View
 
         private void CheckWelcomeGridVisibility()
         {
-            if (SavedPasswords.Count == 0)
+            if (SavedPasswords.Count == 0 || PasswordListBox.SelectedItem == null)
             {
                 WelcomeGrid.Visibility = Visibility.Visible;
                 CreatePasswordGrid.Visibility = Visibility.Collapsed;
@@ -244,6 +244,7 @@ namespace CyberVault.View
             IsUACActive = true;
             UACOverlay.Visibility = Visibility.Visible;
             DeleteConfirmationGrid.Visibility = Visibility.Visible;
+
             var fadeIn = new DoubleAnimation(0, 1, TimeSpan.FromSeconds(0.5));
             DeleteConfirmationGrid.BeginAnimation(UIElement.OpacityProperty, fadeIn);
             UACOverlay.BeginAnimation(UIElement.OpacityProperty, fadeIn);
