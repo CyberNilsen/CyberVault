@@ -54,6 +54,13 @@ namespace CyberVault
                 return;
             }
 
+            const int MinPasswordLength = 8;
+            if (password.Length < MinPasswordLength)
+            {
+                MessageBox.Show($"Password must be at least {MinPasswordLength} characters long!", "Registration Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
             try
             {
                 byte[] salt = GenerateSalt();
