@@ -234,6 +234,7 @@ namespace CyberVault.View
             var fadeOut = new DoubleAnimation(1, 0, TimeSpan.FromSeconds(0.5));
             fadeOut.Completed += (s, a) => {
                 CreatePasswordGrid.Visibility = Visibility.Collapsed;
+                PasswordListBox.SelectedItem = null;
                 CheckWelcomeGridVisibility();
             };
             CreatePasswordGrid.BeginAnimation(UIElement.OpacityProperty, fadeOut);
