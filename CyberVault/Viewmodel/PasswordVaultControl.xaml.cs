@@ -121,7 +121,7 @@ namespace CyberVault.View
 
         private void SearchBox_TextChanged(object sender, TextChangedEventArgs e)
         {
-            string searchTerm = SearchBox.Text.ToLower();
+            string searchTerm = SearchBox.Text.ToLowerInvariant();
 
             ClearSearchButton.Visibility = string.IsNullOrWhiteSpace(searchTerm)
                 ? Visibility.Collapsed
@@ -134,10 +134,11 @@ namespace CyberVault.View
             }
 
             var filteredPasswords = SavedPasswords.Where(p =>
-                p.Name!.ToLower().Contains(searchTerm) ||
-                p.Website!.ToLower().Contains(searchTerm) ||
-                p.Username!.ToLower().Contains(searchTerm) ||
-                p.Email!.ToLower().Contains(searchTerm)).ToList();
+                (!string.IsNullOrEmpty(p.Name) && p.Name.ToLowerInvariant().Contains(searchTerm)) ||
+                (!string.IsNullOrEmpty(p.Website) && p.Website.ToLowerInvariant().Contains(searchTerm)) ||
+                (!string.IsNullOrEmpty(p.Username) && p.Username.ToLowerInvariant().Contains(searchTerm)) ||
+                (!string.IsNullOrEmpty(p.Email) && p.Email.ToLowerInvariant().Contains(searchTerm))
+            ).ToList();
 
             PasswordListBox.ItemsSource = filteredPasswords;
         }
