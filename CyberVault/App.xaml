@@ -480,14 +480,42 @@
                 <Setter Property="Background" Value="#5E81AC"/>
             </Style>
 
-
             <Style x:Key="LogoutButton" TargetType="{x:Type Button}">
+                <Setter Property="Background">
+                    <Setter.Value>
+                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                            <GradientStop Color="#BF616A" Offset="0"/>
+                            <GradientStop Color="#C06470" Offset="1"/>
+                        </LinearGradientBrush>
+                    </Setter.Value>
+                </Setter>
+                <Setter Property="Foreground" Value="White"/>
+                <Setter Property="FontWeight" Value="SemiBold"/>
+                <Setter Property="Padding" Value="16,8"/>
+                <Setter Property="Cursor" Value="Hand"/>
+                <Setter Property="BorderThickness" Value="0"/>
+                <Setter Property="Effect">
+                    <Setter.Value>
+                        <DropShadowEffect ShadowDepth="1" BlurRadius="3" Opacity="0.3" Color="#222222"/>
+                    </Setter.Value>
+                </Setter>
                 <Setter Property="Template">
                     <Setter.Value>
                         <ControlTemplate TargetType="{x:Type Button}">
                             <Grid>
-                                <Border x:Name="border" Background="{TemplateBinding Background}" CornerRadius="8">
-                                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                <Border x:Name="border" 
+                            Background="{TemplateBinding Background}" 
+                            CornerRadius="8"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            Effect="{TemplateBinding Effect}">
+                                    <Grid>
+                                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                            <!-- Logout icon -->
+                                            
+                                            <ContentPresenter x:Name="contentPresenter"/>
+                                        </StackPanel>
+                                    </Grid>
                                 </Border>
                             </Grid>
                             <ControlTemplate.Triggers>
@@ -495,17 +523,42 @@
                                     <Setter TargetName="border" Property="Background">
                                         <Setter.Value>
                                             <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
-                                                <GradientStop Color="#BF616A" Offset="0"/>
-                                                <GradientStop Color="#d08792" Offset="1"/>
+                                                <GradientStop Color="#D64550" Offset="0"/>
+                                                <GradientStop Color="#E35D67" Offset="1"/>
                                             </LinearGradientBrush>
                                         </Setter.Value>
                                     </Setter>
                                     <Setter TargetName="border" Property="RenderTransform">
                                         <Setter.Value>
-                                            <ScaleTransform ScaleX="1.05" ScaleY="1.05"/>
+                                            <ScaleTransform ScaleX="1.03" ScaleY="1.03"/>
                                         </Setter.Value>
                                     </Setter>
                                     <Setter TargetName="border" Property="RenderTransformOrigin" Value="0.5,0.5"/>
+                                    <Setter Property="Effect">
+                                        <Setter.Value>
+                                            <DropShadowEffect ShadowDepth="2" BlurRadius="5" Opacity="0.4" Color="#222222"/>
+                                        </Setter.Value>
+                                    </Setter>
+                                </Trigger>
+                                <Trigger Property="IsPressed" Value="True">
+                                    <Setter TargetName="border" Property="Background">
+                                        <Setter.Value>
+                                            <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                                                <GradientStop Color="#A5424A" Offset="0"/>
+                                                <GradientStop Color="#B14E56" Offset="1"/>
+                                            </LinearGradientBrush>
+                                        </Setter.Value>
+                                    </Setter>
+                                    <Setter TargetName="border" Property="RenderTransform">
+                                        <Setter.Value>
+                                            <ScaleTransform ScaleX="0.98" ScaleY="0.98"/>
+                                        </Setter.Value>
+                                    </Setter>
+                                </Trigger>
+                                <Trigger Property="IsEnabled" Value="False">
+                                    <Setter TargetName="border" Property="Background" Value="#CCCCCC"/>
+                                    <Setter Property="Foreground" Value="#888888"/>
+                                    <Setter Property="Effect" Value="{x:Null}"/>
                                 </Trigger>
                             </ControlTemplate.Triggers>
                         </ControlTemplate>
