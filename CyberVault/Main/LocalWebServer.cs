@@ -11,15 +11,8 @@ public class LocalWebServer
     private byte[] _encryptionKey;
     private static string? _accessToken;
     private static bool _isRunning = false;
-    private Task? _processingTask;
+    private Task _processingTask;
     private CancellationTokenSource _cancellationTokenSource;
-
-    public delegate void LogoutRequestedEventHandler(object sender, EventArgs e);
-    public event LogoutRequestedEventHandler? LogoutRequested;
-
-    private DateTime _lastRequestTime;
-    private readonly TimeSpan _idleTimeout = TimeSpan.FromMinutes(30);
-    private Timer? _idleCheckTimer;
 
     public LocalWebServer(string username, byte[] encryptionKey)
     {
@@ -29,7 +22,6 @@ public class LocalWebServer
         _listener = new HttpListener();
         _listener.Prefixes.Add("http://localhost:8765/");
         _cancellationTokenSource = new CancellationTokenSource();
-        _lastRequestTime = DateTime.Now;
     }
 
     public void Start()
@@ -42,7 +34,7 @@ public class LocalWebServer
             {
                 _listener.Start();
             }
-            catch (HttpListenerException)
+            catch (HttpListenerException )
             {
                 _listener.Close();
                 _listener = new HttpListener();
@@ -52,9 +44,6 @@ public class LocalWebServer
             }
 
             _isRunning = true;
-            _lastRequestTime = DateTime.Now;
-
-            _idleCheckTimer = new Timer(CheckIdleTimeout, null, TimeSpan.FromMinutes(1), TimeSpan.FromMinutes(1));
 
             _processingTask = Task.Run(async () =>
             {
@@ -69,8 +58,6 @@ public class LocalWebServer
 
                         if (token.IsCancellationRequested)
                             break;
-
-                        _lastRequestTime = DateTime.Now;
 
                         ProcessRequest(context);
                     }
@@ -96,23 +83,6 @@ public class LocalWebServer
         }
     }
 
-    private void CheckIdleTimeout(object? state)
-    {
-        if (!_isRunning) return;
-
-        var idleTime = DateTime.Now - _lastRequestTime;
-        if (idleTime > _idleTimeout)
-        {
-            Console.WriteLine("Web server idle timeout reached. Initiating logout.");
-            OnLogoutRequested();
-        }
-    }
-
-    protected virtual void OnLogoutRequested()
-    {
-        LogoutRequested?.Invoke(this, EventArgs.Empty);
-    }
-
     public void Stop()
     {
         if (!_isRunning) return;
@@ -121,9 +91,6 @@ public class LocalWebServer
         {
             _isRunning = false;
             _cancellationTokenSource.Cancel();
-
-            _idleCheckTimer?.Dispose();
-            _idleCheckTimer = null;
 
             try
             {
@@ -136,8 +103,6 @@ public class LocalWebServer
 
             _listener.Stop();
             _listener.Close();
-
-            _accessToken = null;
         }
         catch (ObjectDisposedException) { }
         catch (Exception ex)
@@ -151,7 +116,7 @@ public class LocalWebServer
         try
         {
             context.Response.Headers.Add("Access-Control-Allow-Origin", "*");
-            context.Response.Headers.Add("Access-Control-Allow-Methods", "GET, OPTIONS, HEAD");
+            context.Response.Headers.Add("Access-Control-Allow-Methods", "GET, OPTIONS");
             context.Response.Headers.Add("Access-Control-Allow-Headers", "Authorization");
 
             if (context.Request.HttpMethod == "OPTIONS")
@@ -161,59 +126,17 @@ public class LocalWebServer
                 return;
             }
 
-            if (context.Request.HttpMethod == "GET" && context.Request.Url!.LocalPath == "/logout")
-            {
-                string authHeader = context.Request.Headers["Authorization"] ?? string.Empty;
-                if (string.IsNullOrEmpty(authHeader) || !authHeader.StartsWith("Bearer ") || authHeader.Substring(7) != _accessToken)
-                {
-                    context.Response.StatusCode = 401;
-                    context.Response.Close();
-                    return;
-                }
-
-                context.Response.StatusCode = 200;
-                context.Response.ContentType = "application/json";
-                context.Response.ContentLength64 = Encoding.UTF8.GetBytes("{\"success\":true}").Length;
-                context.Response.OutputStream.Write(Encoding.UTF8.GetBytes("{\"success\":true}"), 0, Encoding.UTF8.GetBytes("{\"success\":true}").Length);
-                context.Response.Close();
-
-                Task.Run(() => OnLogoutRequested());
-                return;
-            }
-
-            if (context.Request.HttpMethod == "HEAD" && context.Request.Url!.LocalPath == "/passwords")
-            {
-                string authHeader = context.Request.Headers["Authorization"] ?? string.Empty;
-                if (string.IsNullOrEmpty(authHeader) || !authHeader.StartsWith("Bearer ") || authHeader.Substring(7) != _accessToken)
-                {
-                    context.Response.StatusCode = 401;
-                    context.Response.Close();
-                    return;
-                }
-
-                context.Response.StatusCode = 200;
-                context.Response.Close();
-                return;
-            }
-
-            if ((context.Request.HttpMethod != "GET" && context.Request.HttpMethod != "HEAD") || context.Request.Url!.LocalPath != "/passwords")
+            if (context.Request.HttpMethod != "GET" || context.Request.Url!.LocalPath != "/passwords")
             {
                 context.Response.StatusCode = 404;
                 context.Response.Close();
                 return;
             }
 
-            string authHeaderValue = context.Request.Headers["Authorization"] ?? string.Empty;
-            if (string.IsNullOrEmpty(authHeaderValue) || !authHeaderValue.StartsWith("Bearer ") || authHeaderValue.Substring(7) != _accessToken)
+            string authHeader = context.Request.Headers["Authorization"] ?? string.Empty;
+            if (string.IsNullOrEmpty(authHeader) || !authHeader.StartsWith("Bearer ") || authHeader.Substring(7) != _accessToken)
             {
                 context.Response.StatusCode = 401;
-                context.Response.Close();
-                return;
-            }
-
-            if (context.Request.HttpMethod == "HEAD")
-            {
-                context.Response.StatusCode = 200;
                 context.Response.Close();
                 return;
             }
@@ -251,7 +174,5 @@ public class LocalWebServer
         return Convert.ToBase64String(tokenData);
     }
 
-    public string GetAccessToken() => _accessToken ?? string.Empty;
-
-    public bool IsRunning => _isRunning;
+    public string GetAccessToken() => _accessToken!;
 }
