@@ -84,6 +84,9 @@ namespace CyberVault
 
             App.MinimizeToTrayEnabled = false;
             App.CurrentUsername = null!;
+            App.CurrentAccessToken = null;
+            App.WebServer?.Stop();
+            App.WebServer = null;
 
             typeof(LoginControl).GetProperty("CurrentEncryptionKey",
                 System.Reflection.BindingFlags.NonPublic |
