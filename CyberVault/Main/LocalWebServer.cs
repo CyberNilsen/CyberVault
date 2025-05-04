@@ -18,10 +18,14 @@ public class LocalWebServer
     {
         _username = username;
         _encryptionKey = encryptionKey;
-        _accessToken = GenerateAccessToken();
         _listener = new HttpListener();
         _listener.Prefixes.Add("http://localhost:8765/");
         _cancellationTokenSource = new CancellationTokenSource();
+
+        if (_accessToken == null || !_isRunning)
+        {
+            _accessToken = GenerateAccessToken();
+        }
     }
 
     public void Start()
@@ -34,7 +38,7 @@ public class LocalWebServer
             {
                 _listener.Start();
             }
-            catch (HttpListenerException )
+            catch (HttpListenerException)
             {
                 _listener.Close();
                 _listener = new HttpListener();
@@ -103,6 +107,7 @@ public class LocalWebServer
 
             _listener.Stop();
             _listener.Close();
+            _accessToken = null;
         }
         catch (ObjectDisposedException) { }
         catch (Exception ex)
@@ -122,6 +127,25 @@ public class LocalWebServer
             if (context.Request.HttpMethod == "OPTIONS")
             {
                 context.Response.StatusCode = 200;
+                context.Response.Close();
+                return;
+            }
+
+            if (context.Request.HttpMethod == "GET" && context.Request.Url!.LocalPath == "/validate")
+            {
+                string authHeaderVal = context.Request.Headers["Authorization"] ?? string.Empty;
+                if (string.IsNullOrEmpty(authHeaderVal) || !authHeaderVal.StartsWith("Bearer ") || authHeaderVal.Substring(7) != _accessToken)
+                {
+                    context.Response.StatusCode = 401;
+                }
+                else
+                {
+                    context.Response.StatusCode = 200;
+                    byte[] responseBuffer = Encoding.UTF8.GetBytes("{\"valid\": true}");
+                    context.Response.ContentType = "application/json";
+                    context.Response.ContentLength64 = responseBuffer.Length;
+                    context.Response.OutputStream.Write(responseBuffer, 0, responseBuffer.Length);
+                }
                 context.Response.Close();
                 return;
             }
