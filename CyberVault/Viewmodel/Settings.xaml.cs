@@ -396,8 +396,11 @@ namespace CyberVault.Viewmodel
 
         private void ChangeMasterPassword_Click(object sender, RoutedEventArgs e)
         {
-            var result = System.Windows.MessageBox.Show("Are you sure you want to change your master password?\nThis will re-encrypt all your stored data.",
-                "Change Master Password", MessageBoxButton.YesNo, MessageBoxImage.Question);
+              var result = System.Windows.MessageBox.Show(
+             "Are you sure you want to change your master password?\nThis will re-encrypt all your stored data.",
+             "Change Master Password",
+             MessageBoxButton.YesNoCancel,
+             MessageBoxImage.Question);
 
             if (result == MessageBoxResult.Yes)
             {
@@ -450,7 +453,21 @@ namespace CyberVault.Viewmodel
                         System.Windows.MessageBox.Show($"Error changing master password: {ex.Message}",
                             "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                     }
+
                 }
+                else if (result == MessageBoxResult.No)
+                {
+                    return;
+                }
+                else if (result == MessageBoxResult.None)
+                {
+                    return;
+                }
+                else if (result == MessageBoxResult.Cancel)
+                {
+                    return;
+                }
+
             }
         }
 
