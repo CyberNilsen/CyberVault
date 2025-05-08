@@ -252,11 +252,6 @@
                                             </LinearGradientBrush>
                                         </Setter.Value>
                                     </Setter>
-                                    <Setter TargetName="border" Property="Effect">
-                                        <Setter.Value>
-                                            <DropShadowEffect BlurRadius="12" ShadowDepth="2" Opacity="0.4" Color="#5E81AC"/>
-                                        </Setter.Value>
-                                    </Setter>
                                     <Trigger.EnterActions>
                                         <BeginStoryboard>
                                             <Storyboard>
