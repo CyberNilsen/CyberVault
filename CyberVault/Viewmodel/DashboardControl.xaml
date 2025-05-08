@@ -222,18 +222,13 @@
                         </Grid.RowDefinitions>
 
                         <Border Grid.Row="0" Background="Transparent" CornerRadius="0,0,15,15" Margin="0,0,0,10">
-                            <Border.Effect>
-                                <DropShadowEffect ShadowDepth="1" BlurRadius="5" Opacity="0.2" Color="#4C566A"/>
-                            </Border.Effect>
+
                             <TextBlock x:Name="WelcomeText" Text="Welcome to CyberVault" 
                                    FontWeight="Bold" FontSize="24" Foreground="#2E3440" Margin="25,25,10,25">
                             </TextBlock>
                         </Border>
 
                         <Border Grid.Row="1" Background="#00000000" Margin="15,0,15,15" CornerRadius="15">
-                            <Border.Effect>
-                                <DropShadowEffect ShadowDepth="1" BlurRadius="10" Opacity="0.1" Color="#4C566A"/>
-                            </Border.Effect>
                             <ContentControl x:Name="DashboardContent" Margin="10"/>
                         </Border>
                     </Grid>
