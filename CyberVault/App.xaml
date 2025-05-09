@@ -252,11 +252,6 @@
                                             </LinearGradientBrush>
                                         </Setter.Value>
                                     </Setter>
-                                    <Setter TargetName="border" Property="Effect">
-                                        <Setter.Value>
-                                            <DropShadowEffect BlurRadius="12" ShadowDepth="2" Opacity="0.4" Color="#5E81AC"/>
-                                        </Setter.Value>
-                                    </Setter>
                                     <Trigger.EnterActions>
                                         <BeginStoryboard>
                                             <Storyboard>
@@ -293,11 +288,6 @@
                                                 <GradientStop Color="#3B4252" Offset="0"/>
                                                 <GradientStop Color="#4C6A99" Offset="1"/>
                                             </LinearGradientBrush>
-                                        </Setter.Value>
-                                    </Setter>
-                                    <Setter TargetName="border" Property="Effect">
-                                        <Setter.Value>
-                                            <DropShadowEffect BlurRadius="6" ShadowDepth="1" Opacity="0.3" Color="#5E81AC"/>
                                         </Setter.Value>
                                     </Setter>
                                 </Trigger>
@@ -511,7 +501,6 @@
                             Effect="{TemplateBinding Effect}">
                                     <Grid>
                                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
-                                            <!-- Logout icon -->
                                             
                                             <ContentPresenter x:Name="contentPresenter"/>
                                         </StackPanel>
@@ -686,4 +675,4 @@
 
         </ResourceDictionary>
     </Application.Resources>
-</Application>
+</Application>  
