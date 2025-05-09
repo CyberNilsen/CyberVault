@@ -7,22 +7,27 @@
         WindowStartupLocation="CenterScreen" 
         ResizeMode="NoResize"
         WindowStyle="ToolWindow">
+    
     <Grid Margin="20">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
+        
         <TextBlock Grid.Row="0" 
                  x:Name="TitleText" 
                  Text="Updating CyberVault" 
                  FontSize="16" 
                  FontWeight="Bold" 
                  Margin="0,0,0,15"/>
+        
         <ProgressBar Grid.Row="1" 
                    x:Name="UpdateProgressBar"
                    Height="20" 
                    Margin="0,0,0,10"/>
+        
+
         <TextBlock Grid.Row="2" 
                  x:Name="StatusText" 
                  Text="Preparing to update..." 
