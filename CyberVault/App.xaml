@@ -284,7 +284,7 @@
                                 <Trigger Property="IsPressed" Value="True">
                                     <Setter TargetName="border" Property="Background">
                                         <Setter.Value>
-                                            <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                            <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
                                                 <GradientStop Color="#3B4252" Offset="0"/>
                                                 <GradientStop Color="#4C6A99" Offset="1"/>
                                             </LinearGradientBrush>
