@@ -128,7 +128,7 @@
                     </StackPanel>
 
                     <Border Grid.Column="1" Background="#4C566A" CornerRadius="15" Padding="10,5">
-                        <TextBlock x:Name="CurrentVersionText" Text="v3.0" 
+                        <TextBlock x:Name="CurrentVersionText" Text="v4.0" 
                                FontWeight="SemiBold" FontSize="12" Foreground="#88C0D0" Margin="0,4,0,4"/>
                     </Border>
                 </Grid>
