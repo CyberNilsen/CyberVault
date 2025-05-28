@@ -17,10 +17,6 @@ CyberVault is a C#-based password manager app designed for users to securely sto
 - **Cryptography**: Utilizes advanced encryption methods to ensure password security.
 - **Local Database**: Stores passwords and related information locally.
 
-## Website for CyberVault
-
-- If you want to learn more about us or the program you can visit: [CyberVault website](https://cybernilsen.github.io/CyberVault-website/index.html)
-
 ## Installation
 
 1. Clone this repository:
