@@ -51,7 +51,7 @@ CyberNilsen
 ## 🌐 Learn More
 
 - **Website**: [CyberVault Website](https://cybernilsen.github.io/CyberVault-website/index.html)
-- **CyberVault program**: [CyberVault](https://github.com/CyberNilsen/CyberVault)
+- **CyberVault Extension**: [CyberVault Extension](https://github.com/CyberNilsen/CyberVaultExtension)
 
 ## 🙌 Thanks to Testers
 
