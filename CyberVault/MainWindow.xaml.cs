@@ -389,7 +389,7 @@ namespace CyberVault
             {
                 dashboard.SetTopBarHeight(NormalTopBarHeight);
             }
-        }
+        }   
 
         private void CloseButton_Click(object sender, RoutedEventArgs e)
         {
