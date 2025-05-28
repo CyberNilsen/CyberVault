@@ -1,0 +1,69 @@
+name: .NET Desktop Build & Test
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        configuration: [Debug, Release]
+
+    runs-on: windows-latest
+
+    env:
+      Solution_Name: CyberVault.sln
+      # If you have test projects, specify them here; otherwise remove
+      Test_Project_Path: CyberVault.Tests\CyberVault.Tests.csproj   # adjust or remove if no tests
+
+      # WAP packaging project info - comment out if not using MSIX packaging
+      Wap_Project_Directory: your-wap-project-directory-name
+      Wap_Project_Path: your-wap-project-path.wapproj
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Setup .NET SDK
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 8.0.x   # or your target .NET version
+
+    - name: Restore dependencies
+      run: dotnet restore ${{ env.Solution_Name }}
+
+    - name: Build solution (${{ matrix.configuration }})
+      run: dotnet build ${{ env.Solution_Name }} --configuration ${{ matrix.configuration }} --no-restore
+
+    - name: Run unit tests
+      run: dotnet test ${{ env.Test_Project_Path }} --configuration ${{ matrix.configuration }} --no-build --verbosity normal
+      # Remove this step if you don't have tests
+
+    # -- Signing and packaging steps commented out, enable if you add a WAP project and signing cert --
+
+    # - name: Decode the pfx signing certificate
+    #   if: secrets.Base64_Encoded_Pfx && secrets.Pfx_Key
+    #   run: |
+    #     $pfx_cert_byte = [System.Convert]::FromBase64String("${{ secrets.Base64_Encoded_Pfx }}")
+    #     $certificatePath = Join-Path -Path $env:Wap_Project_Directory -ChildPath GitHubActionsWorkflow.pfx
+    #     [IO.File]::WriteAllBytes("$certificatePath", $pfx_cert_byte)
+
+    # - name: Create app package
+    #   if: secrets.Base64_Encoded_Pfx && secrets.Pfx_Key
+    #   run: msbuild ${{ env.Wap_Project_Path }} /p:Configuration=${{ matrix.configuration }} /p:UapAppxPackageBuildMode=StoreUpload /p:AppxBundle=Always /p:AppxBundlePlatforms=x86|x64 /p:PackageCertificateKeyFile=GitHubActionsWorkflow.pfx /p:PackageCertificatePassword=${{ secrets.Pfx_Key }}
+
+    # - name: Remove the signing certificate
+    #   if: secrets.Base64_Encoded_Pfx && secrets.Pfx_Key
+    #   run: Remove-Item -path ${{ env.Wap_Project_Directory }}\GitHubActionsWorkflow.pfx
+
+    # - name: Upload build artifacts
+    #   uses: actions/upload-artifact@v4
+    #   with:
+    #     name: MSIX Package
+    #     path: ${{ env.Wap_Project_Directory }}\AppPackages
+
