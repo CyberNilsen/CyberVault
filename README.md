@@ -42,10 +42,6 @@ We welcome contributions from the community! If you have suggestions or bug repo
 This project is licensed under the [MIT License](LICENSE).
 
 
-Contact
-CyberHansen
-CyberNilsen
-
 ## 🌐 Learn More
 
 - **Website**: [CyberVault Website](https://cybernilsen.github.io/CyberVault-website/index.html)
