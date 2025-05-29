@@ -17,7 +17,7 @@ CyberVault is a C#-based password manager app designed for users to securely sto
   Designed for usability without sacrificing security.
 
 - 🧩 **Google extension**  
-  Chrome extension is available to download.
+  [Chrome extension](https://chromewebstore.google.com/detail/cybervault-extension/apoijcgjdomcddnogcfjecfbgnnnhmdd?authuser=3&hl=en) is available to download.
 
 ## 🛠️Technologies
 
@@ -54,7 +54,7 @@ This project is licensed under the [MIT License](LICENSE).
 ## 🌐 Learn More
 
 - **Website**: [CyberVault Website](https://cybernilsen.github.io/CyberVault-website/index.html)
-- **CyberVault Extension**: [CyberVault Extension](https://github.com/CyberNilsen/CyberVaultExtension)
+- **CyberVault Extension Code**: [CyberVault Extension](https://github.com/CyberNilsen/CyberVaultExtension)
 
 ## 🙌 Thanks to Testers
 
