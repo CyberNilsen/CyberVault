@@ -11,7 +11,7 @@ public class LocalWebServer
     private byte[] _encryptionKey;
     private static string? _accessToken;
     private static bool _isRunning = false;
-    private Task _processingTask;
+    private Task? _processingTask;
     private CancellationTokenSource _cancellationTokenSource;
 
     public LocalWebServer(string username, byte[] encryptionKey)
