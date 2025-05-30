@@ -149,7 +149,7 @@
                                     <Setter Property="BorderBrush" TargetName="Border" Value="#88AEEF"/>
                                 </Trigger>
                                 <Trigger Property="IsPressed" Value="True">
-                                    <Setter Property="Background" TargetName="Border" Value="#5E81AC"/>
+                                    <Setter Property="Background" TargetName="Border" Value="#4d76a8"/>
                                     <Setter Property="BorderBrush" TargetName="Border" Value="Transparent"/>
                                 </Trigger>
                             </ControlTemplate.Triggers>
@@ -175,7 +175,6 @@
             <Style x:Key="HomeDashboardButton" TargetType="{x:Type Button}">
                 <Setter Property="Foreground" Value="White"/>
                 <Setter Property="FontWeight" Value="SemiBold"/>
-                <Setter Property="BorderThickness" Value="0"/>
                 <Setter Property="Cursor" Value="Hand"/>
                 <Setter Property="Background" Value="#5E81AC"/>
                 <Setter Property="Template">
@@ -191,7 +190,6 @@
                                 <Trigger Property="IsMouseOver" Value="True">
                                     <Setter TargetName="border" Property="Background" Value="#81A1C1"/>
                                     <Setter TargetName="border" Property="BorderBrush" Value="#88AEEF"/>
-                                    <Setter TargetName="border" Property="BorderThickness" Value="1"/>
                                 </Trigger>
                                 <Trigger Property="IsPressed" Value="True">
                                     <Setter TargetName="border" Property="Background" Value="#4C6A92"/>
@@ -215,7 +213,6 @@
                                 <Trigger Property="IsMouseOver" Value="True">
                                     <Setter TargetName="border" Property="Background" Value="#4CAF50"/>
                                     <Setter TargetName="border" Property="BorderBrush" Value="#A5D6A7"/>
-                                    <Setter TargetName="border" Property="BorderThickness" Value="1"/>
                                 </Trigger>
                                 <Trigger Property="IsPressed" Value="True">
                                     <Setter TargetName="border" Property="Background" Value="#2E7D32"/>
