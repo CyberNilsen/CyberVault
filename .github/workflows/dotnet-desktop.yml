@@ -23,8 +23,8 @@ jobs:
       Test_Project_Path: CyberVault.Tests\CyberVault.Tests.csproj   # adjust or remove if no tests
 
       # WAP packaging project info - comment out if not using MSIX packaging
-      Wap_Project_Directory: your-wap-project-directory-name
-      Wap_Project_Path: your-wap-project-path.wapproj
+      # Wap_Project_Directory: your-wap-project-directory-name
+      # Wap_Project_Path: your-wap-project-path.wapproj
 
     steps:
     - name: Checkout code

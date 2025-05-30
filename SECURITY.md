@@ -13,7 +13,7 @@ We recommend all users upgrade to the latest supported version to receive import
 ### 🛡️ Reporting a Vulnerability
 If you discover a security vulnerability in CyberVault, please do not create a public issue. Instead, follow these steps:
 
-1. Email us directly at [cyberbrothershq@gmail.com] or at [andreasnilsen07@hotmail.com.
+1. Email us directly at cyberbrothershq@gmail.com or at andreasnilsen07@hotmail.com.
 
 2. Please include as much information as possible:
 - Version affected

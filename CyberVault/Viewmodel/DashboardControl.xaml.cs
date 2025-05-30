@@ -56,6 +56,12 @@ namespace CyberVault
             DashboardContent.Content = new PasswordVaultControl(mainWindow, username, encryptionKey);
         }
 
+        private void GeneratePasswordButton_Click(object sender, RoutedEventArgs e)
+        {
+            WelcomeText.Text = "Generate Password";
+            DashboardContent.Content = new GeneratePasswordControl(username, encryptionKey);
+        }
+
         private void AuthenticatorButton_Click(object sender, RoutedEventArgs e)
         {
             DashboardContent.Content = null;
@@ -108,5 +114,7 @@ namespace CyberVault
                     "Logout Error", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
             }
         }
+
+       
     }
 }

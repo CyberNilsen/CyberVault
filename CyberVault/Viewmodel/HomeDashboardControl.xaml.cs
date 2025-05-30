@@ -18,7 +18,7 @@ namespace CyberVault.Viewmodel
     {
         private string? _accessToken;
         private LocalWebServer? _webServer;
-        private string _currentVersion = "v4.0";
+        private string _currentVersion = "v4.1";
         private readonly string _githubRepoUrl = "https://github.com/CyberNilsen/CyberVault";
         private readonly string _githubApiReleaseUrl = "https://api.github.com/repos/CyberNilsen/CyberVault/releases/latest";
         private bool _updateAvailable = false;
