@@ -56,6 +56,9 @@ This project is licensed under the [MIT License](LICENSE).
 - **Website**: [CyberVault Website](https://cybernilsen.github.io/CyberVault-website/index.html)
 - **CyberVault Extension Code**: [CyberVault Extension](https://github.com/CyberNilsen/CyberVaultExtension)
 
+## 📬 Support
+For questions, bugs, or feature requests, please reach out at **cyberbrothershq@gmail.com** or [open an issue](https://github.com/CyberNilsen/CyberVault/issues).
+
 ## 🙌 Thanks to Testers
 
 Big shoutout to our awesome testers who helped us squash bugs and improve **CyberVault**:
