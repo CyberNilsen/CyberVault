@@ -46,6 +46,13 @@ All passwords are encrypted and stored locally for maximum security.
 We love contributions!
 Got a feature idea? Found a bug? Please open an issue or submit a pull request.
 
+## 🗞️ Media Spotlight
+
+We're proud to share that **CyberVault** was featured in our local newspaper, *Laagendalsposten*!  
+It’s an exciting milestone for us, and we’re grateful for the recognition in Kongsberg. 🇳🇴
+
+🔗 [Read the full article (Norwegian)](https://www.laagendalsposten.no/andreas-og-mathias-vil-unnga-hackere-laget-losning-for-sikker-lagring/s/5-64-1548360)
+
 ## 📜 License
 
 This project is licensed under the [MIT License](LICENSE).
@@ -55,6 +62,7 @@ This project is licensed under the [MIT License](LICENSE).
 
 - **Website**: [CyberVault Website](https://cybernilsen.github.io/CyberVault-website/index.html)
 - **CyberVault Extension Code**: [CyberVault Extension](https://github.com/CyberNilsen/CyberVaultExtension)
+
 
 ## 📬 Support
 For questions, bugs, or feature requests, please reach out at **cyberbrothershq@gmail.com** or [open an issue](https://github.com/CyberNilsen/CyberVault/issues).
