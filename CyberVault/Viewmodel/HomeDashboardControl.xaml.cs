@@ -72,15 +72,30 @@ namespace CyberVault.Viewmodel
                 if (File.Exists(versionFilePath))
                 {
                     string versionFromFile = File.ReadAllText(versionFilePath).Trim();
-                    if (!string.IsNullOrEmpty(versionFromFile) && versionFromFile.StartsWith("v"))
+                    if (!string.IsNullOrEmpty(versionFromFile))
                     {
+                        if (!versionFromFile.StartsWith("v"))
+                        {
+                            versionFromFile = "v" + versionFromFile;
+                        }
                         _currentVersion = versionFromFile;
+                        return;
                     }
                 }
+
+                var assembly = System.Reflection.Assembly.GetExecutingAssembly();
+                var version = assembly.GetName().Version;
+                if (version != null)
+                {
+                    _currentVersion = $"v{version.Major}.{version.Minor}.{version.Build}";
+                    return;
+                }
+
+                _currentVersion = "v4.1.1";
             }
             catch (Exception)
             {
-                return;
+                _currentVersion = "v4.1.1";
             }
         }
 
@@ -278,26 +293,37 @@ namespace CyberVault.Viewmodel
                 using (HttpClient client = new HttpClient())
                 {
                     client.DefaultRequestHeaders.Add("User-Agent", "CyberVault-Program");
-                    client.Timeout = TimeSpan.FromSeconds(5);
+                    client.Timeout = TimeSpan.FromSeconds(15); // Increased timeout
 
                     string responseBody = await client.GetStringAsync(_githubApiReleaseUrl);
 
-                    Regex versionRegex = new Regex("\"tag_name\":\\s*\"(v[0-9]+\\.[0-9]+)\"");
+                    // Extract version - handle both with and without 'v' prefix
+                    Regex versionRegex = new Regex("\"tag_name\":\\s*\"(v?[0-9]+\\.[0-9]+(?:\\.[0-9]+)?)\"");
                     Match versionMatch = versionRegex.Match(responseBody);
 
                     if (versionMatch.Success)
                     {
                         _latestVersion = versionMatch.Groups[1].Value;
 
-                        Regex downloadUrlRegex = new Regex("\"browser_download_url\":\\s*\"([^\"]+\\.zip)\"");
-                        Match downloadUrlMatch = downloadUrlRegex.Match(responseBody);
+                        // Ensure version has 'v' prefix for consistency
+                        if (!_latestVersion.StartsWith("v"))
+                        {
+                            _latestVersion = "v" + _latestVersion;
+                        }
 
-                        if (downloadUrlMatch.Success)
-                            _downloadUrl = downloadUrlMatch.Groups[1].Value;
+                        // Find appropriate download URL based on installation type
+                        string downloadUrl = FindDownloadUrl(responseBody);
+
+                        if (!string.IsNullOrEmpty(downloadUrl))
+                        {
+                            _downloadUrl = downloadUrl;
+                            CompareVersions(_currentVersion, _latestVersion);
+                        }
                         else
-                            _downloadUrl = $"{_githubRepoUrl}/releases/tag/{_latestVersion}";
-
-                        CompareVersions(_currentVersion, _latestVersion);
+                        {
+                            if (showErrors)
+                                UpdateStatusText.Text = "No suitable download found for this version.";
+                        }
                     }
                     else
                     {
@@ -317,15 +343,55 @@ namespace CyberVault.Viewmodel
             }
         }
 
+        private string FindDownloadUrl(string responseBody)
+        {
+            try
+            {
+
+                if (_isInstallerVersion)
+                {
+                    Regex installerRegex = new Regex("\"browser_download_url\":\\s*\"([^\"]+\\.exe)\"");
+                    Match installerMatch = installerRegex.Match(responseBody);
+
+                    if (installerMatch.Success)
+                    {
+                        return installerMatch.Groups[1].Value;
+                    }
+                }
+
+                Regex zipRegex = new Regex("\"browser_download_url\":\\s*\"([^\"]+\\.zip)\"");
+                Match zipMatch = zipRegex.Match(responseBody);
+
+                if (zipMatch.Success)
+                {
+                    return zipMatch.Groups[1].Value;
+                }
+
+                Regex sourceZipRegex = new Regex("\"zipball_url\":\\s*\"([^\"]+)\"");
+                Match sourceZipMatch = sourceZipRegex.Match(responseBody);
+
+                if (sourceZipMatch.Success)
+                {
+                    return sourceZipMatch.Groups[1].Value;
+                }
+
+                return $"{_githubRepoUrl}/archive/refs/tags/{_latestVersion}.zip";
+            }
+            catch (Exception)
+            {
+                return "";
+            }
+        }
+
         private void CompareVersions(string currentVersion, string latestVersion)
         {
             try
             {
-                currentVersion = currentVersion.TrimStart('v');
-                latestVersion = latestVersion.TrimStart('v');
+                string normalizedCurrent = NormalizeVersion(currentVersion);
+                string normalizedLatest = NormalizeVersion(latestVersion);
 
-                Version current = new Version(currentVersion);
-                Version latest = new Version(latestVersion);
+                Version current = new Version(normalizedCurrent);
+                Version latest = new Version(normalizedLatest);
 
                 if (latest > current)
                 {
@@ -333,10 +399,16 @@ namespace CyberVault.Viewmodel
                     UpdateStatusText.Text = $"Update available: {_latestVersion}";
                     UpdateNowButton.Visibility = Visibility.Visible;
                 }
-                else
+                else if (latest == current)
                 {
                     _updateAvailable = false;
                     UpdateStatusText.Text = "You have the latest version.";
+                    UpdateNowButton.Visibility = Visibility.Collapsed;
+                }
+                else
+                {
+                    _updateAvailable = false;
+                    UpdateStatusText.Text = $"Development version: {_currentVersion}";
                     UpdateNowButton.Visibility = Visibility.Collapsed;
                 }
             }
@@ -344,6 +416,24 @@ namespace CyberVault.Viewmodel
             {
                 UpdateStatusText.Text = $"Error comparing versions: {ex.Message}";
             }
+        }
+
+        private string NormalizeVersion(string version)
+        {
+            version = version.TrimStart('v');
+
+            string[] parts = version.Split('.');
+
+            if (parts.Length == 1)
+            {
+                return $"{parts[0]}.0.0";
+            }
+            else if (parts.Length == 2)
+            {
+                return $"{parts[0]}.{parts[1]}.0";
+            }
+
+            return version;
         }
 
         private void UpdateNowButton_Click(object sender, RoutedEventArgs e)
@@ -426,8 +516,12 @@ namespace CyberVault.Viewmodel
         {
             try
             {
-                if (!_downloadUrl.EndsWith(".zip", StringComparison.OrdinalIgnoreCase))
+                if (_downloadUrl.EndsWith(".exe", StringComparison.OrdinalIgnoreCase))
                 {
+                    ShowSimpleMessage("Installer Update",
+                        $"The installer for version {_latestVersion} will now download and launch.\n\n" +
+                        "Please follow the installation prompts to complete the update.");
+
                     Process.Start(new ProcessStartInfo
                     {
                         FileName = _downloadUrl,
@@ -488,8 +582,13 @@ namespace CyberVault.Viewmodel
                     _updateProgressWindow = null;
                 }
 
-                MessageBox.Show($"Failed to download update: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show($"Failed to perform update: {ex.Message}", "Update Error",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
             }
+        }
+        private void ShowSimpleMessage(string title, string message)
+        {
+            MessageBox.Show(message, title, MessageBoxButton.OK, MessageBoxImage.Information);
         }
 
         private bool HasWritePermissionToAppDirectory()
@@ -1125,7 +1224,7 @@ exit";
             else if (password.Length >= 6)
                 score += 10;
 
-            // Complexity - up to 60 points
+            // Complexity - up to 60 points 
             bool hasUpperCase = Regex.IsMatch(password, "[A-Z]");
             bool hasLowerCase = Regex.IsMatch(password, "[a-z]");
             bool hasDigit = Regex.IsMatch(password, "[0-9]");
