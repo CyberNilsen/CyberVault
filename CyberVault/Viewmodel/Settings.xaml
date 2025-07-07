@@ -175,7 +175,7 @@
                     <StackPanel Margin="0,8,0,10">
                         <TextBlock Text="CyberVault" FontWeight="SemiBold" FontSize="16" Foreground="#2E3440"/>
 
-                        <TextBlock Text="Version 4.0.0" Foreground="#677591" FontSize="12" Margin="0,4,0,0"/>
+                        <TextBlock Text="Version 4.1.1" Foreground="#677591" FontSize="12" Margin="0,4,0,0"/>
                     </StackPanel>
 
                     <TextBlock TextWrapping="Wrap" Margin="0,0,0,15">

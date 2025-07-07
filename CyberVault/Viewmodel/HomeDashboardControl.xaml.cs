@@ -18,7 +18,7 @@ namespace CyberVault.Viewmodel
     {
         private string? _accessToken;
         private LocalWebServer? _webServer;
-        private string _currentVersion = "v4.1";
+        private string _currentVersion = "v4.1.1";
         private readonly string _githubRepoUrl = "https://github.com/CyberNilsen/CyberVault";
         private readonly string _githubApiReleaseUrl = "https://api.github.com/repos/CyberNilsen/CyberVault/releases/latest";
         private bool _updateAvailable = false;
@@ -27,6 +27,7 @@ namespace CyberVault.Viewmodel
         private bool _isDownloading = false;
         private readonly string _tempDownloadPath;
         private readonly string _applicationPath;
+        private readonly bool _isInstallerVersion;
         private UpdateProgressWindow? _updateProgressWindow;
         private string _username;
         private byte[] _encryptionKey;
@@ -44,6 +45,7 @@ namespace CyberVault.Viewmodel
             LoadCurrentVersion();
 
             _applicationPath = AppDomain.CurrentDomain.BaseDirectory;
+            _isInstallerVersion = _applicationPath.StartsWith(@"C:\Program Files", StringComparison.OrdinalIgnoreCase);
             _tempDownloadPath = Path.Combine(Path.GetTempPath(), "CyberVaultUpdate");
 
             if (App.WebServer != null)
@@ -460,9 +462,17 @@ namespace CyberVault.Viewmodel
                 {
                 }
 
-                CreateUpdaterScript(zipPath);
+                if (_isInstallerVersion && !HasWritePermissionToAppDirectory())
+                {
+                    CreateElevatedUpdaterScript(zipPath);
+                    RunElevatedUpdater();
+                }
+                else
+                {
+                    CreateUpdaterScript(zipPath);
+                    RunUpdaterInBackground();
+                }
 
-                RunUpdaterInBackground();
                 Application.Current.Shutdown();
             }
             catch (Exception ex)
@@ -482,177 +492,410 @@ namespace CyberVault.Viewmodel
             }
         }
 
+        private bool HasWritePermissionToAppDirectory()
+        {
+            try
+            {
+                string testFile = Path.Combine(_applicationPath, "write_test.tmp");
+                File.WriteAllText(testFile, "test");
+                File.Delete(testFile);
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        private void CreateElevatedUpdaterScript(string zipPath)
+        {
+            string psScriptPath = Path.Combine(_tempDownloadPath, "elevated_update.ps1");
+
+            string psScriptContent = @"
+                            param(
+                                [string]$ZipPath,
+                                [string]$AppPath,
+                                [string]$TempPath,
+                                [string]$Version
+                            )
+
+                            # Log function
+                            function Write-Log {
+                                param ([string]$Message)
+                                $logFile = ""$TempPath\elevated_update_log.txt""
+                                Add-Content -Path $logFile -Value ""$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss') - $Message""
+                            }
+
+                            try {
+                                Write-Log ""Elevated update script started for installer version""
+                                Write-Log ""App Path: $AppPath""
+                                Write-Log ""Zip Path: $ZipPath""
+
+                                # Wait for application to close
+                                Start-Sleep -Seconds 3
+                                Write-Log ""Waiting for application to close completely""
+
+                                # Kill any remaining processes
+                                $processes = Get-Process -Name ""CyberVault"" -ErrorAction SilentlyContinue
+                                foreach ($process in $processes) {
+                                    try {
+                                        $process.Kill()
+                                        $process.WaitForExit(5000)
+                                        Write-Log ""Killed process: $($process.Id)""
+                                    } catch {
+                                        Write-Log ""Failed to kill process: $($process.Id)""
+                                    }
+                                }
+
+                                Start-Sleep -Seconds 2
+
+                                # Backup critical files
+                                Write-Log ""Creating backup of critical files""
+                                $backupDir = ""$TempPath\backup""
+                                if (Test-Path -Path $backupDir) {
+                                    Remove-Item -Path $backupDir -Recurse -Force
+                                }
+                                New-Item -ItemType Directory -Path $backupDir -Force | Out-Null
+
+                                $filesToPreserve = @(
+                                    ""config.ini"",
+                                    ""settings.json"",
+                                    ""user_preferences.json""
+                                )
+
+                                foreach ($file in $filesToPreserve) {
+                                    $sourcePath = Join-Path $AppPath $file
+                                    if (Test-Path -Path $sourcePath) {
+                                        $destPath = Join-Path $backupDir $file
+                                        Copy-Item -Path $sourcePath -Destination $destPath -Force
+                                        Write-Log ""Backed up: $file""
+                                    }
+                                }
+
+                                # Clean application directory (except backup)
+                                Write-Log ""Cleaning application directory""
+                                Get-ChildItem -Path $AppPath -Exclude ""CyberVaultUpdate"" | ForEach-Object {
+                                    if ($_.FullName -ne $backupDir) {
+                                        Remove-Item -Path $_.FullName -Recurse -Force -ErrorAction SilentlyContinue
+                                        Write-Log ""Removed: $($_.Name)""
+                                    }
+                                }
+
+                                # Extract update
+                                Write-Log ""Extracting update to application directory""
+                                $extractDir = ""$TempPath\extracted""
+                                if (Test-Path -Path $extractDir) {
+                                    Remove-Item -Path $extractDir -Recurse -Force
+                                }
+                                New-Item -ItemType Directory -Path $extractDir -Force | Out-Null
+
+                                # Use .NET extraction for better compatibility
+                                Add-Type -AssemblyName System.IO.Compression.FileSystem
+                                [System.IO.Compression.ZipFile]::ExtractToDirectory($ZipPath, $extractDir)
+
+                                # Handle different zip structures
+                                $extractedItems = Get-ChildItem -Path $extractDir
+                                if ($extractedItems.Count -eq 1 -and (Get-Item -Path $extractedItems[0].FullName).PSIsContainer) {
+                                    # Single root folder - copy from inside
+                                    Write-Log ""Detected single root folder, extracting contents""
+                                    $rootFolder = $extractedItems[0].FullName
+                                    Get-ChildItem -Path $rootFolder -Recurse | ForEach-Object {
+                                        $relativePath = $_.FullName.Substring($rootFolder.Length + 1)
+                                        $targetPath = Join-Path $AppPath $relativePath
+
+                                        if ($_.PSIsContainer) {
+                                            if (-not (Test-Path -Path $targetPath)) {
+                                                New-Item -ItemType Directory -Path $targetPath -Force | Out-Null
+                                            }
+                                        } else {
+                                            $targetDir = [System.IO.Path]::GetDirectoryName($targetPath)
+                                            if (-not (Test-Path -Path $targetDir)) {
+                                                New-Item -ItemType Directory -Path $targetDir -Force | Out-Null
+                                            }
+                                            Copy-Item -Path $_.FullName -Destination $targetPath -Force
+                                            Write-Log ""Copied: $relativePath""
+                                        }
+                                    }
+                                } else {
+                                    # Multiple items or files - copy directly
+                                    Write-Log ""Copying extracted files directly""
+                                    Get-ChildItem -Path $extractDir -Recurse | ForEach-Object {
+                                        $relativePath = $_.FullName.Substring($extractDir.Length + 1)
+                                        $targetPath = Join-Path $AppPath $relativePath
+
+                                        if ($_.PSIsContainer) {
+                                            if (-not (Test-Path -Path $targetPath)) {
+                                                New-Item -ItemType Directory -Path $targetPath -Force | Out-Null
+                                            }
+                                        } else {
+                                            $targetDir = [System.IO.Path]::GetDirectoryName($targetPath)
+                                            if (-not (Test-Path -Path $targetDir)) {
+                                                New-Item -ItemType Directory -Path $targetDir -Force | Out-Null
+                                            }
+                                            Copy-Item -Path $_.FullName -Destination $targetPath -Force
+                                            Write-Log ""Copied: $relativePath""
+                                        }
+                                    }
+                                }
+
+                                # Update version file
+                                Write-Log ""Updating version file""
+                                Set-Content -Path ""$AppPath\version.txt"" -Value $Version
+
+                                # Restore preserved files
+                                Write-Log ""Restoring preserved files""
+                                foreach ($file in $filesToPreserve) {
+                                    $sourcePath = Join-Path $backupDir $file
+                                    if (Test-Path -Path $sourcePath) {
+                                        $destPath = Join-Path $AppPath $file
+                                        Copy-Item -Path $sourcePath -Destination $destPath -Force -ErrorAction SilentlyContinue
+                                        Write-Log ""Restored: $file""
+                                    }
+                                }
+
+                                # Cleanup
+                                Write-Log ""Cleaning up temporary files""
+                                if (Test-Path -Path $backupDir) {
+                                    Remove-Item -Path $backupDir -Recurse -Force -ErrorAction SilentlyContinue
+                                }
+                                if (Test-Path -Path $extractDir) {
+                                    Remove-Item -Path $extractDir -Recurse -Force -ErrorAction SilentlyContinue
+                                }
+
+                                # Start application
+                                $appExePath = ""$AppPath\CyberVault.exe""
+                                if (Test-Path -Path $appExePath) {
+                                    Write-Log ""Starting application: $appExePath""
+                                    Start-Sleep -Seconds 2
+                                    
+                                    try {
+                                        $startInfo = New-Object System.Diagnostics.ProcessStartInfo
+                                        $startInfo.FileName = $appExePath
+                                        $startInfo.WorkingDirectory = $AppPath
+                                        $startInfo.UseShellExecute = $true
+                                        $startInfo.Verb = """"  # Don't run as admin
+                                        [System.Diagnostics.Process]::Start($startInfo)
+                                        Write-Log ""Application started successfully""
+                                    } catch {
+                                        Write-Log ""Error starting application: $_""
+                                    }
+                                } else {
+                                    Write-Log ""ERROR: Application executable not found""
+                                }
+
+                                Write-Log ""Elevated update completed successfully""
+                                exit 0
+                            }
+                            catch {
+                                Write-Log ""Error during elevated update: $_""
+                                exit 1
+                            }
+                            ";
+
+            File.WriteAllText(psScriptPath, psScriptContent);
+
+            string batchContent = $@"@echo off
+powershell.exe -ExecutionPolicy Bypass -WindowStyle Hidden -Command ""Start-Process PowerShell -ArgumentList '-ExecutionPolicy Bypass -WindowStyle Hidden -File \""{psScriptPath}\"" -ZipPath \""{zipPath}\"" -AppPath \""{_applicationPath}\"" -TempPath \""{_tempDownloadPath}\"" -Version \""{_latestVersion}\"" ' -Verb RunAs""
+exit";
+
+            File.WriteAllText(Path.Combine(_tempDownloadPath, "elevated_update_launcher.bat"), batchContent);
+        }
+
+        private void RunElevatedUpdater()
+        {
+            try
+            {
+                string launcherPath = Path.Combine(_tempDownloadPath, "elevated_update_launcher.bat");
+
+                ProcessStartInfo startInfo = new ProcessStartInfo
+                {
+                    FileName = launcherPath,
+                    UseShellExecute = true,
+                    CreateNoWindow = false,
+                    WindowStyle = ProcessWindowStyle.Hidden
+                };
+
+                Process.Start(startInfo);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Failed to start elevated updater: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
         private void CreateUpdaterScript(string zipPath)
         {
             string psScriptPath = Path.Combine(_tempDownloadPath, "update.ps1");
 
             string psScriptContent = @"
-                                    # Log function
-                                    function Write-Log {
-                                        param (
-                                            [string]$Message
-                                        )
-                                        Add-Content -Path '$LOGFILE$' -Value ""$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss') - $Message""
+                            # Log function
+                            function Write-Log {
+                                param (
+                                    [string]$Message
+                                )
+                                Add-Content -Path '$LOGFILE$' -Value ""$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss') - $Message""
+                            }
+
+                            try {
+                                Write-Log ""Update script started for portable version""
+
+                                Start-Sleep -Seconds 2
+                                Write-Log ""Waiting for application to close completely""
+
+                                $versionFile = ""$TEMPPATH$\version.txt""
+                                if (Test-Path -Path $versionFile) {
+                                    Write-Log ""Found version file, will restore after update""
+                                    $versionContent = Get-Content -Path $versionFile -Raw
+                                }
+
+                                # Create a backup of critical files that should be preserved
+                                Write-Log ""Creating backup of critical files""
+                                $backupDir = ""$TEMPPATH$\backup""
+                                if (Test-Path -Path $backupDir) {
+                                    Remove-Item -Path $backupDir -Recurse -Force
+                                }
+                                New-Item -ItemType Directory -Path $backupDir -Force | Out-Null
+
+                                $filesToPreserve = @(
+                                    ""config.ini"",
+                                    ""settings.json"",
+                                    ""user_preferences.json""
+                                )
+
+                                foreach ($file in $filesToPreserve) {
+                                    $sourcePath = Join-Path ""$APPPATH$"" $file
+                                    if (Test-Path -Path $sourcePath) {
+                                        $destPath = Join-Path $backupDir $file
+                                        Copy-Item -Path $sourcePath -Destination $destPath -Force -Recurse
+                                        Write-Log ""Backed up: $file""
                                     }
+                                }
 
-                                    try {
-                                        Write-Log ""Update script started""
+                                Write-Log ""Cleaning application directory""
+                                Get-ChildItem -Path ""$APPPATH$"" -Exclude ""CyberVaultUpdate"" | ForEach-Object {
+                                    if ($_.FullName -ne $backupDir) {
+                                        Remove-Item -Path $_.FullName -Recurse -Force
+                                        Write-Log ""Removed: $($_.Name)""
+                                    }
+                                }
 
-                                        Start-Sleep -Seconds 2
-                                        Write-Log ""Waiting for application to close completely""
+                                Write-Log ""Extracting update directly to application directory""
+                                $extractDir = ""$TEMPPATH$\extracted""
+                                if (Test-Path -Path $extractDir) {
+                                    Remove-Item -Path $extractDir -Recurse -Force
+                                }
+                                New-Item -ItemType Directory -Path $extractDir -Force | Out-Null
 
-                                        $versionFile = ""$TEMPPATH$\version.txt""
-                                        if (Test-Path -Path $versionFile) {
-                                            Write-Log ""Found version file, will restore after update""
-                                            $versionContent = Get-Content -Path $versionFile -Raw
-                                        }
+                                Expand-Archive -Path ""$ZIPPATH$"" -DestinationPath $extractDir -Force
 
-                                        # Create a backup of critical files that should be preserved
-                                        Write-Log ""Creating backup of critical files""
-                                        $backupDir = ""$TEMPPATH$\backup""
-                                        if (Test-Path -Path $backupDir) {
-                                            Remove-Item -Path $backupDir -Recurse -Force
-                                        }
-                                        New-Item -ItemType Directory -Path $backupDir -Force | Out-Null
+                                $extractedItems = Get-ChildItem -Path $extractDir
+                                if ($extractedItems.Count -eq 1 -and (Get-Item -Path $extractedItems[0].FullName).PSIsContainer) {
+                                    # If the zip contains a root folder, copy content from inside that folder
+                                    Write-Log ""Detected single root folder in archive, extracting from inside it""
+                                    $rootFolder = $extractedItems[0].FullName
+                                    Get-ChildItem -Path $rootFolder -Recurse | ForEach-Object {
+                                        $relativePath = $_.FullName.Substring($rootFolder.Length + 1)
+                                        $targetPath = Join-Path ""$APPPATH$"" $relativePath
 
-                                        $filesToPreserve = @(
-
-                                        )
-
-                                        foreach ($file in $filesToPreserve) {
-                                            $sourcePath = Join-Path ""$APPPATH$"" $file
-                                            if (Test-Path -Path $sourcePath) {
-                                                $destPath = Join-Path $backupDir $file
-                                                Copy-Item -Path $sourcePath -Destination $destPath -Force -Recurse
-                                                Write-Log ""Backed up: $file""
-                                            }
-                                        }
-
-                                        Write-Log ""Cleaning application directory""
-                                        Get-ChildItem -Path ""$APPPATH$"" -Exclude ""CyberVaultUpdate"" | ForEach-Object {
-                                            if ($_.FullName -ne $backupDir) {
-                                                Remove-Item -Path $_.FullName -Recurse -Force
-                                                Write-Log ""Removed: $($_.Name)""
-                                            }
-                                        }
-
-                                        Write-Log ""Extracting update directly to application directory""
-                                        $extractDir = ""$TEMPPATH$\extracted""
-                                        if (Test-Path -Path $extractDir) {
-                                            Remove-Item -Path $extractDir -Recurse -Force
-                                        }
-                                        New-Item -ItemType Directory -Path $extractDir -Force | Out-Null
-
-                                        Expand-Archive -Path ""$ZIPPATH$"" -DestinationPath $extractDir -Force
-
-                                        $extractedItems = Get-ChildItem -Path $extractDir
-                                        if ($extractedItems.Count -eq 1 -and (Get-Item -Path $extractedItems[0].FullName).PSIsContainer) {
-                                            # If the zip contains a root folder, copy content from inside that folder
-                                            Write-Log ""Detected single root folder in archive, extracting from inside it""
-                                            $rootFolder = $extractedItems[0].FullName
-                                            Get-ChildItem -Path $rootFolder -Recurse | ForEach-Object {
-                                                $relativePath = $_.FullName.Substring($rootFolder.Length + 1)
-                                                $targetPath = Join-Path ""$APPPATH$"" $relativePath
-
-                                                if ($_.PSIsContainer) {
-                                                    if (-not (Test-Path -Path $targetPath)) {
-                                                        New-Item -ItemType Directory -Path $targetPath -Force | Out-Null
-                                                        Write-Log ""Created directory: $relativePath""
-                                                    }
-                                                } else {
-                                                    $targetDir = [System.IO.Path]::GetDirectoryName($targetPath)
-                                                    if (-not (Test-Path -Path $targetDir)) {
-                                                        New-Item -ItemType Directory -Path $targetDir -Force | Out-Null
-                                                    }
-                                                    Copy-Item -Path $_.FullName -Destination $targetPath -Force
-                                                    Write-Log ""Copied file: $relativePath""
-                                                }
+                                        if ($_.PSIsContainer) {
+                                            if (-not (Test-Path -Path $targetPath)) {
+                                                New-Item -ItemType Directory -Path $targetPath -Force | Out-Null
+                                                Write-Log ""Created directory: $relativePath""
                                             }
                                         } else {
-                                            Write-Log ""No root folder in archive, copying files directly""
-                                            Get-ChildItem -Path $extractDir -Recurse | ForEach-Object {
-                                                $relativePath = $_.FullName.Substring($extractDir.Length + 1)
-                                                $targetPath = Join-Path ""$APPPATH$"" $relativePath
-
-                                                if ($_.PSIsContainer) {
-                                                    if (-not (Test-Path -Path $targetPath)) {
-                                                        New-Item -ItemType Directory -Path $targetPath -Force | Out-Null
-                                                        Write-Log ""Created directory: $relativePath""
-                                                    }
-                                                } else {
-                                                    $targetDir = [System.IO.Path]::GetDirectoryName($targetPath)
-                                                    if (-not (Test-Path -Path $targetDir)) {
-                                                        New-Item -ItemType Directory -Path $targetDir -Force | Out-Null
-                                                    }
-                                                    Copy-Item -Path $_.FullName -Destination $targetPath -Force
-                                                    Write-Log ""Copied file: $relativePath""
-                                                }
+                                            $targetDir = [System.IO.Path]::GetDirectoryName($targetPath)
+                                            if (-not (Test-Path -Path $targetDir)) {
+                                                New-Item -ItemType Directory -Path $targetDir -Force | Out-Null
                                             }
+                                            Copy-Item -Path $_.FullName -Destination $targetPath -Force
+                                            Write-Log ""Copied file: $relativePath""
                                         }
+                                    }
+                                } else {
+                                    Write-Log ""No root folder in archive, copying files directly""
+                                    Get-ChildItem -Path $extractDir -Recurse | ForEach-Object {
+                                        $relativePath = $_.FullName.Substring($extractDir.Length + 1)
+                                        $targetPath = Join-Path ""$APPPATH$"" $relativePath
 
-                                        if ($versionContent) {
-                                            Write-Log ""Restoring version file""
-                                            Set-Content -Path ""$APPPATH$\version.txt"" -Value $versionContent
-                                        }
-
-                                        Write-Log ""Restoring preserved files""
-                                        foreach ($file in $filesToPreserve) {
-                                            $sourcePath = Join-Path $backupDir $file
-                                            if (Test-Path -Path $sourcePath) {
-                                                $destPath = Join-Path ""$APPPATH$"" $file
-                                                Copy-Item -Path $sourcePath -Destination $destPath -Force -Recurse
-                                                Write-Log ""Restored: $file""
+                                        if ($_.PSIsContainer) {
+                                            if (-not (Test-Path -Path $targetPath)) {
+                                                New-Item -ItemType Directory -Path $targetPath -Force | Out-Null
+                                                Write-Log ""Created directory: $relativePath""
                                             }
-                                        }
-
-                                        Write-Log ""Cleaning up temporary directories""
-                                        if (Test-Path -Path $backupDir) {
-                                            Remove-Item -Path $backupDir -Recurse -Force
-                                        }
-                                        if (Test-Path -Path $extractDir) {
-                                            Remove-Item -Path $extractDir -Recurse -Force
-                                        }
-
-                                        $appExePath = ""$APPPATH$\CyberVault.exe""
-                                        if (Test-Path -Path $appExePath) {
-                                            Write-Log ""Application executable found at: $appExePath""
-
-                                            Start-Sleep -Seconds 2
-
-                                            Write-Log ""Starting application""
-                                            try {
-                                                $startInfo = New-Object System.Diagnostics.ProcessStartInfo
-                                                $startInfo.FileName = $appExePath
-                                                $startInfo.WorkingDirectory = ""$APPPATH$""
-                                                $startInfo.UseShellExecute = $true
-
-                                                [System.Diagnostics.Process]::Start($startInfo)
-                                                Write-Log ""Application started successfully""
+                                        } else {
+                                            $targetDir = [System.IO.Path]::GetDirectoryName($targetPath)
+                                            if (-not (Test-Path -Path $targetDir)) {
+                                                New-Item -ItemType Directory -Path $targetDir -Force | Out-Null
                                             }
-                                            catch {
-                                                Write-Log ""Error starting application: $_""
-                                                try {
-                                                    Start-Process -FilePath $appExePath -WorkingDirectory ""$APPPATH$""
-                                                    Write-Log ""Application started with fallback method""
-                                                }
-                                                catch {
-                                                    Write-Log ""All attempts to start application failed: $_""
-                                                }
-                                            }
+                                            Copy-Item -Path $_.FullName -Destination $targetPath -Force
+                                            Write-Log ""Copied file: $relativePath""
                                         }
-                                        else {
-                                            Write-Log ""ERROR: Application executable not found at: $appExePath""
-                                        }
+                                    }
+                                }
 
-                                        # Exit script
-                                        Write-Log ""Update completed successfully""
-                                        exit 0
+                                if ($versionContent) {
+                                    Write-Log ""Restoring version file""
+                                    Set-Content -Path ""$APPPATH$\version.txt"" -Value $versionContent
+                                }
+
+                                Write-Log ""Restoring preserved files""
+                                foreach ($file in $filesToPreserve) {
+                                    $sourcePath = Join-Path $backupDir $file
+                                    if (Test-Path -Path $sourcePath) {
+                                        $destPath = Join-Path ""$APPPATH$"" $file
+                                        Copy-Item -Path $sourcePath -Destination $destPath -Force -Recurse
+                                        Write-Log ""Restored: $file""
+                                    }
+                                }
+
+                                Write-Log ""Cleaning up temporary directories""
+                                if (Test-Path -Path $backupDir) {
+                                    Remove-Item -Path $backupDir -Recurse -Force
+                                }
+                                if (Test-Path -Path $extractDir) {
+                                    Remove-Item -Path $extractDir -Recurse -Force
+                                }
+
+                                $appExePath = ""$APPPATH$\CyberVault.exe""
+                                if (Test-Path -Path $appExePath) {
+                                    Write-Log ""Application executable found at: $appExePath""
+
+                                    Start-Sleep -Seconds 2
+
+                                    Write-Log ""Starting application""
+                                    try {
+                                        $startInfo = New-Object System.Diagnostics.ProcessStartInfo
+                                        $startInfo.FileName = $appExePath
+                                        $startInfo.WorkingDirectory = ""$APPPATH$""
+                                        $startInfo.UseShellExecute = $true
+
+                                        [System.Diagnostics.Process]::Start($startInfo)
+                                        Write-Log ""Application started successfully""
                                     }
                                     catch {
-                                        Write-Log ""Error during update: $_""
-                                        exit 1
+                                        Write-Log ""Error starting application: $_""
+                                        try {
+                                            Start-Process -FilePath $appExePath -WorkingDirectory ""$APPPATH$""
+                                            Write-Log ""Application started with fallback method""
+                                        }
+                                        catch {
+                                            Write-Log ""All attempts to start application failed: $_""
+                                        }
                                     }
-                                    ";
+                                }
+                                else {
+                                    Write-Log ""ERROR: Application executable not found at: $appExePath""
+                                }
+
+                                # Exit script
+                                Write-Log ""Update completed successfully""
+                                exit 0
+                            }
+                            catch {
+                                Write-Log ""Error during update: $_""
+                                exit 1
+                            }
+                            ";
 
             string logFilePath = Path.Combine(_tempDownloadPath, "update_log.txt");
 
@@ -664,8 +907,8 @@ namespace CyberVault.Viewmodel
             File.WriteAllText(psScriptPath, psScriptContent);
 
             string batchContent = $@"@echo off
-                                  start /b powershell.exe -ExecutionPolicy Bypass -WindowStyle Hidden -File ""{psScriptPath}""
-                                  exit";
+                          start /b powershell.exe -ExecutionPolicy Bypass -WindowStyle Hidden -File ""{psScriptPath}""
+                          exit";
 
             File.WriteAllText(Path.Combine(_tempDownloadPath, "update_launcher.bat"), batchContent);
         }
