@@ -58,7 +58,7 @@
                 </Grid.RowDefinitions>
 
                 <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,10">
-                    <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE72D;" FontSize="18" Foreground="#88C0D0" Margin="0,0,10,0" VerticalAlignment="Center"/>
+                        <TextBlock  Text="🔑" FontSize="18" Foreground="#88C0D0" Margin="0,0,10,0" VerticalAlignment="Center"/>
                     <TextBlock Text="Browser Extension Key" 
                            FontWeight="SemiBold" FontSize="18" Foreground="White"/>
                 </StackPanel>
