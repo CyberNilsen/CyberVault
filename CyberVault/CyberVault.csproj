@@ -8,9 +8,9 @@
 		<ApplicationIcon>Images\CyberVaultLogo.ico</ApplicationIcon>
 		<Platforms>AnyCPU;x86;x64</Platforms>
 		<SupportedOSPlatformVersion>10.0.17763.0</SupportedOSPlatformVersion>
-		<AssemblyVersion>4.2.0.0</AssemblyVersion>
-		<FileVersion>4.2.0.0</FileVersion>
-		<Version>4.2.0</Version>
+		<AssemblyVersion>4.3.0.0</AssemblyVersion>
+		<FileVersion>4.3.0.0</FileVersion>
+		<Version>4.3.0</Version>
 	</PropertyGroup>
 	<ItemGroup>
 		<None Remove="Images\2fa.png" />
