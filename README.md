@@ -120,9 +120,7 @@ Install our **official Chrome extension** for seamless password management:
 
 ### Security Auditing
 - Regular security reviews by the development team
-- Vulnerability reporting via security@cybervault.com
 - Automated dependency scanning with GitHub Security Advisories
-- Code signing with verified publisher certificate
 
 ## 📊 Comparisons
 
