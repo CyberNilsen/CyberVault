@@ -3,7 +3,6 @@ using System.Collections.ObjectModel;
 using System.Windows;
 using System.Windows.Controls;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement.Window;
-
 namespace CyberVault.View
 {
     public partial class PasswordHistoryWindow : Window
@@ -11,14 +10,17 @@ namespace CyberVault.View
         public ObservableCollection<PasswordHistoryEntry> HistoryEntries { get; set; }
         private PasswordItem _passwordItem;
         private string _username;
+        private PasswordVaultControl _parentControl;
         public bool RestoreRequested { get; private set; }
         public int SelectedHistoryIndex { get; private set; }
+        public bool HistoryCleared { get; private set; }
 
-        public PasswordHistoryWindow(PasswordItem passwordItem, string username)
+        public PasswordHistoryWindow(PasswordItem passwordItem, string username, PasswordVaultControl parentControl)
         {
             InitializeComponent();
             _passwordItem = passwordItem;
             _username = username;
+            _parentControl = parentControl;
             HistoryEntries = new ObservableCollection<PasswordHistoryEntry>();
             DataContext = this;
             LoadHistory();
@@ -32,7 +34,6 @@ namespace CyberVault.View
                 HistoryEntries.Add(entry);
             }
         }
-
         private void RestoreButton_Click(object sender, RoutedEventArgs e)
         {
             if (HistoryListBox.SelectedItem is PasswordHistoryEntry selectedEntry)
@@ -42,7 +43,6 @@ namespace CyberVault.View
                     "Confirm Restore",
                     MessageBoxButton.YesNo,
                     MessageBoxImage.Question);
-
                 if (result == MessageBoxResult.Yes)
                 {
                     SelectedHistoryIndex = HistoryEntries.IndexOf(selectedEntry);
@@ -56,7 +56,6 @@ namespace CyberVault.View
                 MessageBox.Show("Please select a password history entry to restore.", "No Selection", MessageBoxButton.OK, MessageBoxImage.Information);
             }
         }
-
         private void ClearHistoryButton_Click(object sender, RoutedEventArgs e)
         {
             var result = MessageBox.Show(
@@ -64,28 +63,25 @@ namespace CyberVault.View
                 "Confirm Clear History",
                 MessageBoxButton.YesNo,
                 MessageBoxImage.Warning);
-
             if (result == MessageBoxResult.Yes)
             {
                 _passwordItem.ClearHistory();
+                _parentControl.SaveAllPasswordsPublic();
                 LoadHistory();
+                HistoryCleared = true;
                 MessageBox.Show("Password history cleared successfully.", "History Cleared", MessageBoxButton.OK, MessageBoxImage.Information);
-                
-            }
 
+            }
             if (HistoryEntries.Count == 0)
             {
                 ClearHistoryButton.IsEnabled = false;
             }
-
         }
-
         private void CloseButton_Click(object sender, RoutedEventArgs e)
         {
             DialogResult = false;
             Close();
         }
-
         private void HistoryListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             RestoreButton.IsEnabled = HistoryListBox.SelectedItem != null;

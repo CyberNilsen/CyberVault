@@ -163,6 +163,11 @@ namespace CyberVault.View
             }
         }
 
+        public void SaveAllPasswordsPublic()
+        {
+            SaveAllPasswords();
+        }
+
         private void LogOut()
         {
             mainWindow.Navigate(new LoginControl(mainWindow));
@@ -228,7 +233,7 @@ namespace CyberVault.View
             var selectedItem = PasswordListBox.SelectedItem as PasswordItem;
             if (selectedItem != null)
             {
-                var historyWindow = new PasswordHistoryWindow(selectedItem, _username);
+                var historyWindow = new PasswordHistoryWindow(selectedItem, _username, this);
                 historyWindow.Owner = Window.GetWindow(this);
 
                 if (historyWindow.ShowDialog() == true && historyWindow.RestoreRequested)
@@ -246,6 +251,10 @@ namespace CyberVault.View
                     ViewHistoryButton.Visibility = selectedItem.PasswordHistory.Count > 0 ? Visibility.Visible : Visibility.Collapsed;
 
                     MessageBox.Show("Password restored from history!", "Info", MessageBoxButton.OK, MessageBoxImage.Information);
+                }
+                else if (historyWindow.HistoryCleared)
+                {
+                    ViewHistoryButton.Visibility = Visibility.Collapsed;
                 }
             }
             else
