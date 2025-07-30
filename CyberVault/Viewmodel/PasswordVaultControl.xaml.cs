@@ -3,13 +3,14 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media.Animation;
 
+
 namespace CyberVault.View
 {
     public partial class PasswordVaultControl : UserControl
     {
         private string _username;
         private byte[] _encryptionKey;
-        private TextBox ?passwordTextBox;
+        private TextBox passwordTextBox;
         public ObservableCollection<PasswordItem> SavedPasswords { get; set; }
         private MainWindow mainWindow;
         public bool IsUACActive { get; set; }
@@ -195,7 +196,11 @@ namespace CyberVault.View
                 selectedItem.Website = WebsiteTextBox.Text;
                 selectedItem.Email = EmailTextBox.Text;
                 selectedItem.Username = UsernameTextBox.Text;
-                selectedItem.Password = password;
+
+                if (selectedItem.Password != password)
+                {
+                    selectedItem.UpdatePassword(password, _username);
+                }
 
                 MessageBox.Show("Password updated!", "Info", MessageBoxButton.OK, MessageBoxImage.Information);
             }
@@ -206,19 +211,48 @@ namespace CyberVault.View
                     Name = PasswordNameTextBox.Text,
                     Website = WebsiteTextBox.Text,
                     Email = EmailTextBox.Text,
-                    Username = UsernameTextBox.Text,
-                    Password = password
+                    Username = UsernameTextBox.Text
                 };
+                newItem.UpdatePassword(password, _username);
                 SavedPasswords.Add(newItem);
                 MessageBox.Show("Password saved!", "Info", MessageBoxButton.OK, MessageBoxImage.Information);
             }
 
             SaveAllPasswords();
             LoadPasswords();
-
             CloseCreatePasswordGrid();
         }
 
+        private void ViewHistory_Click(object sender, RoutedEventArgs e)
+        {
+            var selectedItem = PasswordListBox.SelectedItem as PasswordItem;
+            if (selectedItem != null)
+            {
+                var historyWindow = new PasswordHistoryWindow(selectedItem, _username);
+                historyWindow.Owner = Window.GetWindow(this);
+
+                if (historyWindow.ShowDialog() == true && historyWindow.RestoreRequested)
+                {
+                    selectedItem.RestorePassword(historyWindow.SelectedHistoryIndex, _username);
+                    SaveAllPasswords();
+
+                    PasswordNameTextBox.Text = selectedItem.Name;
+                    WebsiteTextBox.Text = selectedItem.Website;
+                    EmailTextBox.Text = selectedItem.Email;
+                    UsernameTextBox.Text = selectedItem.Username;
+                    NewPasswordBox.Password = selectedItem.Password;
+                    PlainTextPassword.Text = selectedItem.Password;
+
+                    ViewHistoryButton.Visibility = selectedItem.PasswordHistory.Count > 0 ? Visibility.Visible : Visibility.Collapsed;
+
+                    MessageBox.Show("Password restored from history!", "Info", MessageBoxButton.OK, MessageBoxImage.Information);
+                }
+            }
+            else
+            {
+                MessageBox.Show("Please select a password to view its history.", "No Selection", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+        }
 
         private void DeletePassword_Click(object sender, RoutedEventArgs e)
         {
@@ -300,6 +334,7 @@ namespace CyberVault.View
             PasswordListBox.SelectedItem = item;
             PlainTextPassword.Visibility = Visibility.Collapsed;
             NewPasswordBox.Visibility = Visibility.Visible;
+
             if (item != null)
             {
                 PasswordNameTextBox.Text = item.Name;
@@ -308,6 +343,7 @@ namespace CyberVault.View
                 UsernameTextBox.Text = item.Username;
                 NewPasswordBox.Password = item.Password;
                 PlainTextPassword.Text = item.Password;
+                ViewHistoryButton.Visibility = item.PasswordHistory.Count > 0 ? Visibility.Visible : Visibility.Collapsed;
             }
             else
             {
@@ -317,6 +353,7 @@ namespace CyberVault.View
                 UsernameTextBox.Text = "";
                 NewPasswordBox.Password = "";
                 PlainTextPassword.Text = "";
+                ViewHistoryButton.Visibility = Visibility.Collapsed;
             }
         }
     }
