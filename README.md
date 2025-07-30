@@ -1,5 +1,13 @@
 # CyberVault
 
+![Project Status: Stable](https://img.shields.io/badge/status-stable-brightgreen.svg)
+
+CyberVault is a C#-based password manager app designed for users to securely store their passwords locally using high-end cryptography. Developed by **CyberHansen** and **CyberNilsen**, the app aims to provide a safe and easy-to-use solution for password management. Additional features, such as a Chrome extension and more cybersecurity tools, will be added in future updates. The program is only available on Windows.
+
+### ✅ Project Status: Stable  
+CyberVault is feature-complete and considered stable. While major new features are not being added right now, bug fixes and small updates will continue.  
+We welcome contributions, suggestions, and issue reports.
+
 CyberVault is a C#-based password manager app designed for users to securely store their passwords locally using high-end cryptography. Developed by **CyberHansen** and **CyberNilsen**, the app aims to provide a safe and easy-to-use solution for password management. Additional features, such as a Chrome extension and more cybersecurity tools, will be added in future updates. The program is only available on windows.
 
 
