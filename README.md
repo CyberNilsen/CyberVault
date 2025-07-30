@@ -157,10 +157,10 @@ Please read our [Contributing Guidelines](CONTRIBUTING.md) and [Code of Conduct]
 ## 📜 License & Legal
 This project is licensed under the [MIT License](LICENSE) - see the LICENSE file for details.
 
-**Legal Notice**: CyberVault is provided "as-is" without warranty. Users are responsible for maintaining backups of their password databases.
+**Legal Notice**: CyberVault is provided "as-is" without warranty. Users are responsible for maintaining backups of their passwords.
 
 ## 🗞️ Media & Recognition
-**Featured in Laagendalsposten**: CyberVault was highlighted in Norway's local tech news for innovative cybersecurity solutions.  
+**Featured in Laagendalsposten**: CyberVault was highlighted in Norway Kongsberg's local news.  
 🔗 [Read the full article (Norwegian)](https://www.laagendalsposten.no/andreas-og-mathias-vil-unnga-hackere-laget-losning-for-sikker-lagring/s/5-64-1548360)
 
 ## 🌐 Links & Resources
@@ -179,8 +179,6 @@ Special thanks to our dedicated testers who helped make CyberVault secure and re
 - [**Fredrik**](https://github.com/JahnTeigen) - Performance optimization and feature testing
 
 ### Open Source Dependencies
-- **SQLite** - Lightweight database engine
-- **Newtonsoft.Json** - JSON serialization framework
 - **System.Security.Cryptography** - .NET cryptographic APIs
 
 ---
