@@ -27,12 +27,11 @@ CyberVault is production-ready and actively maintained. While major new features
 - **Secure Password Storage**: AES-256 encryption with PBKDF2 key derivation
 - **Password Generator**: Create strong, unique passwords with customizable complexity
 - **Auto-Fill Integration**: Chrome extension for automatic login form completion
-- **Import/Export**: Migrate from other password managers (CSV support)
+- **Import/Export**: Migrate from other password managers (JSON support)
 - **Search & Filter**: Quickly find credentials with built-in search functionality
 
 ### Security Features  
 - **Zero-Knowledge Architecture**: Only you have access to your master password
-- **Local Database Encryption**: SQLite database with full encryption at rest
 - **Secure Memory Handling**: Credentials cleared from memory after use
 - **Backup & Restore**: Encrypted backup files for data protection
 - **Two-Factor Authentication Ready**: Supports TOTP codes and 2FA workflows
@@ -42,7 +41,6 @@ CyberVault is production-ready and actively maintained. While major new features
 - **Fast Performance**: Native C# application with minimal resource usage  
 - **Portable Mode**: Run from USB drive without installation
 - **Multiple Vaults**: Organize credentials into separate encrypted databases
-- **Dark/Light Themes**: Customizable appearance settings
 
 ## 🛠️ Technology Stack
 - **Language**: C# (.NET Framework/Core)
