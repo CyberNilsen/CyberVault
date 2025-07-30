@@ -56,7 +56,7 @@ CyberVault is production-ready and actively maintained. While major new features
 
 ### Method 1: Download Release (Recommended)
 1. Visit our [Releases page](https://github.com/CyberNilsen/CyberVault/releases)
-2. Download the latest `CyberVault-v4.2.0-Setup.exe`
+2. Download the latest
 3. Run installer and follow setup wizard
 4. Launch CyberVault from Start Menu
 
