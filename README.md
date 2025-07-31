@@ -85,7 +85,6 @@ cd CyberVault
 4. **Add Your First Password**: Click "Add New" to store your first credential
 
 ### Daily Workflow  
-- **Quick Access**: Use Ctrl+Alt+V hotkey to open CyberVault from anywhere
 - **Auto-Fill**: Install Chrome extension for seamless web form filling  
 - **Search**: Type in search box to instantly find any stored password
 - **Generate**: Use built-in generator for new account passwords
