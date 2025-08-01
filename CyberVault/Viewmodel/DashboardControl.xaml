@@ -1,4 +1,4 @@
-﻿<UserControl x:Class="CyberVault.DashboardControl"
+<UserControl x:Class="CyberVault.DashboardControl"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:view="clr-namespace:CyberVault.View"
@@ -169,6 +169,26 @@
                                                 </StackPanel>
                                             </DataTemplate>
                                         </Button.ContentTemplate>
+                                    </Button>
+                                </Border>
+
+                                <Border x:Name="PasskeyVaultBorder" Background="#3B4252" CornerRadius="10" Margin="0,0,0,10">
+                                    <Border.Effect>
+                                        <DropShadowEffect ShadowDepth="2" BlurRadius="8" Opacity="0.3" Color="#1F232D"/>
+                                    </Border.Effect>
+                                    <Border.Triggers>
+                                        <EventTrigger RoutedEvent="Border.MouseEnter">
+                                            <BeginStoryboard Storyboard="{StaticResource MenuItemHover}"/>
+                                        </EventTrigger>
+                                        <EventTrigger RoutedEvent="Border.MouseLeave">
+                                            <BeginStoryboard Storyboard="{StaticResource MenuItemLeave}"/>
+                                        </EventTrigger>
+                                    </Border.Triggers>
+                                    <Button Height="45" Style="{StaticResource ActionButton}" Background="Transparent" Foreground="White" Click="PasskeyVaultButton_Click">
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE8D4;" FontSize="16" Margin="0,0,10,0" VerticalAlignment="Center"/>
+                                            <TextBlock Text="Passkey Vault" FontSize="14" FontWeight="SemiBold" Foreground="White" VerticalAlignment="Center"/>
+                                        </StackPanel>
                                     </Button>
                                 </Border>
 

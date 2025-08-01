@@ -1,4 +1,4 @@
-﻿using System.Windows;
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using CyberVault.View;
@@ -54,6 +54,12 @@ namespace CyberVault
         {
             WelcomeText.Text = "Password Manager";
             DashboardContent.Content = new PasswordVaultControl(mainWindow, username, encryptionKey);
+        }
+
+        private void PasskeyVaultButton_Click(object sender, RoutedEventArgs e)
+        {
+            WelcomeText.Text = "Passkey Vault";
+            DashboardContent.Content = new CyberVault.Viewmodel.PasskeyVaultControl();
         }
 
         private void GeneratePasswordButton_Click(object sender, RoutedEventArgs e)
