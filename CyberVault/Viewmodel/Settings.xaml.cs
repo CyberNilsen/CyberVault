@@ -140,7 +140,7 @@ namespace CyberVault.Viewmodel
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error loading settings: {ex.Message}");
+                System.Windows.MessageBox.Show($"Error loading settings: {ex.Message}");
             }
         }
 
@@ -201,7 +201,7 @@ namespace CyberVault.Viewmodel
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error saving user setting: {ex.Message}");
+                System.Windows.MessageBox.Show($"Error saving user setting: {ex.Message}");
             }
         }
 

@@ -261,10 +261,11 @@ namespace CyberVault
 
                 Clipboard.Clear();
             }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Error overwriting clipboard history: {ex.Message}");
+            catch
+            { 
+
             }
+
         }
 
         public void StartClipboardClearTimer(string content)
