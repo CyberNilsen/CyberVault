@@ -1,6 +1,7 @@
 ﻿using System.Collections.ObjectModel;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Media;
 using System.Windows.Media.Animation;
 
 
@@ -228,6 +229,62 @@ namespace CyberVault.View
             CloseCreatePasswordGrid();
         }
 
+        private void CopyPassword_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                string passwordToCopy = string.Empty;
+
+                if (NewPasswordBox.Visibility == Visibility.Visible)
+                {
+                    passwordToCopy = NewPasswordBox.Password;
+                }
+                else if (PlainTextPassword.Visibility == Visibility.Visible)
+                {
+                    passwordToCopy = PlainTextPassword.Text;
+                }
+
+                if (!string.IsNullOrEmpty(passwordToCopy))
+                {
+                    Clipboard.SetText(passwordToCopy);
+
+                    MainWindow? mainWindow = Window.GetWindow(this) as MainWindow;
+                    if (mainWindow != null)
+                    {
+                        mainWindow.StartClipboardClearTimer(passwordToCopy);
+                    }
+
+                    var button = sender as Button;
+                    var originalBrush = button?.Foreground;
+                    if (button != null)
+                    {
+                        button.Foreground = new SolidColorBrush(Color.FromRgb(0xA3, 0xBE, 0x8C));
+                        var timer = new System.Windows.Threading.DispatcherTimer();
+                        timer.Interval = TimeSpan.FromSeconds(2);
+                        timer.Tick += (s, args) =>
+                        {
+                            button.Foreground = originalBrush;
+                            timer.Stop();
+                        };
+                        timer.Start();
+                    }
+
+                    MessageBox.Show("Password copied to clipboard!", "Success",
+                                    MessageBoxButton.OK, MessageBoxImage.Information);
+                }
+                else
+                {
+                    MessageBox.Show("Please enter a password first.", "No Password",
+                                    MessageBoxButton.OK, MessageBoxImage.Warning);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error copying password: {ex.Message}", "Error",
+                                MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
         private void ViewHistory_Click(object sender, RoutedEventArgs e)
         {
             var selectedItem = PasswordListBox.SelectedItem as PasswordItem;
@@ -346,6 +403,8 @@ namespace CyberVault.View
 
             if (item != null)
             {
+                CopyPasswordButton.Visibility = Visibility.Visible;
+
                 PasswordNameTextBox.Text = item.Name;
                 WebsiteTextBox.Text = item.Website;
                 EmailTextBox.Text = item.Email;
@@ -356,6 +415,8 @@ namespace CyberVault.View
             }
             else
             {
+                CopyPasswordButton.Visibility = Visibility.Collapsed;
+
                 PasswordNameTextBox.Text = "";
                 WebsiteTextBox.Text = "";
                 EmailTextBox.Text = "";
