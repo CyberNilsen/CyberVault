@@ -191,17 +191,17 @@ namespace CyberVault.Viewmodel
                 {
                     Clipboard.SetText(_accessToken);
                     ShowCopySuccess();
+
+                    MainWindow? mainWindow = Window.GetWindow(this) as MainWindow;
+                    if (mainWindow != null)
+                    {
+                        mainWindow.StartClipboardClearTimer(_accessToken);
+                    }
                 }
             }
-
             catch (Exception ex)
             {
                 MessageBox.Show($"Failed to copy key: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
-            MainWindow? mainWindow = Window.GetWindow(this) as MainWindow;
-            if (mainWindow != null)
-            {
-                mainWindow.StartClipboardClearTimer(_accessToken!);
             }
         }
 
