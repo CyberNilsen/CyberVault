@@ -173,9 +173,9 @@ This project is licensed under the [MIT License](LICENSE) - see the LICENSE file
 
 ### Beta Testers & Contributors
 Special thanks to our dedicated testers who helped make CyberVault secure and reliable:
-- [**Matvey**](https://github.com/JahBoiMat) - Security testing and penetration testing
-- [**Ådne**](https://github.com/Adnelilleskare) - UI/UX feedback and Windows compatibility testing  
-- [**Fredrik**](https://github.com/JahnTeigen) - Performance optimization and feature testing
+- [**Matvey**](https://github.com/JahBoiMat) - Tester
+- [**Ådne**](https://github.com/Adnelilleskare) - Tester
+- [**Fredrik**](https://github.com/JahnTeigen) - Tester
 
 ### Open Source Dependencies
 - **System.Security.Cryptography** - .NET cryptographic APIs
