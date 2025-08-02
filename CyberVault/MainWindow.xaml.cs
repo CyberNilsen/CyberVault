@@ -7,6 +7,10 @@ using CyberVault.Viewmodel;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Media.Effects;
+using System.Runtime.InteropServices;
+using System.Diagnostics;
+using System.IO;
+
 
 
 namespace CyberVault
@@ -23,6 +27,18 @@ namespace CyberVault
         private bool isLocked = false;
         private string? currentUsername;
         private int autoLockMinutes = 5;
+        private DispatcherTimer? clipboardClearTimer;
+        private int clipboardClearSeconds = 30;
+        private string? lastCopiedContent;
+
+        [DllImport("user32.dll")]
+        private static extern bool OpenClipboard(IntPtr hWndNewOwner);
+
+        [DllImport("user32.dll")]
+        private static extern bool CloseClipboard();
+
+        [DllImport("user32.dll")]
+        private static extern bool EmptyClipboard();
 
         public MainWindow()
         {
@@ -31,6 +47,7 @@ namespace CyberVault
             MainContent.Content = new LoginControl(this);
             InitializeTrayIcon();
             InitializeActivityMonitoring();
+            InitializeClipboardMonitoring();
 
             Closing += MainWindow_Closing!;
         }
@@ -104,6 +121,189 @@ namespace CyberVault
             autoLockMinutes = lockTimeMinutes;
             isLocked = false;
             ResetActivityTimer();
+        }
+
+        private void InitializeClipboardMonitoring()
+        {
+            clipboardClearTimer = new DispatcherTimer();
+            clipboardClearTimer.Tick += ClipboardClearTimer_Tick!;
+        }
+
+        private void ClipboardClearTimer_Tick(object sender, EventArgs e)
+        {
+            try
+            {
+                Clipboard.Clear();
+
+                ClearClipboardCompletely();
+
+                ClearWindowsClipboardHistory();
+
+                clipboardClearTimer?.Stop();
+                lastCopiedContent = null;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Clipboard clear error: {ex.Message}"); 
+                clipboardClearTimer?.Stop();
+            }
+        }
+
+        private void ClearClipboardCompletely()
+        {
+            try
+            {
+                IntPtr hwnd = new System.Windows.Interop.WindowInteropHelper(this).Handle;
+                if (OpenClipboard(hwnd))
+                {
+                    EmptyClipboard();
+                    CloseClipboard();
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Windows API clipboard clear error: {ex.Message}");
+            }
+        }
+
+        private void ClearWindowsClipboardHistory()
+        {
+            try
+            {
+                ClearClipboardHistoryUsingWinRT();
+
+                OverwriteClipboardHistory();
+
+                var clearScript = @"
+                    try {
+                        # Clear current clipboard
+                        [System.Windows.Forms.Clipboard]::Clear()
+                        
+                        # Try to access and clear clipboard history using Windows APIs
+                        Add-Type -AssemblyName PresentationCore
+                        [System.Windows.Clipboard]::Clear()
+                        
+                        # Force garbage collection to clear any cached clipboard data
+                        [System.GC]::Collect()
+                        [System.GC]::WaitForPendingFinalizers()
+                        [System.GC]::Collect()
+                        
+                    } catch {}";
+
+                var psi = new ProcessStartInfo
+                {
+                    FileName = "powershell.exe",
+                    Arguments = $"-WindowStyle Hidden -ExecutionPolicy Bypass -Command \"{clearScript}\"",
+                    WindowStyle = ProcessWindowStyle.Hidden,
+                    CreateNoWindow = true,
+                    UseShellExecute = false
+                };
+
+                using (var process = Process.Start(psi))
+                {
+                    process?.WaitForExit(2000);
+                }
+
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Failed to clear Windows clipboard history: {ex.Message}");
+            }
+        }
+
+        private void ClearClipboardHistoryUsingWinRT()
+        {
+            try
+            {
+                var clearHistoryScript = @"
+                    try {
+                        # Load Windows Runtime
+                        [Windows.ApplicationModel.DataTransfer.Clipboard, Windows.ApplicationModel.DataTransfer, ContentType = WindowsRuntime] | Out-Null
+                        
+                        # Clear clipboard content
+                        [Windows.ApplicationModel.DataTransfer.Clipboard]::Clear()
+                        
+                        # Try to clear history (Windows 10 1809+ feature)
+                        try {
+                            [Windows.ApplicationModel.DataTransfer.Clipboard]::ClearHistory()
+                        } catch {}
+                        
+                    } catch {}";
+
+                var psi = new ProcessStartInfo
+                {
+                    FileName = "powershell.exe",
+                    Arguments = $"-WindowStyle Hidden -Command \"{clearHistoryScript}\"",
+                    WindowStyle = ProcessWindowStyle.Hidden,
+                    CreateNoWindow = true,
+                    UseShellExecute = false
+                };
+
+                Process.Start(psi)?.WaitForExit(1000);
+            }
+            catch { }
+        }
+
+        private void OverwriteClipboardHistory()
+        {
+            try
+            {
+                for (int i = 0; i < 25; i++)
+                {
+                    string dummyContent = $"CLEARED_{i}_{DateTime.Now.Ticks}";
+
+                    Clipboard.SetText(dummyContent);
+                    Thread.Sleep(10);
+
+                    Clipboard.Clear();
+                    Thread.Sleep(10);
+                }
+
+                Clipboard.Clear();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error overwriting clipboard history: {ex.Message}");
+            }
+        }
+
+        public void StartClipboardClearTimer(string content)
+        {
+            if (clipboardClearSeconds > 0)
+            {
+                lastCopiedContent = content;
+                clipboardClearTimer?.Stop();
+                clipboardClearTimer!.Interval = TimeSpan.FromSeconds(clipboardClearSeconds);
+                clipboardClearTimer.Start();
+                
+            }
+        }
+
+        public void UpdateClipboardClearTime(int seconds)
+        {
+            clipboardClearSeconds = seconds;
+            if (seconds == 0)
+            {
+                clipboardClearTimer?.Stop();
+                lastCopiedContent = null;
+            }
+        }
+
+        public void ClearClipboardImmediately()
+        {
+            try
+            {
+                Clipboard.Clear();
+
+                ClearClipboardCompletely();
+
+                ClearWindowsClipboardHistory();
+
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Login clipboard clear error: {ex.Message}");
+            }
         }
 
         private void InitializeTrayIcon()

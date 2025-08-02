@@ -58,28 +58,48 @@
 
                     <Grid Margin="0,8,0,8">
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="200"/>
                             <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="150"/>
                         </Grid.ColumnDefinitions>
 
                         <TextBlock Grid.Column="0" Text="Auto Lock" Style="{StaticResource SettingLabel}"/>
 
-                        <StackPanel Grid.Column="1" Orientation="Vertical">
+                        <TextBlock Grid.Column="1" Text="Automatically lock vault after inactivity" 
+                       Foreground="#677591" FontSize="12" VerticalAlignment="Center"/>
 
-                            <TextBlock Text="Automatically lock vault after inactivity" 
-                                       Foreground="#677591" FontSize="12" VerticalAlignment="Center"/>
+                        <ComboBox Grid.Column="2" x:Name="AutoLockComboBox" Width="150" Height="30" 
+                      HorizontalAlignment="Right" SelectedIndex="2" SelectionChanged="AutoLockComboBox_SelectionChanged">
+                            <ComboBoxItem Content="Never"/>
+                            <ComboBoxItem Content="1 Minute"/>
+                            <ComboBoxItem Content="5 Minutes"/>
+                            <ComboBoxItem Content="15 Minutes"/>
+                            <ComboBoxItem Content="30 Minutes"/>
+                            <ComboBoxItem Content="1 Hour"/>
+                        </ComboBox>
+                    </Grid>
 
-                            <ComboBox x:Name="AutoLockComboBox" Width="150" Height="30" Margin="0,8,0,0" 
-                                      HorizontalAlignment="Left" SelectedIndex="2" SelectionChanged="AutoLockComboBox_SelectionChanged">
-                                <ComboBoxItem Content="Never"/>
-                                <ComboBoxItem Content="1 Minute"/>
-                                <ComboBoxItem Content="5 Minutes"/>
-                                <ComboBoxItem Content="15 Minutes"/>
-                                <ComboBoxItem Content="30 Minutes"/>
-                                <ComboBoxItem Content="1 Hour"/>
-                            </ComboBox>
-                        </StackPanel>
+                    <Grid Margin="0,8,0,8">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="200"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="150"/>
+                        </Grid.ColumnDefinitions>
+
+                        <TextBlock Grid.Column="0" Text="Auto Clear Clipboard" Style="{StaticResource SettingLabel}"/>
+
+                        <TextBlock Grid.Column="1" Text="Automatically clear clipboard after copying sensitive data" 
+                       Foreground="#677591" FontSize="12" VerticalAlignment="Center"/>
+
+                        <ComboBox Grid.Column="2" x:Name="ClipboardClearComboBox" Width="150" Height="30" 
+                      HorizontalAlignment="Right" SelectedIndex="2" SelectionChanged="ClipboardClearComboBox_SelectionChanged">
+                            <ComboBoxItem Content="Never"/>
+                            <ComboBoxItem Content="15 Seconds"/>
+                            <ComboBoxItem Content="30 Seconds"/>
+                            <ComboBoxItem Content="1 Minute"/>
+                            <ComboBoxItem Content="2 Minutes"/>
+                            <ComboBoxItem Content="5 Minutes"/>
+                        </ComboBox>
                     </Grid>
 
                     <Grid Margin="0,15,0,8">

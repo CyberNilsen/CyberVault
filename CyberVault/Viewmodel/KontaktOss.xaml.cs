@@ -63,7 +63,7 @@ namespace CyberVault.Viewmodel
             catch (Exception ex)
             {
                 StatusMessage.Text = "An error occurred. Please try again later.";
-                Console.WriteLine($"Error sending message: {ex.Message}");
+                MessageBox.Show($"Error sending message: {ex.Message}");
             }
             finally
             {

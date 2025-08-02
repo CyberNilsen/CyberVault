@@ -37,9 +37,7 @@ namespace CyberVault.Viewmodel
             try
             {
                 Dictionary<string, bool> settings = new Dictionary<string, bool>();
-
                 Dictionary<string, string> stringSettings = new Dictionary<string, string>();
-
                 string appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
                 string cyberVaultPath = Path.Combine(appDataPath, "CyberVault");
                 string settingsFilePath = Path.Combine(cyberVaultPath, $"{username}_settings.ini");
@@ -47,7 +45,6 @@ namespace CyberVault.Viewmodel
                 if (System.IO.File.Exists(settingsFilePath))
                 {
                     string[] lines = System.IO.File.ReadAllLines(settingsFilePath);
-
                     foreach (string line in lines)
                     {
                         string[] parts = line.Split('=');
@@ -67,17 +64,13 @@ namespace CyberVault.Viewmodel
                 }
 
                 settings["MinimizeToTray"] = App.MinimizeToTrayEnabled;
-
                 TemporarilyDisableToggleEvents();
-
                 MinimizeToTrayToggle.IsChecked = settings.GetValueOrDefault("MinimizeToTray", false);
                 StartWithWindowsToggle.IsChecked = settings.GetValueOrDefault("StartWithWindows", false);
                 BiometricToggle.IsChecked = settings.GetValueOrDefault("BiometricEnabled", false);
-
                 ReattachToggleEvents();
 
                 string autoLockTime = stringSettings.GetValueOrDefault("AutoLockTime", "5 Minutes");
-
                 if (AutoLockComboBox != null && AutoLockComboBox.Items.Count > 0)
                 {
                     bool foundMatchingItem = false;
@@ -90,7 +83,6 @@ namespace CyberVault.Viewmodel
                             break;
                         }
                     }
-
                     if (!foundMatchingItem)
                     {
                         foreach (ComboBoxItem item in AutoLockComboBox.Items)
@@ -103,10 +95,52 @@ namespace CyberVault.Viewmodel
                         }
                     }
                 }
+
+                string clipboardClearTime = stringSettings.GetValueOrDefault("ClipboardClearTime", "30 Seconds");
+                if (ClipboardClearComboBox != null && ClipboardClearComboBox.Items.Count > 0)
+                {
+                    bool foundMatchingItem = false;
+                    foreach (ComboBoxItem item in ClipboardClearComboBox.Items)
+                    {
+                        if (item.Content.ToString() == clipboardClearTime)
+                        {
+                            ClipboardClearComboBox.SelectedItem = item;
+                            foundMatchingItem = true;
+                            break;
+                        }
+                    }
+                    if (!foundMatchingItem)
+                    {
+                        foreach (ComboBoxItem item in ClipboardClearComboBox.Items)
+                        {
+                            if (item.Content.ToString() == "30 Seconds")
+                            {
+                                ClipboardClearComboBox.SelectedItem = item;
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                MainWindow? mainWindow = Window.GetWindow(this) as MainWindow;
+                if (mainWindow != null)
+                {
+                    int seconds = 30;
+                    switch (clipboardClearTime)
+                    {
+                        case "Never": seconds = 0; break;
+                        case "15 Seconds": seconds = 15; break;
+                        case "30 Seconds": seconds = 30; break;
+                        case "1 Minute": seconds = 60; break;
+                        case "2 Minutes": seconds = 120; break;
+                        case "5 Minutes": seconds = 300; break;
+                    }
+                    mainWindow.UpdateClipboardClearTime(seconds);
+                }
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error loading settings: {ex.Message}");
+                MessageBox.Show($"Error loading settings: {ex.Message}");
             }
         }
 
@@ -167,7 +201,7 @@ namespace CyberVault.Viewmodel
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error saving user setting: {ex.Message}");
+                MessageBox.Show($"Error saving user setting: {ex.Message}");
             }
         }
 
@@ -247,6 +281,31 @@ namespace CyberVault.Viewmodel
                     }
 
                     mainWindow.UserLoggedIn(username, minutes);
+                }
+            }
+        }
+
+        private void ClipboardClearComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (ClipboardClearComboBox.SelectedItem is ComboBoxItem selectedItem)
+            {
+                string selectionText = selectedItem.Content.ToString()!;
+                SaveUserSetting("ClipboardClearTime", selectionText);
+
+                MainWindow? mainWindow = Window.GetWindow(this) as MainWindow;
+                if (mainWindow != null)
+                {
+                    int seconds = 30;
+                    switch (selectionText)
+                    {
+                        case "Never": seconds = 0; break;
+                        case "15 Seconds": seconds = 15; break;
+                        case "30 Seconds": seconds = 30; break;
+                        case "1 Minute": seconds = 60; break;
+                        case "2 Minutes": seconds = 120; break;
+                        case "5 Minutes": seconds = 300; break;
+                    }
+                    mainWindow.UpdateClipboardClearTime(seconds);
                 }
             }
         }
@@ -390,7 +449,7 @@ namespace CyberVault.Viewmodel
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error removing biometric config: {ex.Message}");
+                System.Windows.MessageBox.Show($"Error removing biometric config: {ex.Message}");
             }
         }
 
@@ -509,7 +568,7 @@ namespace CyberVault.Viewmodel
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error re-encrypting authenticators: {ex.Message}");
+                System.Windows.MessageBox.Show($"Error re-encrypting authenticators: {ex.Message}");
             }
         }
 
@@ -767,7 +826,7 @@ namespace CyberVault.Viewmodel
                     }
                     catch (Exception ex)
                     {
-                        Console.WriteLine($"Error importing file {exportedFile}: {ex.Message}");
+                        System.Windows.MessageBox.Show($"Error importing file {exportedFile}: {ex.Message}");
                     }
                 }
 

@@ -193,7 +193,7 @@ namespace CyberVault
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error getting auto-lock time: {ex.Message}");
+                MessageBox.Show($"Error getting auto-lock time: {ex.Message}");
             }
 
             return minutes;

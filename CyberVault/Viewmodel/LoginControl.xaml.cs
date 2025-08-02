@@ -5,10 +5,13 @@ using System.Windows.Forms;
 using System.Windows.Input;
 using CyberVault.WebExtension;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement.StartPanel;
+using CyberVault;
+using CyberVault.Viewmodel;
 
 
 namespace CyberVault
 {
+
     public partial class LoginControl : System.Windows.Controls.UserControl
     {
         private MainWindow mainWindow;
@@ -103,12 +106,15 @@ namespace CyberVault
                 mainWindow.Navigate(new DashboardControl(mainWindow, username, CurrentEncryptionKey));
                 int lockTimeMinutes = GetAutoLockTimeFromSettings(username);
                 mainWindow.UserLoggedIn(username, lockTimeMinutes);
+                mainWindow.StartClipboardClearTimer("LOGIN_SECURITY_CLEAR");
                 if (App.WebServer == null)
                 {
                     App.WebServer = new LocalWebServer(username, CurrentEncryptionKey);
                     App.WebServer.Start();
                     App.CurrentAccessToken = App.WebServer.GetAccessToken();
                 }
+
+
 
             }
             catch (Exception ex)
@@ -178,7 +184,7 @@ namespace CyberVault
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error getting auto-lock time: {ex.Message}");
+                System.Windows.MessageBox.Show($"Error getting auto-lock time: {ex.Message}");
             }
 
             return minutes;
@@ -308,7 +314,7 @@ namespace CyberVault
                     }
                     catch (Exception ex)
                     {
-                        Console.WriteLine($"Error importing file {exportedFile}: {ex.Message}");
+                        System.Windows.MessageBox.Show($"Error importing file {exportedFile}: {ex.Message}");
                     }
                 }
 

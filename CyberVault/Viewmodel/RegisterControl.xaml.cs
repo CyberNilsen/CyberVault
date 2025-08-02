@@ -130,7 +130,7 @@ namespace CyberVault
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error creating settings file: {ex.Message}");
+                MessageBox.Show($"Error creating settings file: {ex.Message}");
             }
         }
 

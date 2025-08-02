@@ -193,9 +193,15 @@ namespace CyberVault.Viewmodel
                     ShowCopySuccess();
                 }
             }
+
             catch (Exception ex)
             {
                 MessageBox.Show($"Failed to copy key: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+            MainWindow? mainWindow = Window.GetWindow(this) as MainWindow;
+            if (mainWindow != null)
+            {
+                mainWindow.StartClipboardClearTimer(_accessToken!);
             }
         }
 

@@ -210,15 +210,21 @@ namespace CyberVault.Viewmodel
                 if (!string.IsNullOrEmpty(GeneratedPasswordTextBox.Text) &&
                     GeneratedPasswordTextBox.Text != "Click Generate to create password")
                 {
-                    Clipboard.SetText(GeneratedPasswordTextBox.Text);
+                    string passwordToCopy = GeneratedPasswordTextBox.Text;
+                    Clipboard.SetText(passwordToCopy);
 
+                    MainWindow? mainWindow = Window.GetWindow(this) as MainWindow;
+                    if (mainWindow != null)
+                    {
+                        mainWindow.StartClipboardClearTimer(passwordToCopy);
+                    }
+
+                    // Visual feedback for the button
                     var button = sender as Button;
                     var originalBrush = button?.Foreground;
-
                     if (button != null)
                     {
                         button.Foreground = new SolidColorBrush(Color.FromRgb(0xA3, 0xBE, 0x8C)); // Green
-
                         var timer = new System.Windows.Threading.DispatcherTimer();
                         timer.Interval = TimeSpan.FromSeconds(2);
                         timer.Tick += (s, args) =>
@@ -245,7 +251,7 @@ namespace CyberVault.Viewmodel
             }
         }
 
-           
-        
+
+
     }
 }
