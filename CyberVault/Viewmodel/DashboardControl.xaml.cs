@@ -80,6 +80,12 @@ namespace CyberVault
             DashboardContent.Content = authenticatorControl;
         }
 
+        private void SecureNotesButton_Click(object sender, RoutedEventArgs e)
+        {
+            WelcomeText.Text = "Secure Notes";
+            DashboardContent.Content = new CyberVault.View.SecureNotesControl(username, encryptionKey);
+        }
+
         public void Settings_Click(object sender, RoutedEventArgs e)
         {
             WelcomeText.Text = "Settings";
@@ -105,7 +111,7 @@ namespace CyberVault
                 App.CurrentAccessToken = null;
                 App.WebServer?.Stop();
                 App.WebServer = null;
-                
+
 
 
                 typeof(LoginControl).GetProperty("CurrentEncryptionKey",
@@ -121,6 +127,6 @@ namespace CyberVault
             }
         }
 
-       
+
     }
 }

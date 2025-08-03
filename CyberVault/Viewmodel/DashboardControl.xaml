@@ -158,13 +158,38 @@
                                             <BeginStoryboard Storyboard="{StaticResource MenuItemLeave}"/>
                                         </EventTrigger>
                                     </Border.Triggers>
-                  
+
                                     <Button Content="Authenticator" Height="45" Style="{StaticResource ActionButton}" 
                                            Background="Transparent" Foreground="White" Click="AuthenticatorButton_Click">
                                         <Button.ContentTemplate>
                                             <DataTemplate>
                                                 <StackPanel Orientation="Horizontal">
                                                     <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE928;" FontSize="16" Margin="0,0,10,0" VerticalAlignment="Center"/>
+                                                    <TextBlock Text="{Binding}" FontSize="14" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                                                </StackPanel>
+                                            </DataTemplate>
+                                        </Button.ContentTemplate>
+                                    </Button>
+                                </Border>
+
+                                <Border x:Name="SecureNotesBorder" Background="#3B4252" CornerRadius="10" Margin="0,0,0,10">
+                                    <Border.Effect>
+                                        <DropShadowEffect ShadowDepth="2" BlurRadius="8" Opacity="0.3" Color="#1F232D"/>
+                                    </Border.Effect>
+                                    <Border.Triggers>
+                                        <EventTrigger RoutedEvent="Border.MouseEnter">
+                                            <BeginStoryboard Storyboard="{StaticResource MenuItemHover}"/>
+                                        </EventTrigger>
+                                        <EventTrigger RoutedEvent="Border.MouseLeave">
+                                            <BeginStoryboard Storyboard="{StaticResource MenuItemLeave}"/>
+                                        </EventTrigger>
+                                    </Border.Triggers>
+                                    <Button Content="Secure Notes" Height="45" Style="{StaticResource ActionButton}" 
+                                           Background="Transparent" Foreground="White" Click="SecureNotesButton_Click">
+                                        <Button.ContentTemplate>
+                                            <DataTemplate>
+                                                <StackPanel Orientation="Horizontal">
+                                                    <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE70F;" FontSize="16" Margin="0,0,10,0" VerticalAlignment="Center"/>
                                                     <TextBlock Text="{Binding}" FontSize="14" FontWeight="SemiBold" VerticalAlignment="Center"/>
                                                 </StackPanel>
                                             </DataTemplate>
