@@ -14,11 +14,8 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-
-
 namespace CyberVault.Viewmodel
 {
-
     public partial class GeneratePasswordControl : UserControl
     {
         private string _username;
@@ -30,16 +27,19 @@ namespace CyberVault.Viewmodel
         private const string SpecialChars = "!@#$%^&*()_+-=[]{}|;:,.<>?";
         private const string SimilarChars = "0O1lI";
         private const string AmbiguousChars = "{}[]()/'\"~,;.<>";
+
         public GeneratePasswordControl(string username, byte[] encryptionKey)
         {
             InitializeComponent();
             _username = username;
             _encryptionKey = encryptionKey;
 
-            GenerateNewPassword();
+            this.Loaded += (s, e) =>
+            {
+                GenerateNewPassword();
+            };
 
             LengthSlider.ValueChanged += (s, e) => UpdatePasswordStrength();
-
             UppercaseToggle.Checked += (s, e) => UpdatePasswordStrength();
             UppercaseToggle.Unchecked += (s, e) => UpdatePasswordStrength();
             LowercaseToggle.Checked += (s, e) => UpdatePasswordStrength();
@@ -150,15 +150,49 @@ namespace CyberVault.Viewmodel
 
                 int strengthScore = CalculatePasswordStrength(length, characterTypes);
 
-                StrengthProgressBar.Value = strengthScore;
-
+                UpdateStrengthIndicator(strengthScore);
                 UpdateStrengthDisplay(strengthScore);
+                UpdateStrengthLevelIndicators(strengthScore);
             }
             catch (Exception)
             {
-                StrengthProgressBar.Value = 0;
+                StrengthIndicator.Width = 20;
                 StrengthLabel.Text = "Unknown";
+                StrengthPercentage.Text = "0%";
             }
+        }
+
+        private void UpdateStrengthIndicator(int score)
+        {
+            var parentBorder = StrengthIndicator.Parent as Grid;
+            if (parentBorder != null)
+            {
+                double percentage = score / 100.0;
+                double targetWidth = parentBorder.ActualWidth * percentage;
+                targetWidth = Math.Max(20, targetWidth);
+
+                var animation = new System.Windows.Media.Animation.DoubleAnimation
+                {
+                    To = targetWidth,
+                    Duration = TimeSpan.FromMilliseconds(500),
+                    EasingFunction = new System.Windows.Media.Animation.CubicEase { EasingMode = System.Windows.Media.Animation.EasingMode.EaseOut }
+                };
+
+                StrengthIndicator.BeginAnimation(FrameworkElement.WidthProperty, animation);
+            }
+        }
+
+        private void UpdateStrengthLevelIndicators(int score)
+        {
+            WeakIndicator.Background = new SolidColorBrush(Color.FromRgb(0xE5, 0xE7, 0xEB));
+            FairIndicator.Background = new SolidColorBrush(Color.FromRgb(0xE5, 0xE7, 0xEB));
+            GoodIndicator.Background = new SolidColorBrush(Color.FromRgb(0xE5, 0xE7, 0xEB));
+            StrongIndicator.Background = new SolidColorBrush(Color.FromRgb(0xE5, 0xE7, 0xEB));
+
+            if (score >= 25) WeakIndicator.Background = new SolidColorBrush(Color.FromRgb(0xEF, 0x44, 0x44));
+            if (score >= 50) FairIndicator.Background = new SolidColorBrush(Color.FromRgb(0xF5, 0x9E, 0x0B));
+            if (score >= 75) GoodIndicator.Background = new SolidColorBrush(Color.FromRgb(0xEA, 0xB3, 0x08));
+            if (score >= 90) StrongIndicator.Background = new SolidColorBrush(Color.FromRgb(0x10, 0xB9, 0x81));
         }
 
         private int CalculatePasswordStrength(int length, int characterTypes)
@@ -177,29 +211,35 @@ namespace CyberVault.Viewmodel
 
         private void UpdateStrengthDisplay(int score)
         {
+            StrengthPercentage.Text = $"{score}%";
+
             if (score < 30)
             {
                 StrengthLabel.Text = "Weak";
-                StrengthLabel.Foreground = new SolidColorBrush(Color.FromRgb(0xBF, 0x61, 0x6A)); // Red
-                StrengthProgressBar.Foreground = new SolidColorBrush(Color.FromRgb(0xBF, 0x61, 0x6A));
+                StrengthLabel.Foreground = new SolidColorBrush(Color.FromRgb(0xEF, 0x44, 0x44)); // Red
+                StrengthIndicator.Background = new SolidColorBrush(Color.FromRgb(0xEF, 0x44, 0x44));
+                StrengthIcon.Background = new SolidColorBrush(Color.FromRgb(0xEF, 0x44, 0x44));
             }
             else if (score < 60)
             {
                 StrengthLabel.Text = "Fair";
-                StrengthLabel.Foreground = new SolidColorBrush(Color.FromRgb(0xD0, 0x8F, 0x70)); // Orange
-                StrengthProgressBar.Foreground = new SolidColorBrush(Color.FromRgb(0xD0, 0x8F, 0x70));
+                StrengthLabel.Foreground = new SolidColorBrush(Color.FromRgb(0xF5, 0x9E, 0x0B)); // Orange
+                StrengthIndicator.Background = new SolidColorBrush(Color.FromRgb(0xF5, 0x9E, 0x0B));
+                StrengthIcon.Background = new SolidColorBrush(Color.FromRgb(0xF5, 0x9E, 0x0B));
             }
             else if (score < 80)
             {
                 StrengthLabel.Text = "Good";
-                StrengthLabel.Foreground = new SolidColorBrush(Color.FromRgb(0xEB, 0xCB, 0x8B)); // Yellow
-                StrengthProgressBar.Foreground = new SolidColorBrush(Color.FromRgb(0xEB, 0xCB, 0x8B));
+                StrengthLabel.Foreground = new SolidColorBrush(Color.FromRgb(0xEA, 0xB3, 0x08)); // Yellow
+                StrengthIndicator.Background = new SolidColorBrush(Color.FromRgb(0xEA, 0xB3, 0x08));
+                StrengthIcon.Background = new SolidColorBrush(Color.FromRgb(0xEA, 0xB3, 0x08));
             }
             else
             {
                 StrengthLabel.Text = "Very Strong";
-                StrengthLabel.Foreground = new SolidColorBrush(Color.FromRgb(0xA3, 0xBE, 0x8C)); // Green
-                StrengthProgressBar.Foreground = new SolidColorBrush(Color.FromRgb(0xA3, 0xBE, 0x8C));
+                StrengthLabel.Foreground = new SolidColorBrush(Color.FromRgb(0x10, 0xB9, 0x81)); // Green
+                StrengthIndicator.Background = new SolidColorBrush(Color.FromRgb(0x10, 0xB9, 0x81));
+                StrengthIcon.Background = new SolidColorBrush(Color.FromRgb(0x10, 0xB9, 0x81));
             }
         }
 
@@ -208,7 +248,7 @@ namespace CyberVault.Viewmodel
             try
             {
                 if (!string.IsNullOrEmpty(GeneratedPasswordTextBox.Text) &&
-                    GeneratedPasswordTextBox.Text != "Click Generate to create password")
+                    GeneratedPasswordTextBox.Text != "Click 'Generate Password' to create a secure password")
                 {
                     string passwordToCopy = GeneratedPasswordTextBox.Text;
                     Clipboard.SetText(passwordToCopy);
@@ -219,12 +259,11 @@ namespace CyberVault.Viewmodel
                         mainWindow.StartClipboardClearTimer(passwordToCopy);
                     }
 
-                    // Visual feedback for the button
                     var button = sender as Button;
                     var originalBrush = button?.Foreground;
                     if (button != null)
                     {
-                        button.Foreground = new SolidColorBrush(Color.FromRgb(0xA3, 0xBE, 0x8C)); // Green
+                        button.Foreground = new SolidColorBrush(Color.FromRgb(0xA3, 0xBE, 0x8C));
                         var timer = new System.Windows.Threading.DispatcherTimer();
                         timer.Interval = TimeSpan.FromSeconds(2);
                         timer.Tick += (s, args) =>
@@ -250,8 +289,5 @@ namespace CyberVault.Viewmodel
                                 MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
-
-
-
     }
 }
