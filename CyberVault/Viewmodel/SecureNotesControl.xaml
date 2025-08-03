@@ -3,7 +3,6 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
     <UserControl.Resources>
-        
         <Storyboard x:Key="FadeIn">
             <DoubleAnimation Storyboard.TargetProperty="Opacity" From="0" To="1" Duration="0:0:0.3">
                 <DoubleAnimation.EasingFunction>
@@ -17,6 +16,8 @@
                 </DoubleAnimation.EasingFunction>
             </DoubleAnimation>
         </Storyboard>
+
+
 
         <Style x:Key="ActionButton" TargetType="Button">
             <Setter Property="Background" Value="Transparent"/>
@@ -129,25 +130,17 @@
                                 BorderBrush="{TemplateBinding BorderBrush}"
                                 BorderThickness="{TemplateBinding BorderThickness}"
                                 CornerRadius="8">
-                            <Border.Effect>
-                                <DropShadowEffect ShadowDepth="2" BlurRadius="6" Opacity="0.2" Color="#1F232D"/>
-                            </Border.Effect>
                             <ScrollViewer x:Name="PART_ContentHost" 
                                         Padding="{TemplateBinding Padding}"
                                         VerticalScrollBarVisibility="{TemplateBinding VerticalScrollBarVisibility}"/>
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsFocused" Value="True">
-                                <Setter Property="BorderBrush" Value="#5E81AC"/>
+                                <Setter Property="BorderBrush" Value="#6A9BD1"/>
                                 <Setter Property="Background" Value="#3B4252"/>
-                                <Setter Property="Effect">
-                                    <Setter.Value>
-                                        <DropShadowEffect ShadowDepth="3" BlurRadius="10" Opacity="0.3" Color="#5E81AC"/>
-                                    </Setter.Value>
-                                </Setter>
                             </Trigger>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter Property="BorderBrush" Value="#5E81AC"/>
+                                <Setter Property="BorderBrush" Value="#6A9BD1"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -184,9 +177,6 @@
                                 CornerRadius="10" 
                                 Padding="15,12"
                                 Cursor="Hand">
-                            <Border.Effect>
-                                <DropShadowEffect ShadowDepth="2" BlurRadius="8" Opacity="0.3" Color="#1F232D"/>
-                            </Border.Effect>
                             <ContentPresenter/>
                             <Border.Style>
                                 <Style TargetType="Border">
@@ -201,8 +191,6 @@
                                                                 <CubicEase EasingMode="EaseOut"/>
                                                             </DoubleAnimation.EasingFunction>
                                                         </DoubleAnimation>
-                                                        <DoubleAnimation Storyboard.TargetProperty="Effect.ShadowDepth" To="4" Duration="0:0:0.2"/>
-                                                        <DoubleAnimation Storyboard.TargetProperty="Effect.BlurRadius" To="12" Duration="0:0:0.2"/>
                                                     </Storyboard>
                                                 </BeginStoryboard>
                                             </Trigger.EnterActions>
@@ -211,20 +199,13 @@
                                                     <Storyboard>
                                                         <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.X)" 
                                                                        To="0" Duration="0:0:0.2"/>
-                                                        <DoubleAnimation Storyboard.TargetProperty="Effect.ShadowDepth" To="2" Duration="0:0:0.2"/>
-                                                        <DoubleAnimation Storyboard.TargetProperty="Effect.BlurRadius" To="8" Duration="0:0:0.2"/>
                                                     </Storyboard>
                                                 </BeginStoryboard>
                                             </Trigger.ExitActions>
                                             <Setter Property="Background" Value="#4C566A"/>
                                         </Trigger>
                                         <DataTrigger Binding="{Binding IsSelected, RelativeSource={RelativeSource AncestorType=ListBoxItem}}" Value="True">
-                                            <Setter Property="Background" Value="#5E81AC"/>
-                                            <Setter Property="Effect">
-                                                <Setter.Value>
-                                                    <DropShadowEffect ShadowDepth="4" BlurRadius="12" Opacity="0.4" Color="#5E81AC"/>
-                                                </Setter.Value>
-                                            </Setter>
+                                            <Setter Property="Background" Value="#6A9BD1"/>
                                         </DataTrigger>
                                     </Style.Triggers>
                                 </Style>
@@ -243,9 +224,6 @@
                                 BorderBrush="{TemplateBinding BorderBrush}"
                                 BorderThickness="{TemplateBinding BorderThickness}"
                                 CornerRadius="8">
-                            <Border.Effect>
-                                <DropShadowEffect ShadowDepth="2" BlurRadius="6" Opacity="0.2" Color="#1F232D"/>
-                            </Border.Effect>
                             <Grid>
                                 <TextBlock Text="🔍 Search notes..." 
                                            Foreground="#888888" 
@@ -268,11 +246,11 @@
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsFocused" Value="True">
-                                <Setter Property="BorderBrush" Value="#5E81AC"/>
+                                <Setter Property="BorderBrush" Value="#6A9BD1"/>
                                 <Setter Property="Background" Value="#3B4252"/>
                             </Trigger>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter Property="BorderBrush" Value="#5E81AC"/>
+                                <Setter Property="BorderBrush" Value="#6A9BD1"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -305,9 +283,6 @@
         </Grid.ColumnDefinitions>
 
         <Border Grid.Column="0" Background="#2E3440" CornerRadius="15" Margin="15,15,8,15">
-            <Border.Effect>
-                <DropShadowEffect ShadowDepth="4" BlurRadius="15" Opacity="0.3" Color="#1F232D"/>
-            </Border.Effect>
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
@@ -318,15 +293,12 @@
                     <StackPanel>
                         <StackPanel Orientation="Horizontal" Margin="0,0,0,18">
                             <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE70F;" 
-                                       FontSize="20" Foreground="#5E81AC" Margin="0,0,12,0" VerticalAlignment="Center"/>
+                                       FontSize="20" Foreground="#6A9BD1" Margin="0,0,12,0" VerticalAlignment="Center"/>
                             <StackPanel>
                                 <TextBlock Text="Secure Notes" FontSize="20" FontWeight="Bold" 
                                            Foreground="White">
-                                    <TextBlock.Effect>
-                                        <DropShadowEffect ShadowDepth="1" BlurRadius="3" Opacity="0.3" Color="#1F232D"/>
-                                    </TextBlock.Effect>
                                 </TextBlock>
-                                <TextBlock Text="End-to-end encrypted" FontSize="11" 
+                                <TextBlock Text="Locally encrypted storage" FontSize="11" 
                                            Foreground="#BBBBBB" Margin="0,2,0,0"/>
                             </StackPanel>
                         </StackPanel>
@@ -335,10 +307,7 @@
                                  Style="{StaticResource SearchTextBox}"
                                  Margin="0,0,0,15"/>
 
-                        <Border Background="#5E81AC" CornerRadius="10" Margin="0,0,0,0">
-                            <Border.Effect>
-                                <DropShadowEffect ShadowDepth="2" BlurRadius="8" Opacity="0.3" Color="#1F232D"/>
-                            </Border.Effect>
+                        <Border Background="#6A9BD1" CornerRadius="10" Margin="0,0,0,0">
                             <Button x:Name="NewNoteBtn" 
                                     Content="Create New Note" 
                                     Style="{StaticResource ActionButton}"
@@ -397,9 +366,6 @@
         </Border>
 
         <Border Grid.Column="1" Background="#FFFFFF" CornerRadius="15" Margin="8,15,15,15">
-            <Border.Effect>
-                <DropShadowEffect ShadowDepth="4" BlurRadius="15" Opacity="0.3" Color="#1F232D"/>
-            </Border.Effect>
             <Grid>
                 <Grid x:Name="EmptyStatePanel" Visibility="Visible">
                     <Grid.Background>
@@ -411,7 +377,7 @@
                     <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Opacity="0.6">
                         <Border Background="#ECEFF4" CornerRadius="50" Width="80" Height="80" Margin="0,0,0,25">
                             <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE70F;" 
-                                       FontSize="32" Foreground="#5E81AC" 
+                                       FontSize="32" Foreground="#6A9BD1" 
                                        HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Border>
                         <TextBlock Text="Ready to capture your thoughts?" 
@@ -433,10 +399,7 @@
 
                     <Border Grid.Row="0" Background="#3B4252" CornerRadius="15,15,0,0" Padding="25,20">
                         <StackPanel Orientation="Horizontal">
-                            <Border Background="#A3BE8C" CornerRadius="8" Margin="0,0,12,0">
-                                <Border.Effect>
-                                    <DropShadowEffect ShadowDepth="2" BlurRadius="6" Opacity="0.3" Color="#1F232D"/>
-                                </Border.Effect>
+                            <Border Background="#88C999" CornerRadius="8" Margin="0,0,12,0">
                                 <Button x:Name="SaveBtn" 
                                         Content="Save Changes" 
                                         Style="{StaticResource ActionButton}"
@@ -455,10 +418,7 @@
                                 </Button>
                             </Border>
 
-                            <Border Background="#BF616A" CornerRadius="8">
-                                <Border.Effect>
-                                    <DropShadowEffect ShadowDepth="2" BlurRadius="6" Opacity="0.3" Color="#1F232D"/>
-                                </Border.Effect>
+                            <Border Background="#E74C3C" CornerRadius="8">
                                 <Button x:Name="DeleteBtn" 
                                         Content="Delete Note" 
                                         Style="{StaticResource ActionButton}"
@@ -506,7 +466,7 @@
                     <Border Grid.Row="3" Background="#3B4252" CornerRadius="0,0,15,15" Padding="25,15">
                         <StackPanel Orientation="Horizontal">
                             <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE7C3;" 
-                                       FontSize="12" Foreground="#5E81AC" Margin="0,0,10,0" VerticalAlignment="Center"/>
+                                       FontSize="12" Foreground="#6A9BD1" Margin="0,0,10,0" VerticalAlignment="Center"/>
                             <TextBlock x:Name="StatusLabel" 
                                        Text="Select a note to edit" 
                                        FontSize="12" 
