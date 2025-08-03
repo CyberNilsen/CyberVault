@@ -2,9 +2,35 @@
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              MinHeight="400" MinWidth="600">
+
+    <UserControl.Resources>
+        <Storyboard x:Key="FadeIn">
+            <DoubleAnimation Storyboard.TargetProperty="Opacity" From="0" To="1" Duration="0:0:0.6">
+                <DoubleAnimation.EasingFunction>
+                    <CubicEase EasingMode="EaseOut"/>
+                </DoubleAnimation.EasingFunction>
+            </DoubleAnimation>
+            <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.Y)" 
+                           From="30" To="0" Duration="0:0:0.6">
+                <DoubleAnimation.EasingFunction>
+                    <CubicEase EasingMode="EaseOut"/>
+                </DoubleAnimation.EasingFunction>
+            </DoubleAnimation>
+        </Storyboard>
+    </UserControl.Resources>
+
+    <UserControl.RenderTransform>
+        <TranslateTransform Y="0"/>
+    </UserControl.RenderTransform>
+
+    <UserControl.Triggers>
+        <EventTrigger RoutedEvent="Loaded">
+            <BeginStoryboard Storyboard="{StaticResource FadeIn}"/>
+        </EventTrigger>
+    </UserControl.Triggers>
+
     <Border CornerRadius="12" Background="#2E3440" Padding="32">
         <StackPanel>
-            <!-- Header -->
             <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,0,32">
                 <Border Background="#3B4252" CornerRadius="28" Width="56" Height="56" VerticalAlignment="Center" Margin="0,0,20,0">
                     <Border.Effect>
@@ -27,7 +53,6 @@
                 </Border>
             </StackPanel>
 
-            <!-- Empty State -->
             <Grid x:Name="EmptyStatePanel" Visibility="Collapsed">
                 <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,48,0,0">
                     <TextBlock Text="No passkeys yet" FontSize="20" Foreground="#BBDCED" HorizontalAlignment="Center"/>
@@ -35,7 +60,6 @@
                 </StackPanel>
             </Grid>
 
-            <!-- Passkey List -->
             <ItemsControl x:Name="PasskeyList" Margin="0,0,0,0">
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>

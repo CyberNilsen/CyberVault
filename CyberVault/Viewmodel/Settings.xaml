@@ -7,6 +7,32 @@
              mc:Ignorable="d" d:DesignWidth="800"
              Loaded="Settings_Loaded" >
 
+    <UserControl.Resources>
+        <Storyboard x:Key="FadeIn">
+            <DoubleAnimation Storyboard.TargetProperty="Opacity" From="0" To="1" Duration="0:0:0.6">
+                <DoubleAnimation.EasingFunction>
+                    <CubicEase EasingMode="EaseOut"/>
+                </DoubleAnimation.EasingFunction>
+            </DoubleAnimation>
+            <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.Y)" 
+                           From="30" To="0" Duration="0:0:0.6">
+                <DoubleAnimation.EasingFunction>
+                    <CubicEase EasingMode="EaseOut"/>
+                </DoubleAnimation.EasingFunction>
+            </DoubleAnimation>
+        </Storyboard>
+    </UserControl.Resources>
+
+    <UserControl.RenderTransform>
+        <TranslateTransform Y="0"/>
+    </UserControl.RenderTransform>
+
+    <UserControl.Triggers>
+        <EventTrigger RoutedEvent="Loaded">
+            <BeginStoryboard Storyboard="{StaticResource FadeIn}"/>
+        </EventTrigger>
+    </UserControl.Triggers>
+
     <ScrollViewer VerticalScrollBarVisibility="Auto">
         <StackPanel Margin="0,0,0,20">
 
@@ -176,7 +202,7 @@
                                 Background="#434C5E" Click="ExportPasswords_Click"/>
                         <Button Content="Import Passwords" Style="{StaticResource SaveButton}" 
                     Background="#434C5E" Margin="10,0,0,0" Click="ImportPasswords_Click"/>
-                        
+
                     </StackPanel>
                     <TextBlock TextWrapping="Wrap" Foreground="#677591" Margin="0,0,0,0">
                     <Run Text="If you need help importing passwords or exporting passwords you can consult this for help:"/>
@@ -203,7 +229,6 @@
             <Run Text="All your data is encrypted using AES-256 encryption and never leaves your device without your permission."/>
                     </TextBlock>
 
-                    <!-- Ny Kontakt oss knapp -->
                     <Button Content="Contact us" 
                 Style="{StaticResource SaveButton}" 
                 Background="#434C5E" 
