@@ -17,19 +17,20 @@
             </DoubleAnimation>
         </Storyboard>
 
-
-
         <Style x:Key="ActionButton" TargetType="Button">
             <Setter Property="Background" Value="Transparent"/>
             <Setter Property="Foreground" Value="White"/>
             <Setter Property="BorderThickness" Value="0"/>
-            <Setter Property="Padding" Value="12,8"/>
+            <Setter Property="Padding" Value="16,10"/>
             <Setter Property="FontWeight" Value="SemiBold"/>
             <Setter Property="FontSize" Value="13"/>
             <Setter Property="Cursor" Value="Hand"/>
             <Setter Property="RenderTransform">
                 <Setter.Value>
-                    <ScaleTransform ScaleX="1" ScaleY="1"/>
+                    <TransformGroup>
+                        <ScaleTransform ScaleX="1" ScaleY="1"/>
+                        <TranslateTransform Y="0"/>
+                    </TransformGroup>
                 </Setter.Value>
             </Setter>
             <Setter Property="RenderTransformOrigin" Value="0.5,0.5"/>
@@ -37,7 +38,7 @@
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
                         <Border Background="{TemplateBinding Background}" 
-                                CornerRadius="8"
+                                CornerRadius="10"
                                 Padding="{TemplateBinding Padding}">
                             <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Border>
@@ -46,16 +47,22 @@
                                 <Trigger.EnterActions>
                                     <BeginStoryboard>
                                         <Storyboard>
-                                            <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleX)" 
-                                                           To="1.02" Duration="0:0:0.2">
+                                            <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleX)" 
+                                                           To="1.05" Duration="0:0:0.15">
                                                 <DoubleAnimation.EasingFunction>
                                                     <BackEase EasingMode="EaseOut" Amplitude="0.3"/>
                                                 </DoubleAnimation.EasingFunction>
                                             </DoubleAnimation>
-                                            <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleY)" 
-                                                           To="1.02" Duration="0:0:0.2">
+                                            <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleY)" 
+                                                           To="1.05" Duration="0:0:0.15">
                                                 <DoubleAnimation.EasingFunction>
                                                     <BackEase EasingMode="EaseOut" Amplitude="0.3"/>
+                                                </DoubleAnimation.EasingFunction>
+                                            </DoubleAnimation>
+                                            <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[1].(TranslateTransform.Y)" 
+                                                           To="-2" Duration="0:0:0.15">
+                                                <DoubleAnimation.EasingFunction>
+                                                    <CubicEase EasingMode="EaseOut"/>
                                                 </DoubleAnimation.EasingFunction>
                                             </DoubleAnimation>
                                         </Storyboard>
@@ -64,27 +71,28 @@
                                 <Trigger.ExitActions>
                                     <BeginStoryboard>
                                         <Storyboard>
-                                            <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleX)" 
-                                                           To="1" Duration="0:0:0.2"/>
-                                            <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleY)" 
-                                                           To="1" Duration="0:0:0.2"/>
+                                            <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleX)" 
+                                                           To="1" Duration="0:0:0.15"/>
+                                            <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleY)" 
+                                                           To="1" Duration="0:0:0.15"/>
+                                            <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[1].(TranslateTransform.Y)" 
+                                                           To="0" Duration="0:0:0.15"/>
                                         </Storyboard>
                                     </BeginStoryboard>
                                 </Trigger.ExitActions>
-                                <Setter Property="Background" Value="#4C566A"/>
                             </Trigger>
                             <Trigger Property="IsPressed" Value="True">
-                                <Setter Property="Background" Value="#434C5E"/>
                                 <Setter Property="RenderTransform">
                                     <Setter.Value>
-                                        <ScaleTransform ScaleX="0.98" ScaleY="0.98"/>
+                                        <TransformGroup>
+                                            <ScaleTransform ScaleX="0.95" ScaleY="0.95"/>
+                                            <TranslateTransform Y="1"/>
+                                        </TransformGroup>
                                     </Setter.Value>
                                 </Setter>
                             </Trigger>
                             <Trigger Property="IsEnabled" Value="False">
-                                <Setter Property="Background" Value="#4C566A"/>
-                                <Setter Property="Foreground" Value="#888888"/>
-                                <Setter Property="Opacity" Value="0.5"/>
+                                <Setter Property="Opacity" Value="0.4"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -93,25 +101,67 @@
         </Style>
 
         <Style x:Key="SaveButton" TargetType="Button" BasedOn="{StaticResource ActionButton}">
-            <Setter Property="Background" Value="#A3BE8C"/>
+            <Setter Property="Background">
+                <Setter.Value>
+                    <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                        <GradientStop Color="#10B981" Offset="0"/>
+                        <GradientStop Color="#059669" Offset="1"/>
+                    </LinearGradientBrush>
+                </Setter.Value>
+            </Setter>
             <Style.Triggers>
                 <Trigger Property="IsMouseOver" Value="True">
-                    <Setter Property="Background" Value="#B8D4A1"/>
+                    <Setter Property="Background">
+                        <Setter.Value>
+                            <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                <GradientStop Color="#34D399" Offset="0"/>
+                                <GradientStop Color="#10B981" Offset="1"/>
+                            </LinearGradientBrush>
+                        </Setter.Value>
+                    </Setter>
                 </Trigger>
                 <Trigger Property="IsPressed" Value="True">
-                    <Setter Property="Background" Value="#8FAC7A"/>
+                    <Setter Property="Background">
+                        <Setter.Value>
+                            <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                <GradientStop Color="#059669" Offset="0"/>
+                                <GradientStop Color="#047857" Offset="1"/>
+                            </LinearGradientBrush>
+                        </Setter.Value>
+                    </Setter>
                 </Trigger>
             </Style.Triggers>
         </Style>
 
         <Style x:Key="DeleteButton" TargetType="Button" BasedOn="{StaticResource ActionButton}">
-            <Setter Property="Background" Value="#BF616A"/>
+            <Setter Property="Background">
+                <Setter.Value>
+                    <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                        <GradientStop Color="#EF4444" Offset="0"/>
+                        <GradientStop Color="#DC2626" Offset="1"/>
+                    </LinearGradientBrush>
+                </Setter.Value>
+            </Setter>
             <Style.Triggers>
                 <Trigger Property="IsMouseOver" Value="True">
-                    <Setter Property="Background" Value="#D08770"/>
+                    <Setter Property="Background">
+                        <Setter.Value>
+                            <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                <GradientStop Color="#F87171" Offset="0"/>
+                                <GradientStop Color="#EF4444" Offset="1"/>
+                            </LinearGradientBrush>
+                        </Setter.Value>
+                    </Setter>
                 </Trigger>
                 <Trigger Property="IsPressed" Value="True">
-                    <Setter Property="Background" Value="#A54A54"/>
+                    <Setter Property="Background">
+                        <Setter.Value>
+                            <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                <GradientStop Color="#DC2626" Offset="0"/>
+                                <GradientStop Color="#B91C1C" Offset="1"/>
+                            </LinearGradientBrush>
+                        </Setter.Value>
+                    </Setter>
                 </Trigger>
             </Style.Triggers>
         </Style>
@@ -305,7 +355,8 @@
 
                         <TextBox x:Name="SearchBox" 
                                  Style="{StaticResource SearchTextBox}"
-                                 Margin="0,0,0,15"/>
+                                 Margin="0,0,0,15"
+                                 TextChanged="SearchBox_TextChanged"/>
 
                         <Border Background="#6A9BD1" CornerRadius="10" Margin="0,0,0,0">
                             <Button x:Name="NewNoteBtn" 
@@ -399,43 +450,38 @@
 
                     <Border Grid.Row="0" Background="#3B4252" CornerRadius="15,15,0,0" Padding="25,20">
                         <StackPanel Orientation="Horizontal">
-                            <Border Background="#88C999" CornerRadius="8" Margin="0,0,12,0">
-                                <Button x:Name="SaveBtn" 
-                                        Content="Save Changes" 
-                                        Style="{StaticResource ActionButton}"
-                                        Background="Transparent"
-                                        Click="SaveBtn_Click" 
-                                        IsEnabled="False">
-                                    <Button.ContentTemplate>
-                                        <DataTemplate>
-                                            <StackPanel Orientation="Horizontal">
-                                                <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE74E;" 
-                                                           FontSize="12" Margin="0,0,8,0" VerticalAlignment="Center" Foreground="White"/>
-                                                <TextBlock Text="{Binding}" FontSize="12" FontWeight="SemiBold" VerticalAlignment="Center" Foreground="White"/>
-                                            </StackPanel>
-                                        </DataTemplate>
-                                    </Button.ContentTemplate>
-                                </Button>
-                            </Border>
+                            <Button x:Name="SaveBtn" 
+                                    Content="Save Changes" 
+                                    Style="{StaticResource SaveButton}"
+                                    Click="SaveBtn_Click" 
+                                    IsEnabled="False"
+                                    Margin="0,0,15,0">
+                                <Button.ContentTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE74E;" 
+                                                       FontSize="12" Margin="0,0,8,0" VerticalAlignment="Center" Foreground="White"/>
+                                            <TextBlock Text="{Binding}" FontSize="12" FontWeight="SemiBold" VerticalAlignment="Center" Foreground="White"/>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </Button.ContentTemplate>
+                            </Button>
 
-                            <Border Background="#E74C3C" CornerRadius="8">
-                                <Button x:Name="DeleteBtn" 
-                                        Content="Delete Note" 
-                                        Style="{StaticResource ActionButton}"
-                                        Background="Transparent"
-                                        Click="DeleteBtn_Click" 
-                                        IsEnabled="False">
-                                    <Button.ContentTemplate>
-                                        <DataTemplate>
-                                            <StackPanel Orientation="Horizontal">
-                                                <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE74D;" 
-                                                           FontSize="12" Margin="0,0,8,0" VerticalAlignment="Center" Foreground="White"/>
-                                                <TextBlock Text="{Binding}" FontSize="12" FontWeight="SemiBold" VerticalAlignment="Center" Foreground="White"/>
-                                            </StackPanel>
-                                        </DataTemplate>
-                                    </Button.ContentTemplate>
-                                </Button>
-                            </Border>
+                            <Button x:Name="DeleteBtn" 
+                                    Content="Delete Note" 
+                                    Style="{StaticResource DeleteButton}"
+                                    Click="DeleteBtn_Click" 
+                                    IsEnabled="False">
+                                <Button.ContentTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE74D;" 
+                                                       FontSize="12" Margin="0,0,8,0" VerticalAlignment="Center" Foreground="White"/>
+                                            <TextBlock Text="{Binding}" FontSize="12" FontWeight="SemiBold" VerticalAlignment="Center" Foreground="White"/>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </Button.ContentTemplate>
+                            </Button>
                         </StackPanel>
                     </Border>
 

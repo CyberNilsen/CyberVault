@@ -16,6 +16,7 @@ namespace CyberVault.View
         private readonly byte[] encryptionKey;
         private readonly string notesFilePath;
         private List<SimpleNote> notes;
+        private List<SimpleNote> filteredNotes;
         private SimpleNote currentNote;
         private bool isLoading = false;
 
@@ -30,6 +31,7 @@ namespace CyberVault.View
             notesFilePath = Path.Combine(appDataPath, $"{username}_notes.dat");
 
             notes = new List<SimpleNote>();
+            filteredNotes = new List<SimpleNote>();
             LoadNotes();
             RefreshList();
         }
@@ -72,8 +74,27 @@ namespace CyberVault.View
 
         private void RefreshList()
         {
-            var sortedNotes = notes.OrderByDescending(n => n.LastModified).ToList();
+            string searchText = SearchBox?.Text?.ToLower() ?? "";
+
+            if (string.IsNullOrWhiteSpace(searchText))
+            {
+                filteredNotes = notes.ToList();
+            }
+            else
+            {
+                filteredNotes = notes.Where(n =>
+                    n.Title.ToLower().Contains(searchText) ||
+                    n.Content.ToLower().Contains(searchText)
+                ).ToList();
+            }
+
+            var sortedNotes = filteredNotes.OrderByDescending(n => n.LastModified).ToList();
             NotesList.ItemsSource = sortedNotes;
+        }
+
+        private void SearchBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            RefreshList();
         }
 
         private void NewNoteBtn_Click(object sender, RoutedEventArgs e)
@@ -218,6 +239,4 @@ namespace CyberVault.View
         public DateTime CreatedDate { get; set; }
         public DateTime LastModified { get; set; }
     }
-
-
 }
