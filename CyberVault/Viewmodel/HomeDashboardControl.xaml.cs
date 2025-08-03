@@ -1,3 +1,5 @@
+using CyberVault.Main;
+using CyberVault.WebExtension;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -9,8 +11,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
-using CyberVault.Main;
-using CyberVault.WebExtension;
+using System.Windows.Threading;
 
 namespace CyberVault.Viewmodel
 {
@@ -191,7 +192,6 @@ namespace CyberVault.Viewmodel
                 {
                     Clipboard.SetText(_accessToken);
                     ShowCopySuccess();
-
                     MainWindow? mainWindow = Window.GetWindow(this) as MainWindow;
                     if (mainWindow != null)
                     {
@@ -213,34 +213,84 @@ namespace CyberVault.Viewmodel
                 {
                     ExtensionKeyText.Text = _accessToken;
                 }
-
                 ExtensionKeyText.Visibility = Visibility.Visible;
                 MaskedKeyText.Visibility = Visibility.Collapsed;
-                ((TextBlock)ToggleKeyVisibilityButton.Content).Text = "\uE7B3";
+
+                SetToggleButtonIcon("\uE7B2"); 
             }
             else
             {
                 ExtensionKeyText.Visibility = Visibility.Collapsed;
                 MaskedKeyText.Visibility = Visibility.Visible;
-                ((TextBlock)ToggleKeyVisibilityButton.Content).Text = "\uE7B3";
+
+                SetToggleButtonIcon("\uE7B3");
+            }
+        }
+
+        private void SetToggleButtonIcon(string iconText)
+        {
+            try
+            {
+                if (ToggleKeyVisibilityButton.Content is TextBlock textBlock)
+                {
+                    textBlock.Text = iconText;
+                }
+            }
+            catch
+            {
+
             }
         }
 
         private void ShowCopySuccess()
         {
-            string? originalContent = CopyKeyButton.Content.ToString();
-            CopyKeyButton.Content = "Copied!";
-            CopyKeyButton.Background = System.Windows.Media.Brushes.Green;
-
-            var timer = new System.Windows.Threading.DispatcherTimer();
-            timer.Tick += (s, args) =>
+            try
             {
-                CopyKeyButton.Content = originalContent;
-                CopyKeyButton.Background = new System.Windows.Media.SolidColorBrush((System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString("#5E81AC"));
-                timer.Stop();
-            };
-            timer.Interval = TimeSpan.FromSeconds(2);
-            timer.Start();
+                var originalContent = CopyKeyButton.Content;
+
+                var successContent = new StackPanel
+                {
+                    Orientation = Orientation.Horizontal
+                };
+
+                successContent.Children.Add(new TextBlock
+                {
+                    FontFamily = new FontFamily("Segoe MDL2 Assets"),
+                    Text = "\uE10C",
+                    FontSize = 14,
+                    Margin = new Thickness(0, 0, 8, 0),
+                    VerticalAlignment = VerticalAlignment.Center,
+                    Foreground = Brushes.White
+                });
+
+                successContent.Children.Add(new TextBlock
+                {
+                    Text = "Copied!",
+                    FontSize = 14,
+                    FontWeight = FontWeights.SemiBold,
+                    VerticalAlignment = VerticalAlignment.Center,
+                    Foreground = Brushes.White
+                });
+
+                CopyKeyButton.Content = successContent;
+
+                var resetTimer = new DispatcherTimer
+                {
+                    Interval = TimeSpan.FromSeconds(2)
+                };
+
+                resetTimer.Tick += (s, args) =>
+                {
+                    CopyKeyButton.Content = originalContent;
+                    resetTimer.Stop();
+                };
+
+                resetTimer.Start();
+            }
+            catch
+            {
+               
+            }
         }
 
         private void SetRandomQuote()
