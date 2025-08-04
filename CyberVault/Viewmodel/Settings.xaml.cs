@@ -8,20 +8,152 @@ using Windows.Security.Credentials.UI;
 using Windows.Security.Credentials;
 using System.Windows.Navigation;
 using CyberVault.Viewmodel;
+using Microsoft.Win32;
+using System.IO.Compression;
+using System.Threading.Tasks;
+using System.Timers;
+using System.Linq;
+
 
 
 namespace CyberVault.Viewmodel
 {
-    public partial class Settings : System.Windows.Controls.UserControl
+    public partial class Settings : System.Windows.Controls.UserControl, IDisposable
     {
+        private bool disposed = false;
+
         private string? username;
         private byte[]? encryptionKey;
+        private System.Timers.Timer? backupTimer;
+        private string? backupLocation;
+        private System.Timers.Timer? syncTimer;
+        private string? syncLocation;
+        private string? deviceName;
+        private FileSystemWatcher? syncWatcher;
+        private readonly object backupLock = new object();
+        private readonly object syncLock = new object();
+        private System.Timers.Timer? syncDebounceTimer;
+        private volatile bool isBackupInProgress = false;
+        private volatile bool isSyncInProgress = false;
 
         public Settings(string user, byte[] key)
         {
             InitializeComponent();
             username = user;
             encryptionKey = key;
+
+            InitializeDeviceSync();
+
+            LoadBackupSettings();
+            LoadSyncSettings();
+
+            Loaded += Settings_InitialBackupSync;
+        }
+
+        private async void Settings_InitialBackupSync(object sender, RoutedEventArgs e)
+        {
+            Loaded -= Settings_InitialBackupSync;
+
+            await Task.Delay(2000);
+
+            try
+            {
+                if (AutoBackupToggle?.IsChecked == true && !string.IsNullOrEmpty(backupLocation))
+                {
+                    await PerformBackup("login_backup");
+                }
+
+                if (!string.IsNullOrEmpty(syncLocation))
+                {
+                    await PerformSync();
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Login backup/sync failed: {ex.Message}");
+            }
+        }
+
+        private async Task PerformSync()
+        {
+            if (isSyncInProgress)
+            {
+                System.Diagnostics.Debug.WriteLine("Sync already in progress, skipping...");
+                return;
+            }
+
+            lock (syncLock)
+            {
+                if (isSyncInProgress)
+                    return;
+                isSyncInProgress = true;
+            }
+
+            try
+            {
+                await PerformBidirectionalSync();
+
+                string syncTime = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+                SaveUserSetting("LastSyncTime", syncTime);
+
+                if (System.Windows.Application.Current?.Dispatcher != null)
+                {
+                    await System.Windows.Application.Current.Dispatcher.InvokeAsync(() =>
+                    {
+                        try
+                        {
+                            if (LastSyncTextBlock != null)
+                                LastSyncTextBlock.Text = syncTime;
+                        }
+                        catch (Exception ex)
+                        {
+                            System.Diagnostics.Debug.WriteLine($"Error updating sync UI: {ex.Message}");
+                        }
+                    });
+                }
+
+                System.Diagnostics.Debug.WriteLine("Sync completed successfully");
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Sync failed: {ex.Message}");
+            }
+            finally
+            {
+                lock (syncLock)
+                {
+                    isSyncInProgress = false;
+                }
+            }
+        }
+
+
+        private void NotifyConflictResolution(string fileName, string winningDevice, string losingDevice)
+        {
+            System.Windows.Application.Current.Dispatcher.Invoke(() =>
+            {
+                System.Windows.MessageBox.Show($"Sync conflict resolved for '{fileName}'.\nUsing version from: {winningDevice}\nOverriding version from: {losingDevice}",
+                    "Sync Conflict Resolved", MessageBoxButton.OK, MessageBoxImage.Information);
+            });
+        }
+        public void Dispose()
+        {
+            try
+            {
+                StopBackupTimer();
+                StopSyncWatcher();
+
+                syncDebounceTimer?.Stop();
+                syncDebounceTimer?.Dispose();
+                syncDebounceTimer = null;
+
+                syncWatcher?.Dispose();
+                syncWatcher = null;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error disposing Settings: {ex.Message}");
+            }
         }
 
         private void Settings_Loaded(object sender, RoutedEventArgs e)
@@ -168,40 +300,52 @@ namespace CyberVault.Viewmodel
             BiometricToggle.Unchecked += BiometricToggle_Unchecked;
         }
 
-        private void SaveUserSetting(string settingName, string value)
+        private void SaveUserSetting(string key, string value)
         {
             try
             {
-                if (string.IsNullOrEmpty(username))
-                    return;
-
                 string appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
                 string cyberVaultPath = Path.Combine(appDataPath, "CyberVault");
+
+                if (!Directory.Exists(cyberVaultPath))
+                {
+                    Directory.CreateDirectory(cyberVaultPath);
+                }
+
                 string settingsFilePath = Path.Combine(cyberVaultPath, $"{username}_settings.ini");
 
                 Dictionary<string, string> settings = new Dictionary<string, string>();
 
                 if (System.IO.File.Exists(settingsFilePath))
                 {
-                    foreach (string line in System.IO.File.ReadAllLines(settingsFilePath))
+                    string[] existingLines = System.IO.File.ReadAllLines(settingsFilePath);
+                    foreach (string line in existingLines)
                     {
-                        string[] parts = line.Split('=');
+                        if (string.IsNullOrWhiteSpace(line) || !line.Contains('='))
+                            continue;
+
+                        string[] parts = line.Split('=', 2);
                         if (parts.Length == 2)
                         {
-                            settings[parts[0]] = parts[1];
+                            settings[parts[0].Trim()] = parts[1].Trim();
                         }
                     }
                 }
 
-                settings[settingName] = value;
+                settings[key] = value;
 
-                Directory.CreateDirectory(cyberVaultPath);
-                System.IO.File.WriteAllLines(settingsFilePath,
-                    settings.Select(kvp => $"{kvp.Key}={kvp.Value}"));
+                List<string> outputLines = new List<string>();
+                foreach (var kvp in settings)
+                {
+                    outputLines.Add($"{kvp.Key}={kvp.Value}");
+                }
+
+                System.IO.File.WriteAllLines(settingsFilePath, outputLines);
             }
             catch (Exception ex)
             {
-                System.Windows.MessageBox.Show($"Error saving user setting: {ex.Message}");
+                System.Windows.MessageBox.Show($"Error saving setting: {ex.Message}", "Settings Error",
+                    MessageBoxButton.OK, MessageBoxImage.Warning);
             }
         }
 
@@ -571,6 +715,937 @@ namespace CyberVault.Viewmodel
                 System.Windows.MessageBox.Show($"Error re-encrypting authenticators: {ex.Message}");
             }
         }
+
+        private void LoadBackupSettings()
+        {
+            try
+            {
+                string appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+                string cyberVaultPath = Path.Combine(appDataPath, "CyberVault");
+
+                if (!Directory.Exists(cyberVaultPath))
+                {
+                    Directory.CreateDirectory(cyberVaultPath);
+                }
+
+                string settingsFilePath = Path.Combine(cyberVaultPath, $"{username}_settings.ini");
+
+                if (System.IO.File.Exists(settingsFilePath))
+                {
+                    string[] lines = System.IO.File.ReadAllLines(settingsFilePath);
+                    foreach (string line in lines)
+                    {
+                        if (string.IsNullOrWhiteSpace(line) || !line.Contains('='))
+                            continue;
+
+                        string[] parts = line.Split('=', 2); 
+                        if (parts.Length == 2)
+                        {
+                            string key = parts[0].Trim();
+                            string value = parts[1].Trim();
+
+                            switch (key)
+                            {
+                                case "AutoBackupEnabled":
+                                    if (bool.TryParse(value, out bool autoBackup))
+                                    {
+                                        AutoBackupToggle.IsChecked = autoBackup;
+                                    }
+                                    break;
+                                case "BackupLocation":
+                                    backupLocation = value;
+                                    BackupLocationTextBox.Text = value;
+                                    break;
+                                case "BackupFrequency":
+                                    SetComboBoxSelection(BackupFrequencyComboBox, value);
+                                    break;
+                                case "BackupRetention":
+                                    SetComboBoxSelection(BackupRetentionComboBox, value);
+                                    break;
+                                case "LastBackupTime":
+                                    if (DateTime.TryParse(value, out DateTime lastBackup))
+                                    {
+                                        LastBackupTextBlock.Text = lastBackup.ToString("yyyy-MM-dd HH:mm:ss");
+                                    }
+                                    break;
+                            }
+                        }
+                    }
+                }
+
+                if (AutoBackupToggle.IsChecked == true)
+                {
+                    StartBackupTimer();
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Windows.MessageBox.Show($"Error loading backup settings: {ex.Message}", "Settings Error",
+                    MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
+        }
+
+        private void SetComboBoxSelection(System.Windows.Controls.ComboBox comboBox, string value)
+        {
+            if (comboBox?.Items == null) return;
+
+            foreach (ComboBoxItem item in comboBox.Items.OfType<ComboBoxItem>())
+            {
+                if (item.Content?.ToString() == value)
+                {
+                    comboBox.SelectedItem = item;
+                    break;
+                }
+            }
+        }
+
+        private void AutoBackupToggle_Checked(object sender, RoutedEventArgs e)
+        {
+            SaveUserSetting("AutoBackupEnabled", "True");
+            StartBackupTimer();
+        }
+
+        private void AutoBackupToggle_Unchecked(object sender, RoutedEventArgs e)
+        {
+            SaveUserSetting("AutoBackupEnabled", "False");
+            StopBackupTimer();
+        }
+
+
+        private void BackupFrequencyComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (BackupFrequencyComboBox.SelectedItem is ComboBoxItem selectedItem)
+            {
+                SaveUserSetting("BackupFrequency", selectedItem.Content?.ToString() ?? "Weekly");
+                if (AutoBackupToggle.IsChecked == true)
+                {
+                    StartBackupTimer();
+                }
+            }
+        }
+
+        private void BackupRetentionComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (BackupRetentionComboBox.SelectedItem is ComboBoxItem selectedItem)
+            {
+                SaveUserSetting("BackupRetention", selectedItem.Content?.ToString() ?? "10");
+            }
+        }
+
+        private void BrowseBackupLocation_Click(object sender, RoutedEventArgs e)
+        {
+            var folderDialog = new System.Windows.Forms.FolderBrowserDialog
+            {
+                Description = "Select backup location",
+                ShowNewFolderButton = true
+            };
+
+            if (folderDialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+            {
+                backupLocation = folderDialog.SelectedPath;
+                BackupLocationTextBox.Text = backupLocation;
+                SaveUserSetting("BackupLocation", backupLocation);
+            }
+        }
+
+        private async void BackupNow_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                var button = sender as System.Windows.Controls.Button;
+                if (button != null)
+                {
+                    button.IsEnabled = false;
+                    button.Content = "Backing up...";
+                }
+
+                await PerformBackup("manual_backup");
+
+                System.Windows.MessageBox.Show("Backup completed successfully!", "Backup",
+                    MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+            catch (Exception ex)
+            {
+                System.Windows.MessageBox.Show($"Backup failed: {ex.Message}", "Backup Error",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+            finally
+            {
+                var button = sender as System.Windows.Controls.Button;
+                if (button != null)
+                {
+                    button.IsEnabled = true;
+                    button.Content = "Backup Now";
+                }
+            }
+        }
+
+
+        private void RestoreFromBackup_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                var openFileDialog = new Microsoft.Win32.OpenFileDialog
+                {
+                    Filter = "CyberVault Backup Files (*.cvbackup)|*.cvbackup|All files (*.*)|*.*",
+                    Title = "Select backup file to restore"
+                };
+
+                if (openFileDialog.ShowDialog() == true)
+                {
+                    var result = System.Windows.MessageBox.Show(
+                        "This will restore your vault data from the selected backup. Your current data will be backed up first. Continue?",
+                        "Confirm Restore",
+                        MessageBoxButton.YesNo,
+                        MessageBoxImage.Warning);
+
+                    if (result == MessageBoxResult.Yes)
+                    {
+                        _ = Task.Run(async () => await PerformBackup("pre_restore_backup"));
+
+                        RestoreFromBackupFile(openFileDialog.FileName);
+
+                        System.Windows.MessageBox.Show("Backup restored successfully! Please restart the application.",
+                            "Restore Complete", MessageBoxButton.OK, MessageBoxImage.Information);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Windows.MessageBox.Show($"Error restoring backup: {ex.Message}",
+                    "Restore Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+
+        private void StartBackupTimer()
+        {
+            StopBackupTimer();
+
+            if (string.IsNullOrEmpty(backupLocation))
+                return;
+
+            string frequency = "Weekly"; 
+
+            try
+            {
+                if (System.Windows.Application.Current?.Dispatcher != null)
+                {
+                    System.Windows.Application.Current.Dispatcher.Invoke(() =>
+                    {
+                        frequency = ((ComboBoxItem)BackupFrequencyComboBox.SelectedItem)?.Content?.ToString() ?? "Weekly";
+                    });
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error getting backup frequency: {ex.Message}");
+            }
+
+            TimeSpan interval = frequency switch
+            {
+                "Daily" => TimeSpan.FromDays(1),
+                "Weekly" => TimeSpan.FromDays(7),
+                "Monthly" => TimeSpan.FromDays(30),
+                _ => TimeSpan.FromDays(7)
+            };
+
+            backupTimer = new System.Timers.Timer(interval.TotalMilliseconds);
+            backupTimer.Elapsed += async (s, e) =>
+            {
+                try
+                {
+                    await PerformBackup("auto_backup");
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"Automatic backup failed: {ex.Message}");
+                }
+            };
+            backupTimer.AutoReset = true;
+            backupTimer.Start();
+
+            System.Diagnostics.Debug.WriteLine($"Backup timer started with {frequency} frequency");
+        }
+
+
+        private void StopBackupTimer()
+        {
+            if (backupTimer != null)
+            {
+                backupTimer.Stop();
+                backupTimer.Dispose();
+                backupTimer = null;
+            }
+        }
+
+        private void CleanupOldBackups()
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(backupLocation))
+                    return;
+
+                int retention = 10; 
+
+                if (System.Windows.Application.Current?.Dispatcher != null)
+                {
+                    System.Windows.Application.Current.Dispatcher.Invoke(() =>
+                    {
+                        try
+                        {
+                            if (BackupRetentionComboBox?.SelectedItem is ComboBoxItem selectedItem)
+                            {
+                                if (!int.TryParse(selectedItem.Content?.ToString(), out retention))
+                                    retention = 10;
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            System.Diagnostics.Debug.WriteLine($"Error getting retention setting: {ex.Message}");
+                        }
+                    });
+                }
+
+                var backupFiles = Directory.GetFiles(backupLocation, "CyberVault_backup_*.cvbackup")
+                    .Select(f => new FileInfo(f))
+                    .OrderByDescending(f => f.CreationTime)
+                    .Skip(retention)
+                    .ToList();
+
+                int deletedCount = 0;
+                foreach (var file in backupFiles)
+                {
+                    try
+                    {
+                        file.Delete();
+                        deletedCount++;
+                    }
+                    catch (IOException ex)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"Could not delete backup file {file.Name}: {ex.Message}");
+                    }
+                    catch (UnauthorizedAccessException ex)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"Access denied deleting backup file {file.Name}: {ex.Message}");
+                    }
+                }
+
+                if (deletedCount > 0)
+                {
+                    System.Diagnostics.Debug.WriteLine($"Cleaned up {deletedCount} old backup files");
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error cleaning up old backups: {ex.Message}");
+            }
+        }
+
+        private void RestoreFromBackupFile(string backupFilePath)
+        {
+            if (!System.IO.File.Exists(backupFilePath))
+                throw new FileNotFoundException("Backup file not found");
+
+            string targetDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "CyberVault");
+            string tempDir = Path.Combine(Path.GetTempPath(), "CyberVault_Restore_" + Guid.NewGuid().ToString("N")[..8]);
+
+            try
+            {
+                ZipFile.ExtractToDirectory(backupFilePath, tempDir);
+
+                if (Directory.Exists(targetDir))
+                {
+                    string backupCurrentDir = targetDir + "_backup_" + DateTime.Now.ToString("yyyyMMdd_HHmmss");
+                    Directory.Move(targetDir, backupCurrentDir);
+                }
+
+                Directory.Move(tempDir, targetDir);
+            }
+            catch
+            {
+                if (Directory.Exists(tempDir))
+                {
+                    Directory.Delete(tempDir, true);
+                }
+                throw;
+            }
+        }
+
+        private void LoadSyncSettings()
+        {
+            try
+            {
+                string appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+                string cyberVaultPath = Path.Combine(appDataPath, "CyberVault");
+                string settingsFilePath = Path.Combine(cyberVaultPath, $"{username}_settings.ini");
+
+                if (System.IO.File.Exists(settingsFilePath))
+                {
+                    string[] lines = System.IO.File.ReadAllLines(settingsFilePath);
+                    foreach (string line in lines)
+                    {
+                        if (string.IsNullOrWhiteSpace(line) || !line.Contains('='))
+                            continue;
+
+                        string[] parts = line.Split('=', 2);
+                        if (parts.Length == 2)
+                        {
+                            string key = parts[0].Trim();
+                            string value = parts[1].Trim();
+
+                            switch (key)
+                            {
+                                case "AutoSyncEnabled":
+                                    if (bool.TryParse(value, out bool autoSync))
+                                    {
+                                        if (AutoSyncToggle != null)
+                                            AutoSyncToggle.IsChecked = autoSync;
+                                    }
+                                    break;
+                                case "SyncLocation":
+                                    syncLocation = value;
+                                    if (SyncLocationTextBox != null)
+                                        SyncLocationTextBox.Text = value;
+                                    break;
+                                case "DeviceName":
+                                    deviceName = value;
+                                    if (DeviceNameTextBox != null)
+                                        DeviceNameTextBox.Text = value;
+                                    break;
+                                case "LastSyncTime":
+                                    if (LastSyncTextBlock != null)
+                                        LastSyncTextBlock.Text = value;
+                                    break;
+                            }
+                        }
+                    }
+                }
+
+                if (AutoSyncToggle?.IsChecked == true && !string.IsNullOrEmpty(syncLocation))
+                {
+                    StartSyncWatcher();
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Windows.MessageBox.Show($"Error loading sync settings: {ex.Message}", "Settings Error",
+                    MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
+        }
+
+        private void AutoSyncToggle_Checked(object sender, RoutedEventArgs e)
+        {
+            SaveUserSetting("AutoSyncEnabled", "True");
+            StartSyncWatcher();
+        }
+
+        private void AutoSyncToggle_Unchecked(object sender, RoutedEventArgs e)
+        {
+            SaveUserSetting("AutoSyncEnabled", "False");
+            StopSyncWatcher();
+        }
+
+        private void BrowseSyncLocation_Click(object sender, RoutedEventArgs e)
+        {
+            var folderDialog = new System.Windows.Forms.FolderBrowserDialog
+            {
+                Description = "Select sync location",
+                ShowNewFolderButton = true
+            };
+
+            if (folderDialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+            {
+                syncLocation = folderDialog.SelectedPath;
+
+                if (SyncLocationTextBox != null)
+                {
+                    SyncLocationTextBox.Text = syncLocation;
+                }
+
+                SaveUserSetting("SyncLocation", syncLocation);
+
+                if (AutoSyncToggle?.IsChecked == true)
+                {
+                    StartSyncWatcher();
+                }
+            }
+        }
+
+        private void DeviceNameTextBox_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
+        {
+            deviceName = DeviceNameTextBox.Text;
+            SaveUserSetting("DeviceName", deviceName);
+        }
+
+        private async void SyncNow_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                var button = sender as System.Windows.Controls.Button;
+                if (button != null)
+                {
+                    button.IsEnabled = false;
+                    button.Content = "Syncing...";
+                }
+
+                await PerformSync();
+
+                System.Windows.MessageBox.Show("Sync completed successfully!", "Sync",
+                    MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+            catch (Exception ex)
+            {
+                System.Windows.MessageBox.Show($"Sync failed: {ex.Message}", "Sync Error",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+            finally
+            {
+                var button = sender as System.Windows.Controls.Button;
+                if (button != null)
+                {
+                    button.IsEnabled = true;
+                    button.Content = "Sync Now";
+                }
+            }
+        }
+
+        private void StartSyncWatcher()
+        {
+            StopSyncWatcher();
+
+            if (string.IsNullOrEmpty(syncLocation))
+                return;
+
+            try
+            {
+                string sourceDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "CyberVault");
+
+                syncWatcher = new FileSystemWatcher(sourceDir)
+                {
+                    NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.FileName | NotifyFilters.DirectoryName,
+                    Filter = "*.*",
+                    IncludeSubdirectories = true,
+                    EnableRaisingEvents = true
+                };
+
+                syncWatcher.Changed += OnSyncFileChanged;
+                syncWatcher.Created += OnSyncFileChanged;
+                syncWatcher.Deleted += OnSyncFileChanged;
+                syncWatcher.Renamed += OnSyncFileRenamed;
+
+                syncTimer = new System.Timers.Timer(TimeSpan.FromMinutes(5).TotalMilliseconds);
+                syncTimer.Elapsed += async (s, e) => await PerformSync();
+                syncTimer.AutoReset = true;
+                syncTimer.Start();
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error starting sync watcher: {ex.Message}");
+            }
+        }
+
+        private void StopSyncWatcher()
+        {
+            syncWatcher?.Dispose();
+            syncWatcher = null;
+
+            syncTimer?.Stop();
+            syncTimer?.Dispose();
+            syncTimer = null;
+        }
+
+        private async void OnSyncFileChanged(object sender, FileSystemEventArgs e)
+        {
+            syncDebounceTimer?.Stop();
+            syncDebounceTimer?.Dispose();
+
+            syncDebounceTimer = new System.Timers.Timer(5000);
+            syncDebounceTimer.Elapsed += async (s, args) =>
+            {
+                syncDebounceTimer?.Stop();
+                syncDebounceTimer?.Dispose();
+                syncDebounceTimer = null;
+
+                await PerformSync();
+            };
+            syncDebounceTimer.AutoReset = false;
+            syncDebounceTimer.Start();
+        }
+
+        private void OnSyncFileRenamed(object sender, RenamedEventArgs e)
+        {
+            OnSyncFileChanged(sender, e);
+        }
+
+
+        private async Task PerformBidirectionalSync()
+        {
+            if (string.IsNullOrEmpty(syncLocation) || string.IsNullOrEmpty(deviceName))
+                return;
+
+            try
+            {
+                string localDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "CyberVault");
+                string deviceSyncDir = Path.Combine(syncLocation, deviceName);
+                string sharedSyncDir = Path.Combine(syncLocation, "Shared");
+
+                if (!Directory.Exists(localDir))
+                    return;
+
+                Directory.CreateDirectory(deviceSyncDir);
+                Directory.CreateDirectory(sharedSyncDir);
+
+                await Task.Run(() =>
+                {
+                    SyncToDevice(localDir, deviceSyncDir);
+
+                    MergeDeviceChanges(syncLocation, sharedSyncDir);
+
+                    SyncFromShared(sharedSyncDir, localDir);
+                });
+
+                SaveUserSetting("LastSyncTime", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Bidirectional sync failed: {ex.Message}");
+            }
+        }
+
+        private class FileConflictInfo
+        {
+            public string DeviceName { get; set; }
+            public DateTime SyncTime { get; set; }
+            public DateTime ModificationTime { get; set; }
+            public string FilePath { get; set; }
+        }
+
+        private void InitializeDeviceSync()
+        {
+            if (string.IsNullOrEmpty(deviceName))
+            {
+                deviceName = $"{Environment.MachineName}_{Environment.UserName}_{DateTime.Now:yyyyMMdd}";
+                SaveUserSetting("DeviceName", deviceName);
+            }
+        }
+
+        private void SyncToDevice(string localDir, string deviceDir)
+        {
+            foreach (string file in Directory.GetFiles(localDir, "*", SearchOption.AllDirectories))
+            {
+                string relativePath = Path.GetRelativePath(localDir, file);
+                string targetFile = Path.Combine(deviceDir, relativePath);
+
+                Directory.CreateDirectory(Path.GetDirectoryName(targetFile));
+
+                if (!System.IO.File.Exists(targetFile) || System.IO.File.GetLastWriteTime(file) > System.IO.File.GetLastWriteTime(targetFile))
+                {
+                    System.IO.File.Copy(file, targetFile, true);
+
+                    string metadataFile = targetFile + ".meta";
+                    System.IO.File.WriteAllText(metadataFile, $"{deviceName}|{DateTime.Now:yyyy-MM-dd HH:mm:ss}|{System.IO.File.GetLastWriteTime(file):yyyy-MM-dd HH:mm:ss}");
+                }
+            }
+        }
+
+        private void MergeDeviceChanges(string syncLocation, string sharedDir)
+        {
+            var deviceDirs = Directory.GetDirectories(syncLocation)
+                .Where(d => !Path.GetFileName(d).Equals("Shared", StringComparison.OrdinalIgnoreCase))
+                .ToList();
+
+            Dictionary<string, List<FileConflictInfo>> allFileVersions = new Dictionary<string, List<FileConflictInfo>>();
+
+            foreach (string deviceDir in deviceDirs)
+            {
+                string currentDeviceName = Path.GetFileName(deviceDir);
+
+                foreach (string file in Directory.GetFiles(deviceDir, "*", SearchOption.AllDirectories))
+                {
+                    if (file.EndsWith(".meta")) continue;
+
+                    string relativePath = Path.GetRelativePath(deviceDir, file);
+                    string metadataFile = file + ".meta";
+
+                    if (System.IO.File.Exists(metadataFile))
+                    {
+                        string[] metadata = System.IO.File.ReadAllText(metadataFile).Split('|');
+                        if (metadata.Length >= 3)
+                        {
+                            var conflictInfo = new FileConflictInfo
+                            {
+                                DeviceName = metadata[0],
+                                SyncTime = DateTime.Parse(metadata[1]),
+                                ModificationTime = DateTime.Parse(metadata[2]),
+                                FilePath = file
+                            };
+
+                            if (!allFileVersions.ContainsKey(relativePath))
+                                allFileVersions[relativePath] = new List<FileConflictInfo>();
+
+                            allFileVersions[relativePath].Add(conflictInfo);
+                        }
+                    }
+                }
+            }
+
+            foreach (var kvp in allFileVersions)
+            {
+                string relativePath = kvp.Key;
+                var versions = kvp.Value.OrderByDescending(v => v.ModificationTime).ToList();
+
+                if (versions.Count > 1)
+                {
+                    var winner = versions[0];
+                    var loser = versions[1];
+                    NotifyConflictResolution(relativePath, winner.DeviceName, loser.DeviceName);
+                }
+
+                string targetFile = Path.Combine(sharedDir, relativePath);
+                Directory.CreateDirectory(Path.GetDirectoryName(targetFile));
+                System.IO.File.Copy(versions[0].FilePath, targetFile, true);
+            }
+        }
+
+        private void SyncFromShared(string sharedDir, string localDir)
+        {
+            if (!Directory.Exists(sharedDir))
+                return;
+
+            foreach (string file in Directory.GetFiles(sharedDir, "*", SearchOption.AllDirectories))
+            {
+                string relativePath = Path.GetRelativePath(sharedDir, file);
+                string localFile = Path.Combine(localDir, relativePath);
+
+                Directory.CreateDirectory(Path.GetDirectoryName(localFile));
+
+                if (!System.IO.File.Exists(localFile) || System.IO.File.GetLastWriteTime(file) > System.IO.File.GetLastWriteTime(localFile))
+                {
+                    System.IO.File.Copy(file, localFile, true);
+                }
+            }
+        }
+
+
+        private void SyncDirectory(string sourceDir, string targetDir)
+        {
+            foreach (string file in Directory.GetFiles(sourceDir))
+            {
+                string fileName = Path.GetFileName(file);
+                string targetFile = Path.Combine(targetDir, fileName);
+
+                if (!System.IO.File.Exists(targetFile) || System.IO.File.GetLastWriteTime(file) > System.IO.File.GetLastWriteTime(targetFile))
+                {
+                    System.IO.File.Copy(file, targetFile, true);
+                }
+            }
+
+            foreach (string subDir in Directory.GetDirectories(sourceDir))
+            {
+                string dirName = Path.GetFileName(subDir);
+                string targetSubDir = Path.Combine(targetDir, dirName);
+
+                if (!Directory.Exists(targetSubDir))
+                    Directory.CreateDirectory(targetSubDir);
+
+                SyncDirectory(subDir, targetSubDir);
+            }
+        }
+
+        private async Task UploadLocalBackups()
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(backupLocation) || string.IsNullOrEmpty(syncLocation))
+                    return;
+
+                string deviceSyncFolder = Path.Combine(syncLocation, $"CyberVault_Backups_{deviceName}");
+                Directory.CreateDirectory(deviceSyncFolder);
+
+                var localBackups = Directory.GetFiles(backupLocation, "*.cvbackup");
+
+                foreach (string localBackup in localBackups)
+                {
+                    string fileName = Path.GetFileName(localBackup);
+                    string syncFilePath = Path.Combine(deviceSyncFolder, fileName);
+
+                    if (!System.IO.File.Exists(syncFilePath) ||
+                        System.IO.File.GetLastWriteTime(localBackup) > System.IO.File.GetLastWriteTime(syncFilePath))
+                    {
+                        await Task.Run(() => System.IO.File.Copy(localBackup, syncFilePath, true));
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Failed to upload local backups: {ex.Message}");
+            }
+        }
+
+        private async Task DownloadRemoteBackups()
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(backupLocation) || string.IsNullOrEmpty(syncLocation))
+                    return;
+
+                string remoteBackupsFolder = Path.Combine(backupLocation, "Remote_Backups");
+                Directory.CreateDirectory(remoteBackupsFolder);
+
+                var deviceFolders = Directory.GetDirectories(syncLocation, "CyberVault_Backups_*")
+                    .Where(folder => !folder.EndsWith($"CyberVault_Backups_{deviceName}"));
+
+                foreach (string deviceFolder in deviceFolders)
+                {
+                    string deviceFolderName = Path.GetFileName(deviceFolder);
+                    string localDeviceFolder = Path.Combine(remoteBackupsFolder, deviceFolderName);
+                    Directory.CreateDirectory(localDeviceFolder);
+
+                    var remoteBackups = Directory.GetFiles(deviceFolder, "*.cvbackup");
+
+                    foreach (string remoteBackup in remoteBackups)
+                    {
+                        string fileName = Path.GetFileName(remoteBackup);
+                        string localFilePath = Path.Combine(localDeviceFolder, fileName);
+
+                        if (!System.IO.File.Exists(localFilePath) ||
+                            System.IO.File.GetLastWriteTime(remoteBackup) > System.IO.File.GetLastWriteTime(localFilePath))
+                        {
+                            await Task.Run(() => System.IO.File.Copy(remoteBackup, localFilePath, true));
+                        }
+                    }
+
+                    CleanupRemoteBackups(localDeviceFolder);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Failed to download remote backups: {ex.Message}");
+            }
+        }
+
+        private void CleanupRemoteBackups(string deviceFolder)
+        {
+            try
+            {
+                var backupFiles = Directory.GetFiles(deviceFolder, "*.cvbackup")
+                    .Select(f => new FileInfo(f))
+                    .OrderByDescending(f => f.CreationTime)
+                    .Skip(5) 
+                    .ToList();
+
+                foreach (var file in backupFiles)
+                {
+                    file.Delete();
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error cleaning up remote backups: {ex.Message}");
+            }
+        }
+
+        private async Task PerformBackup(string suffix = "")
+        {
+            if (isBackupInProgress)
+            {
+                System.Diagnostics.Debug.WriteLine("Backup already in progress, skipping...");
+                return;
+            }
+
+            lock (backupLock)
+            {
+                if (isBackupInProgress)
+                    return;
+                isBackupInProgress = true;
+            }
+
+            try
+            {
+                if (string.IsNullOrEmpty(backupLocation) || string.IsNullOrEmpty(username))
+                    throw new InvalidOperationException("Backup location or username not set");
+
+                string sourceDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "CyberVault");
+
+                if (!Directory.Exists(sourceDir))
+                    throw new DirectoryNotFoundException("CyberVault data directory not found");
+
+                if (!Directory.Exists(backupLocation))
+                    Directory.CreateDirectory(backupLocation);
+
+                string timestamp = DateTime.Now.ToString("yyyyMMdd_HHmmss");
+                string backupFileName = string.IsNullOrEmpty(suffix)
+                    ? $"CyberVault_backup_{timestamp}.cvbackup"
+                    : $"CyberVault_{suffix}_{timestamp}.cvbackup";
+
+                string backupFilePath = Path.Combine(backupLocation, backupFileName);
+
+                await Task.Run(() =>
+                {
+                    int maxRetries = 5;
+                    for (int retry = 0; retry < maxRetries; retry++)
+                    {
+                        try
+                        {
+                            if (retry > 0)
+                            {
+                                Thread.Sleep(1000 * retry);
+                            }
+
+                            ZipFile.CreateFromDirectory(sourceDir, backupFilePath, CompressionLevel.Optimal, false);
+                            break; 
+                        }
+                        catch (IOException ex) when (retry < maxRetries - 1)
+                        {
+                            System.Diagnostics.Debug.WriteLine($"Backup retry {retry + 1}: {ex.Message}");
+                            continue; 
+                        }
+                        catch (Exception ex)
+                        {
+                            System.Diagnostics.Debug.WriteLine($"Backup failed on retry {retry + 1}: {ex.Message}");
+                            if (retry == maxRetries - 1)
+                                throw; 
+                        }
+                    }
+                });
+
+                SaveUserSetting("LastBackupTime", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
+
+                if (System.Windows.Application.Current?.Dispatcher != null)
+                {
+                    await System.Windows.Application.Current.Dispatcher.InvokeAsync(() =>
+                    {
+                        try
+                        {
+                            if (LastBackupTextBlock != null)
+                                LastBackupTextBlock.Text = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+                        }
+                        catch (Exception ex)
+                        {
+                            System.Diagnostics.Debug.WriteLine($"Error updating UI: {ex.Message}");
+                        }
+                    });
+                }
+
+                _ = Task.Run(() => CleanupOldBackups());
+
+                System.Diagnostics.Debug.WriteLine($"Backup completed successfully: {backupFileName}");
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Backup failed: {ex.Message}");
+                throw;
+            }
+            finally
+            {
+                lock (backupLock)
+                {
+                    isBackupInProgress = false;
+                }
+            }
+        }
+
 
         private void ExportData_Click(object sender, RoutedEventArgs e)
         {

@@ -162,6 +162,169 @@
 
             <Border Style="{StaticResource SettingsCard}">
                 <StackPanel>
+                    <TextBlock Text="Auto Backup" Style="{StaticResource SectionTitle}"/>
+
+                    <Grid Margin="0,8,0,8">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+
+                        <TextBlock Grid.Column="0" Text="Enable Auto Backup" Style="{StaticResource SettingLabel}"/>
+
+                        <TextBlock Grid.Column="1" Text="Automatically backup your vault data" 
+                                   Foreground="#677591" FontSize="12" VerticalAlignment="Center"/>
+
+                        <ToggleButton Grid.Column="2" x:Name="AutoBackupToggle" 
+                                      Style="{StaticResource SettingToggle}" 
+                                      Checked="AutoBackupToggle_Checked" 
+                                      Unchecked="AutoBackupToggle_Unchecked"/>
+                    </Grid>
+
+                    <Grid Margin="0,8,0,8">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="200"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="150"/>
+                        </Grid.ColumnDefinitions>
+
+                        <TextBlock Grid.Column="0" Text="Backup Frequency" Style="{StaticResource SettingLabel}"/>
+
+                        <TextBlock Grid.Column="1" Text="How often to create automatic backups" 
+                                   Foreground="#677591" FontSize="12" VerticalAlignment="Center"/>
+
+                        <ComboBox Grid.Column="2" x:Name="BackupFrequencyComboBox" Width="150" Height="30" 
+                                  HorizontalAlignment="Right" SelectedIndex="1" SelectionChanged="BackupFrequencyComboBox_SelectionChanged">
+                            <ComboBoxItem Content="Daily"/>
+                            <ComboBoxItem Content="Weekly"/>
+                            <ComboBoxItem Content="Monthly"/>
+                        </ComboBox>
+                    </Grid>
+
+                    <Grid Margin="0,8,0,8">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="200"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="100"/>
+                        </Grid.ColumnDefinitions>
+
+                        <TextBlock Grid.Column="0" Text="Backup Location" Style="{StaticResource SettingLabel}"/>
+
+                        <TextBox Grid.Column="1" x:Name="BackupLocationTextBox" Height="30" 
+                                 Margin="0,0,10,0" VerticalContentAlignment="Center" IsReadOnly="True"
+                                 Text="Select backup location..."/>
+
+                        <Button Grid.Column="2" Content="Browse" Height="35" Width="90"
+                                Style="{StaticResource SaveButton}" Background="#434C5E"
+                                Click="BrowseBackupLocation_Click" HorizontalAlignment="Left" Margin="10,0,0,0"/>
+                    </Grid>
+
+                    <Grid Margin="0,8,0,8">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="200"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="100"/>
+                        </Grid.ColumnDefinitions>
+
+                        <TextBlock Grid.Column="0" Text="Keep Backups" Style="{StaticResource SettingLabel}"/>
+
+                        <TextBlock Grid.Column="1" Text="Number of backup copies to retain" 
+                                   Foreground="#677591" FontSize="12" VerticalAlignment="Center"/>
+
+                        <ComboBox Grid.Column="2" x:Name="BackupRetentionComboBox" Width="90" Height="30" 
+                                  HorizontalAlignment="Right" SelectedIndex="2" SelectionChanged="BackupRetentionComboBox_SelectionChanged">
+                            <ComboBoxItem Content="3"/>
+                            <ComboBoxItem Content="5"/>
+                            <ComboBoxItem Content="10"/>
+                            <ComboBoxItem Content="15"/>
+                            <ComboBoxItem Content="30"/>
+                        </ComboBox>
+                    </Grid>
+
+                    <Grid Margin="0,15,0,8">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <TextBlock Grid.Column="0" Text="Last Backup:" Style="{StaticResource SettingLabel}" Margin="0,0,10,0"/>
+                        <TextBlock Grid.Column="1" x:Name="LastBackupTextBlock" Text="Never" 
+                                   Foreground="#677591" FontSize="12" VerticalAlignment="Center"/>
+                    </Grid>
+
+                    <Grid Margin="0,8,0,8">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+
+                        <TextBlock Grid.Column="0" Text="Auto Sync Backups" Style="{StaticResource SettingLabel}"/>
+
+                        <TextBlock Grid.Column="1" Text="Automatically sync backups between devices" 
+                                   Foreground="#677591" FontSize="12" VerticalAlignment="Center"/>
+
+                        <ToggleButton Grid.Column="2" x:Name="AutoSyncToggle" 
+                                      Style="{StaticResource SettingToggle}" 
+                                      Checked="AutoSyncToggle_Checked" 
+                                      Unchecked="AutoSyncToggle_Unchecked"/>
+                    </Grid>
+
+                    <Grid Margin="0,8,0,8">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="200"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="120"/>
+                        </Grid.ColumnDefinitions>
+
+                        <TextBlock Grid.Column="0" Text="Sync Location" Style="{StaticResource SettingLabel}"/>
+
+                        <TextBox Grid.Column="1" x:Name="SyncLocationTextBox" Height="30" 
+                                 Margin="0,0,10,0" VerticalContentAlignment="Center" IsReadOnly="True"
+                                 Text="Select sync location..."/>
+
+                        <Button Grid.Column="2" Content="Browse" Height="35" Width="90"
+                                Style="{StaticResource SaveButton}" Background="#434C5E"
+                                Click="BrowseSyncLocation_Click" HorizontalAlignment="Left" Margin="30,0,0,0"/>
+                    </Grid>
+
+                    <Grid Margin="0,8,0,8">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="200"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <TextBlock Grid.Column="0" Text="Device Name:" Style="{StaticResource SettingLabel}" Margin="0,0,10,0"/>
+                        <TextBox Grid.Column="1" x:Name="DeviceNameTextBox" Height="30" 
+                                 VerticalContentAlignment="Center" Text=""
+                                 TextChanged="DeviceNameTextBox_TextChanged"/>
+                    </Grid>
+
+                    <Grid Margin="0,8,0,8">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <TextBlock Grid.Column="0" Text="Last Sync:" Style="{StaticResource SettingLabel}" Margin="0,0,10,0"/>
+                        <TextBlock Grid.Column="1" x:Name="LastSyncTextBlock" Text="Never" 
+                                   Foreground="#677591" FontSize="12" VerticalAlignment="Center"/>
+                    </Grid>
+
+                    <StackPanel Orientation="Horizontal" Margin="0,15,0,0">
+                        <Button Content="Backup Now" Style="{StaticResource SaveButton}" 
+                                Background="#5E81AC" Click="BackupNow_Click"/>
+                        <Button Content="Sync Now" Style="{StaticResource SaveButton}" 
+                                Background="#A3BE8C" Margin="10,0,0,0" Click="SyncNow_Click"/>
+                        <Button Content="Restore from Backup" Style="{StaticResource SaveButton}" 
+                                Background="#434C5E" Margin="10,0,0,0" Click="RestoreFromBackup_Click"/>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+
+            <Border Style="{StaticResource SettingsCard}">
+                <StackPanel>
                     <TextBlock Text="Data" Style="{StaticResource SectionTitle}"/>
 
                     <Grid Margin="0,8,0,8">

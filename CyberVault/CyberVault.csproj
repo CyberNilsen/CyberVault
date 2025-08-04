@@ -53,6 +53,7 @@
 	</ItemGroup>
 	<ItemGroup>
 		<PackageReference Include="Hardcodet.NotifyIcon.Wpf" Version="2.0.1" />
+		<PackageReference Include="System.IO" Version="4.3.0" />
 	</ItemGroup>
 	<ItemGroup>
 		<Resource Include="Images\2fa.png" />
