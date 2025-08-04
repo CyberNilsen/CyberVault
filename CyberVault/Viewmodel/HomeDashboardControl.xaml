@@ -427,7 +427,7 @@
                                            Foreground="#1E293B" HorizontalAlignment="Center" Margin="0,0,0,8"/>
                                 <TextBlock Text="Security Score" FontSize="14" Foreground="#F59E0B" HorizontalAlignment="Center" 
                                            FontWeight="Medium"/>
-                                <TextBlock Text="Excellent rating" FontSize="11" Foreground="#94A3B8" HorizontalAlignment="Center" 
+                                <TextBlock Text="Secure status" FontSize="11" Foreground="#94A3B8" HorizontalAlignment="Center" 
                                            Margin="0,2,0,0"/>
                             </StackPanel>
                         </Border>
