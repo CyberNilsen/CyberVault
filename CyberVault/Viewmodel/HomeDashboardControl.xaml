@@ -302,7 +302,7 @@
 
                         <Border Grid.Column="1" Background="#EFF6FF" CornerRadius="20" Padding="16,8"
                                 BorderBrush="#3B82F6" BorderThickness="1" VerticalAlignment="Center">
-                            <TextBlock x:Name="CurrentVersionText" Text="v4.3.0" 
+                            <TextBlock x:Name="CurrentVersionText" Text="v4.4.0" 
                                        FontWeight="Bold" FontSize="12" Foreground="#1E40AF" 
                                        HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Border>
