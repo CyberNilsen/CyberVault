@@ -35,6 +35,7 @@ CyberVault is production-ready and actively maintained. While major new features
 - **Secure Memory Handling**: Credentials cleared from memory after use
 - **Backup & Restore**: Encrypted backup files for data protection
 - **Two-Factor Authentication Ready**: Supports TOTP codes and 2FA workflows
+- **Secure Notes**: Can write notes and store the notes securely
 
 ### User Experience
 - **Intuitive Interface**: Clean, modern WPF design optimized for Windows
