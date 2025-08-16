@@ -10,7 +10,8 @@ Developed by **CyberHansen** and **CyberNilsen** | Featured in *Laagendalsposten
 ### ✅ Project Status: Stable  
 CyberVault is production-ready and actively maintained. While major new features are not being added right now, we continue releasing security updates and bug fixes.
 
-![CyberVault Program](https://github.com/user-attachments/assets/bc10b4f0-eae4-43de-b10a-87c90f4bbf91)
+![CyberVault_f2I3OER92r](https://github.com/user-attachments/assets/6251e8f9-9b32-411d-8a03-27a78566d406)
+
 
 ## 🎯 Why Choose CyberVault?
 
